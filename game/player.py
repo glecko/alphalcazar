@@ -24,8 +24,8 @@ class Player(object):
 
     def setup_pieces(self) -> List[Piece]:
         pieces = list()
-        for order in PieceType:
-            piece = Piece(owner_id=self.id, type=order)
+        for piece_type in PieceType:
+            piece = Piece(owner_id=self.id, type=piece_type)
             pieces.append(piece)
         return pieces
 
