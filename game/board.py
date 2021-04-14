@@ -173,3 +173,11 @@ class Board(object):
 
     def get_legal_tiles(self):
         return [tile for tile in self.tiles if tile.is_placement_legal()]
+
+    def to_string_notation(self) -> str:
+        result = ""
+        for index, tile in enumerate(self.tiles):
+            if index > 0:
+                result += ","
+            result += tile.to_string_notation()
+        return result

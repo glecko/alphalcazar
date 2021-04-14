@@ -1,6 +1,6 @@
 from game.constants import PLAY_AREA_SIZE, PERIMETER_COORDINATES
 from game.piece import Piece
-from game.enums import Direction
+from game.enums import Direction, PieceType
 from typing import Optional
 
 
@@ -52,3 +52,8 @@ class Tile(object):
 
     def has_piece_of_player(self, owner_id: int) -> bool:
         return self.piece is not None and self.piece.owner_id == owner_id
+
+    def to_string_notation(self) -> str:
+        if self.piece:
+            return f"{self.piece.type}|{self.piece.owner_id}|{self.piece.direction.name}"
+        return ""

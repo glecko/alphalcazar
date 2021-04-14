@@ -11,6 +11,12 @@ class PlacementMove(object):
         self.piece = piece
         self.tile = tile
 
+    def __str__(self):
+        return f"{self.piece!r} -> {self.tile!r}"
+
+    def __repr__(self):
+        return f"<PlacementMove {self!s}>"
+
     def execute(self):
         self.tile.place_piece(self.piece)
         self.piece.set_movement_direction(self.tile.legal_placement_direction)
@@ -32,12 +38,22 @@ class Player(object):
     def get_available_pieces(self):
         return [piece for piece in self.pieces if not piece.is_on_board()]
 
-    def play_random_piece(self) -> Optional[PlacementMove]:
+    def get_piece_by_type(self, type: int) -> Piece:
+        return next((piece for piece in self.pieces if piece.type == type), None)
+
+    def get_legal_placement_moves(self) -> List[PlacementMove]:
         legal_tiles = self.board.get_legal_tiles()
         available_pieces = self.get_available_pieces()
-        if len(legal_tiles) > 0 and len(available_pieces) > 0:
-            move = PlacementMove(piece=random.choice(available_pieces), tile=random.choice(legal_tiles))
-            move.execute()
-            return move
+        legal_moves: List[PlacementMove] = list()
+        for tile in legal_tiles:
+            for piece in available_pieces:
+                move = PlacementMove(piece, tile)
+                legal_moves.append(move)
+        return legal_moves
+
+    def play_random_piece(self) -> Optional[PlacementMove]:
+        legal_moves = self.get_legal_placement_moves()
+        if len(legal_moves) > 0:
+            return random.choice(legal_moves)
         return None
 
