@@ -3,6 +3,7 @@ from game.enums import GameResult
 from game.board import Board
 
 WIN_CONDITION_SCORE = 900
+DEPTH_PENALTY = 10
 
 
 PLACED_PIECE_SCORE = {
