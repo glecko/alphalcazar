@@ -122,4 +122,27 @@ class TestBoardMovements(object):
         assert board.get_tile(2, 1).piece is None
         assert board.get_tile(2, 0).piece is None
 
+    def test_one_not_pushable_if_piece_behind(self):
+        board = Board()
+
+        five = Piece(PLAYER_1_ID, PieceType.five)
+        five.set_movement_direction(Direction.south)
+        board.get_tile(2, 2).place_piece(five)
+
+        one = Piece(PLAYER_1_ID, PieceType.one)
+        one.set_movement_direction(Direction.north)
+        board.get_tile(1, 1).place_piece(one)
+
+        enemy_two = Piece(PLAYER_2_ID, PieceType.two)
+        enemy_two.set_movement_direction(Direction.east)
+        board.get_tile(0, 2).place_piece(enemy_two)
+
+        board.execute_board_movements(PLAYER_2_ID)
+
+        assert board.get_tile(2, 1).piece == five
+        assert board.get_tile(1, 2).piece == one
+        assert board.get_tile(0, 2).piece is None
+
+
+
 

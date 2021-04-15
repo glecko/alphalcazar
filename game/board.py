@@ -121,7 +121,18 @@ class Board(object):
                 self.commit_piece_movement(target_tile.piece, target_tile, push_target_tile)
                 self.commit_piece_movement(piece, source_tile, target_tile)
                 return 2
+            else:
+                self.remove_piece_stuck_in_perimeter(source_tile, piece)
+        else:
+            self.remove_piece_stuck_in_perimeter(source_tile, piece)
         return 0
+
+    @staticmethod
+    def remove_piece_stuck_in_perimeter(tile: Tile, piece: Piece):
+        # Piece could not move, remove it from play if it was stuck in the perimeter
+        if tile.is_perimeter():
+            tile.remove_piece()
+            piece.remove_from_play()
 
     def get_chained_push_movements(self, source_tile: Tile, target_tile: Tile) -> List[Tuple[Tile, Tile]]:
         x_direction = target_tile.x - source_tile.x
