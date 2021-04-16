@@ -23,9 +23,10 @@ class PlacementMove(object):
 
 
 class Player(object):
-    def __init__(self, player_id: int, board: Board):
+    def __init__(self, player_id: int, board: Board, game):
         self.id = player_id
         self.board = board
+        self.game = game
         self.pieces = self.setup_pieces()
 
     def setup_pieces(self) -> List[Piece]:

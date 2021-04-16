@@ -2,15 +2,17 @@ from game.player import Player, PlacementMove
 from game.game import Game
 from tree_search_strategy.scored_move import ScoredMove, get_legal_scored_moves
 from tree_search_strategy.board_evaluation import evaluate_board, WIN_CONDITION_SCORE, DEPTH_PENALTY
-from typing import Optional
+from typing import Optional, Callable
 
 
-def tree_search_strategy(player: Player, opponent: Player, is_starting: bool) -> Optional[PlacementMove]:
-    if len(player.get_legal_placement_moves()) == 0:
-        return None
+def build_tree_search_strategy(depth: int) -> Callable[[Player, Player, bool], Optional[PlacementMove]]:
+    def tree_search_strategy(player: Player, opponent: Player, is_starting: bool) -> Optional[PlacementMove]:
+        if len(player.get_legal_placement_moves()) == 0:
+            return None
 
-    best_move = MinMaxState(player, opponent, is_starting, 3).get_best_move()
-    return best_move.to_placement_move(player)
+        best_move = MinMaxState(player, opponent, is_starting, depth).get_best_move()
+        return best_move.to_placement_move(player)
+    return tree_search_strategy
 
 
 class MinMaxState(object):
@@ -33,7 +35,7 @@ class MinMaxState(object):
         moves = get_legal_scored_moves(player)
         best_move = ScoredMove(None, -WIN_CONDITION_SCORE * 10)
         for move in moves:
-            game_clone = Game.from_string_notation(f"{player.id}#{player.board.to_string_notation()}")
+            game_clone = player.game.clone()
             move.execute(game_clone.get_player_by_id(player.id))
             if is_first_move:
                 best_next_move = self.min(
@@ -74,7 +76,7 @@ class MinMaxState(object):
         moves = get_legal_scored_moves(opponent)
         best_move = ScoredMove(None, WIN_CONDITION_SCORE * 10)
         for move in moves:
-            game_clone = Game.from_string_notation(f"{player.id}#{player.board.to_string_notation()}")
+            game_clone = player.game.clone()
             move.execute(game_clone.get_player_by_id(opponent.id))
             if is_first_move:
                 best_next_move = self.max(

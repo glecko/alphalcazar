@@ -1,3 +1,4 @@
+from __future__ import annotations
 from game.board import Board
 from game.player import Player, PlacementMove
 from game.constants import PLAYER_1_ID, PLAYER_2_ID
@@ -7,15 +8,15 @@ from game.enums import GameResult, Direction
 class Game(object):
     def __init__(self):
         self.board = Board()
-        self.player_1 = Player(PLAYER_1_ID, self.board)
-        self.player_2 = Player(PLAYER_2_ID, self.board)
+        self.player_1 = Player(PLAYER_1_ID, self.board, self)
+        self.player_2 = Player(PLAYER_2_ID, self.board, self)
         self.starting_player = self.player_1
         self.player_1_moves, self.player_2_moves = list(), list()
         self.turns = 0
         self.result = None
 
     @classmethod
-    def from_string_notation(cls, notation: str):
+    def from_string_notation(cls, notation: str) -> Game:
         game = cls()
         starting_player, board_notation = notation.split("#")
         if int(starting_player) == PLAYER_1_ID:
@@ -91,3 +92,6 @@ class Game(object):
 
     def to_string_notation(self):
         return f"{self.starting_player.id}#{self.board.to_string_notation()}"
+
+    def clone(self) -> Game:
+        return self.from_string_notation(f"{self.starting_player.id}#{self.board.to_string_notation()}")
