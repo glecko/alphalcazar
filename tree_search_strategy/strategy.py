@@ -1,5 +1,4 @@
 from game.player import Player, PlacementMove
-from game.game import Game
 from tree_search_strategy.scored_move import ScoredMove, get_legal_scored_moves
 from tree_search_strategy.board_evaluation import evaluate_board, WIN_CONDITION_SCORE, DEPTH_PENALTY
 from typing import Optional, Callable
@@ -48,6 +47,7 @@ class MinMaxState(object):
                 )
             else:
                 game_clone.board.execute_board_movements(opponent.id)
+                game_clone.switch_starting_player()
                 best_next_move = self.max(
                     game_clone.get_player_by_id(player.id),
                     game_clone.get_player_by_id(opponent.id),
@@ -89,6 +89,7 @@ class MinMaxState(object):
                 )
             else:
                 game_clone.board.execute_board_movements(player.id)
+                game_clone.switch_starting_player()
                 best_next_move = self.min(
                     game_clone.get_player_by_id(player.id),
                     game_clone.get_player_by_id(opponent.id),

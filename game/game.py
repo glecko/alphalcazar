@@ -11,7 +11,10 @@ class Game(object):
         self.player_1 = Player(PLAYER_1_ID, self.board, self)
         self.player_2 = Player(PLAYER_2_ID, self.board, self)
         self.starting_player = self.player_1
-        self.player_1_moves, self.player_2_moves = list(), list()
+        self.player_moves = {
+            PLAYER_1_ID: list(),
+            PLAYER_2_ID: list()
+        }
         self.turns = 0
         self.result = None
 
@@ -37,7 +40,6 @@ class Game(object):
             game.board.tiles[index].place_piece(piece)
         return game
 
-
     @staticmethod
     def play_random_piece_strategy(player: Player, opponent: Player, is_starting: bool) -> PlacementMove:
         return player.play_random_piece()
@@ -53,7 +55,7 @@ class Game(object):
             if executed_movements == 0 and self.board.is_full():
                 self.result = GameResult.draw
                 return self.result
-            self.starting_player = self.get_secondary_player()
+            self.switch_starting_player()
             self.result = self.get_current_result()
         print(self.result)
         return self.result
@@ -67,12 +69,8 @@ class Game(object):
         print(second_move)
         if second_move is not None:
             second_move.execute()
-        if self.starting_player.id == PLAYER_1_ID:
-            self.player_1_moves.append(starting_move)
-            self.player_2_moves.append(second_move)
-        else:
-            self.player_1_moves.append(second_move)
-            self.player_2_moves.append(starting_move)
+        self.player_moves[self.starting_player.id].append(starting_move)
+        self.player_moves[self.get_secondary_player().id].append(second_move)
 
     def get_current_result(self) -> GameResult:
         return self.board.get_game_result(self.player_1.id, self.player_2.id)
@@ -84,6 +82,9 @@ class Game(object):
             return self.player_2
         else:
             raise ValueError(f"Unknown player ID specified: {player_id}")
+
+    def switch_starting_player(self):
+        self.starting_player = self.get_secondary_player()
 
     def get_secondary_player(self) -> Player:
         if self.starting_player is self.player_1:

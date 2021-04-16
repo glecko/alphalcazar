@@ -75,3 +75,14 @@ class TestBoard(object):
 
         assert board.get_game_result(PLAYER_1_ID, PLAYER_2_ID) is None
 
+
+    def test_board_pieces(self):
+        board = Board()
+        assert board.get_board_pieces() == []
+
+        board.get_tile(0, 1).place_piece(Piece(PLAYER_1_ID, PieceType.four))
+        board.get_tile(2, 2).place_piece(Piece(PLAYER_1_ID, PieceType.two))
+        board.get_tile(3, 3).place_piece(Piece(PLAYER_1_ID, PieceType.one))
+
+        assert len(board.get_board_pieces()) == 3
+        assert len(board.get_board_pieces(exclude_perimeter=True)) == 2

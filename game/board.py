@@ -166,10 +166,10 @@ class Board(object):
         else:
             target_tile.place_piece(piece)
 
-    def get_board_pieces(self):
+    def get_board_pieces(self, exclude_perimeter=False):
         pieces = list()
         for tile in self.tiles:
-            if tile.piece:
+            if tile.piece and not (exclude_perimeter and tile.is_perimeter()):
                 pieces.append(tile.piece)
         return pieces
 

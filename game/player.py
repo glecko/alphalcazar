@@ -1,9 +1,15 @@
+from __future__ import annotations
 from game.piece import Piece
 from game.enums import PieceType
 from game.tile import Tile
 from game.board import Board
 from typing import List, Optional
 import random
+
+# To avoid the cyclic import with Game, only needed for type checking
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from game.game import Game
 
 
 class PlacementMove(object):
@@ -23,7 +29,7 @@ class PlacementMove(object):
 
 
 class Player(object):
-    def __init__(self, player_id: int, board: Board, game):
+    def __init__(self, player_id: int, board: Board, game: Game):
         self.id = player_id
         self.board = board
         self.game = game

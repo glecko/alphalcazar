@@ -1,8 +1,9 @@
 from game.game import Game
 from game.enums import PieceType, GameResult, Direction
+from game.constants import PLAYER_1_ID, PLAYER_2_ID
 
 
-class TestBoard(object):
+class TestGame(object):
 
     def test_setup(self):
         game = Game()
@@ -16,7 +17,7 @@ class TestBoard(object):
             game = Game()
             result = game.play_random_game()
             assert game.turns >= 3  # Minimum amount of moves by one player to win or draw
-            assert game.turns == len(game.player_2_moves) == len(game.player_1_moves)
+            assert game.turns == len(game.player_moves[PLAYER_1_ID]) == len(game.player_moves[PLAYER_2_ID])
             assert result == GameResult.win or result == GameResult.draw or result == GameResult.loss
 
     def test_clone_game(self):
@@ -44,4 +45,8 @@ class TestBoard(object):
         assert center_piece_clone.owner_id == game_clone.player_2.id
 
         assert game_clone.starting_player == game_clone.player_2
+
+        game_clone.switch_starting_player()
+
+        assert game_clone.starting_player.id != game.starting_player.id
 
