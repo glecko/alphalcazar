@@ -8,6 +8,7 @@ from typing import List, Tuple, Optional
 class Board(object):
     def __init__(self):
         self.tiles = self.setup_tiles()
+        self.tiles_by_coordinates_dict = self.setup_tile_by_coordinates_dict()
 
     def __repr__(self):
         return f"""
@@ -29,6 +30,14 @@ class Board(object):
                 tile = Tile(x, y)
                 tiles.append(tile)
         return tiles
+
+    def setup_tile_by_coordinates_dict(self):
+        tiles_dict = dict()
+        for tile in self.tiles:
+            if tiles_dict.get(tile.x) is None:
+                tiles_dict[tile.x] = dict()
+            tiles_dict[tile.x][tile.y] = tile
+        return tiles_dict
 
     def get_game_result(self, player, opponent):
         if self.has_complete_row(player) and self.has_complete_row(opponent):
@@ -176,8 +185,9 @@ class Board(object):
                 return tile
         return None
 
-    def get_tile(self, x, y) -> Tile:
-        return next((tile for tile in self.tiles if tile.x == x and tile.y == y), None)
+    def get_tile(self, x, y) -> Optional[Tile]:
+        x_dict = self.tiles_by_coordinates_dict.get(x)
+        return x_dict.get(y) if x_dict is not None else None
 
     def get_board_tiles(self):
         return [tile for tile in self.tiles if not tile.is_perimeter()]
