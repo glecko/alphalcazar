@@ -1,5 +1,6 @@
 from game.player import Player, PlacementMove
 from typing import Optional, List
+import random
 
 
 class ScoredMove(object):
@@ -33,4 +34,5 @@ def get_legal_scored_moves(player: Player) -> List[ScoredMove]:
     scored_moves = list()
     for move in placement_moves:
         scored_moves.append(ScoredMove(move, None))
+    random.shuffle(scored_moves)
     return scored_moves
