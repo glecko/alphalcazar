@@ -2,7 +2,7 @@ from __future__ import annotations
 from game.board import Board
 from game.player import Player, PlacementMove
 from game.constants import PLAYER_1_ID, PLAYER_2_ID
-from game.enums import GameResult, Direction
+from game.enums import GameResult
 
 
 class Game(object):
@@ -17,28 +17,6 @@ class Game(object):
         }
         self.turns = 0
         self.result = None
-
-    @classmethod
-    def from_string_notation(cls, notation: str) -> Game:
-        game = cls()
-        starting_player, board_notation = notation.split("#")
-        if int(starting_player) == PLAYER_1_ID:
-            game.starting_player = game.player_1
-        elif int(starting_player) == PLAYER_2_ID:
-            game.starting_player = game.player_2
-        else:
-            raise ValueError(f"Unknown starting player ID found: {starting_player!r}.")
-
-        tiles = board_notation.split(",")
-        for index, tile_notation in enumerate(tiles):
-            if tile_notation == "":
-                continue
-            piece_type, owner_id, direction = tile_notation.split("|")
-            owner = game.get_player_by_id(int(owner_id))
-            piece = owner.get_piece_by_type(int(piece_type))
-            piece.set_movement_direction(Direction[direction])
-            game.board.tiles[index].place_piece(piece)
-        return game
 
     @staticmethod
     def play_random_piece_strategy(player: Player, opponent: Player, is_starting: bool) -> PlacementMove:
@@ -91,8 +69,14 @@ class Game(object):
             return self.player_2
         return self.player_1
 
-    def to_string_notation(self):
-        return f"{self.starting_player.id}#{self.board.to_string_notation()}"
-
     def clone(self) -> Game:
-        return self.from_string_notation(f"{self.starting_player.id}#{self.board.to_string_notation()}")
+        clone_game = Game()
+        clone_game.starting_player = clone_game.get_player_by_id(self.starting_player.id)
+        board_pieces = self.board.get_board_pieces()
+        for board_piece in board_pieces:
+            owner = clone_game.get_player_by_id(board_piece.owner_id)
+            target_piece = owner.get_piece_by_type(board_piece.type)
+            target_piece.set_movement_direction(board_piece.direction)
+            target_tile = clone_game.board.get_tile(board_piece.tile.x, board_piece.tile.y)
+            target_tile.place_piece(target_piece)
+        return clone_game

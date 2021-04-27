@@ -2,13 +2,12 @@ from game.constants import BOARD_SIZE, PLAY_AREA_SIZE, PERIMETER_COORDINATES
 from game.enums import GameResult
 from game.tile import Tile
 from game.piece import Piece
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict
 
 
 class Board(object):
     def __init__(self):
-        self.tiles = self.setup_tiles()
-        self.tiles_by_coordinates_dict = self.setup_tile_by_coordinates_dict()
+        self.tiles, self.tiles_by_coordinates_dict = self.setup_tiles()
 
     def __repr__(self):
         return f"""
@@ -20,8 +19,9 @@ class Board(object):
         """
 
     @staticmethod
-    def setup_tiles():
+    def setup_tiles() -> Tuple[List[Tile], Dict[int, Dict[int, Tile]]]:
         tiles = list()
+        coordinates_dict = dict()
         for x in range(PLAY_AREA_SIZE):
             for y in range(PLAY_AREA_SIZE):
                 if x in PERIMETER_COORDINATES and y in PERIMETER_COORDINATES:
@@ -29,15 +29,13 @@ class Board(object):
                     continue
                 tile = Tile(x, y)
                 tiles.append(tile)
-        return tiles
 
-    def setup_tile_by_coordinates_dict(self):
-        tiles_dict = dict()
-        for tile in self.tiles:
-            if tiles_dict.get(tile.x) is None:
-                tiles_dict[tile.x] = dict()
-            tiles_dict[tile.x][tile.y] = tile
-        return tiles_dict
+                # Add to coordinates dict
+                if coordinates_dict.get(x) is None:
+                    coordinates_dict[x] = dict()
+                coordinates_dict[x][y] = tile
+
+        return tiles, coordinates_dict
 
     def get_game_result(self, player, opponent):
         if self.has_complete_row(player) and self.has_complete_row(opponent):
@@ -194,11 +192,3 @@ class Board(object):
 
     def get_legal_tiles(self):
         return [tile for tile in self.tiles if tile.is_placement_legal()]
-
-    def to_string_notation(self) -> str:
-        result = ""
-        for index, tile in enumerate(self.tiles):
-            if index > 0:
-                result += ","
-            result += tile.to_string_notation()
-        return result
