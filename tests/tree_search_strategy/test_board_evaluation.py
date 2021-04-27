@@ -2,7 +2,7 @@ from game.constants import PLAYER_1_ID, PLAYER_2_ID
 from game.piece import Piece
 from game.enums import PieceType
 from game.board import Board
-from tree_search_strategy.board_evaluation import evaluate_board, PLACED_PIECE_SCORE, WIN_CONDITION_SCORE
+from tree_search_strategy.board_evaluation import evaluate_board, PLACED_PIECE_SCORE, WIN_CONDITION_SCORE, TILE_SCORE_MULTIPLIER
 
 
 class TestBoardEvaluation(object):
@@ -12,15 +12,18 @@ class TestBoardEvaluation(object):
 
         board.get_tile(2, 2).place_piece(Piece(PLAYER_1_ID, PieceType.two))
 
-        assert evaluate_board(board, PLAYER_1_ID, PLAYER_2_ID) == PLACED_PIECE_SCORE[PieceType.two]
+        piece_two_score = PLACED_PIECE_SCORE[PieceType.two] * TILE_SCORE_MULTIPLIER[2][2]
+        assert evaluate_board(board, PLAYER_1_ID, PLAYER_2_ID) == piece_two_score
 
         board.get_tile(2, 1).place_piece(Piece(PLAYER_2_ID, PieceType.two))
 
-        assert evaluate_board(board, PLAYER_1_ID, PLAYER_2_ID) == 0
+        enemy_two_score = PLACED_PIECE_SCORE[PieceType.two] * TILE_SCORE_MULTIPLIER[2][1]
+        assert evaluate_board(board, PLAYER_1_ID, PLAYER_2_ID) == piece_two_score - enemy_two_score
 
         board.get_tile(1, 1).place_piece(Piece(PLAYER_2_ID, PieceType.three))
 
-        assert evaluate_board(board, PLAYER_1_ID, PLAYER_2_ID) == -PLACED_PIECE_SCORE[PieceType.three]
+        enemy_three_score = PLACED_PIECE_SCORE[PieceType.three] * TILE_SCORE_MULTIPLIER[1][1]
+        assert evaluate_board(board, PLAYER_1_ID, PLAYER_2_ID) == piece_two_score - enemy_two_score - enemy_three_score
 
     def test_win_condition_board_evaluation(self):
         board = Board()
