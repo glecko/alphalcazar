@@ -9,7 +9,7 @@ class Tile(object):
         self.piece: Piece = None
         self.x: int = x
         self.y: int = y
-        self.legal_placement_direction = self.setup_legal_placement_directions()
+        self.legal_placement_direction = self.setup_legal_placement_direction()
 
     def __eq__(self, other):
         if other is None:
@@ -22,7 +22,7 @@ class Tile(object):
     def __repr__(self):
         return f"<Tile {self!s}>"
 
-    def setup_legal_placement_directions(self) -> Optional[Direction]:
+    def setup_legal_placement_direction(self) -> Optional[Direction]:
         if self.is_perimeter():
             if self.x == 0:
                 return Direction.east
@@ -52,3 +52,8 @@ class Tile(object):
 
     def has_piece_of_player(self, owner_id: int) -> bool:
         return self.piece is not None and self.piece.owner_id == owner_id
+
+    def to_string_notation(self) -> str:
+        if self.piece:
+            return f"{self.piece.type}|{self.piece.owner_id}|{self.piece.direction.name}"
+        return ""

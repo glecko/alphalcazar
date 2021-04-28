@@ -3,7 +3,7 @@ from game.player import PlacementMove
 from game.enums import PieceType, Direction
 from game.game import Game
 from tree_search_strategy.strategy import MinMaxState
-from tree_search_strategy.board_evaluation import WIN_CONDITION_SCORE, DEPTH_PENALTY, PLACED_PIECE_SCORE
+from tree_search_strategy.config import WIN_CONDITION_SCORE, DEPTH_PENALTY, PLACED_PIECE_SCORE
 
 
 class TestTreeSearch(object):

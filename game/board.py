@@ -65,28 +65,27 @@ class Board(object):
                 [(-1, 1), (1, -1)]
             ]
             for direction_offsets in diagonal_direction_offsets:
-                pieces = 1
-                for x, y in direction_offsets:
-                    tile = self.get_tile(x=center_coordinate + x, y=center_coordinate + y)
-                    if tile.has_piece_of_player(player):
-                        pieces += 1
-                if pieces == BOARD_SIZE:
+                if self.check_diagonal_completness(player, center_coordinate, direction_offsets):
                     return True
 
         return False
 
+    def check_diagonal_completness(self, player, center_coordinate, direction_offsets):
+        for x, y in direction_offsets:
+            tile = self.get_tile(x=center_coordinate + x, y=center_coordinate + y)
+            if not tile.has_piece_of_player(player):
+                return False
+        return True
+
     def check_row_completeness(self, player, main_coordinate, vertical) -> bool:
-        pieces = 0
         for secondary_coordinate in range(1, BOARD_SIZE + 1):
             if vertical:
                 tile = self.get_tile(x=secondary_coordinate, y=main_coordinate)
             else:
                 tile = self.get_tile(x=main_coordinate, y=secondary_coordinate)
-            if tile.has_piece_of_player(player):
-                pieces += 1
-        if pieces == BOARD_SIZE:
-            return True
-        return False
+            if not tile.has_piece_of_player(player):
+                return False
+        return True
 
     def get_movement_ordered_pieces(self, starting_player_id: int):
         pieces = self.get_board_pieces()
@@ -192,3 +191,11 @@ class Board(object):
 
     def get_legal_tiles(self):
         return [tile for tile in self.tiles if tile.is_placement_legal()]
+
+    def to_string_notation(self) -> str:
+        result = ""
+        for index, tile in enumerate(self.tiles):
+            if index > 0:
+                result += ","
+            result += tile.to_string_notation()
+        return result

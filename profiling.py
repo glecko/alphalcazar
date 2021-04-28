@@ -12,7 +12,7 @@ def profile_function(callback: Callable):
     callback()
     pr.disable()
     stream = io.StringIO()
-    profile_stream = pstats.Stats(pr, stream=stream).strip_dirs().sort_stats(SortKey.CUMULATIVE)
+    profile_stream = pstats.Stats(pr, stream=stream).strip_dirs().sort_stats(SortKey.TIME)
     profile_stream.print_stats()
     print(stream.getvalue())
 

@@ -1,6 +1,7 @@
 from game.player import Player, PlacementMove
 from tree_search_strategy.scored_move import ScoredMove, get_legal_scored_moves
-from tree_search_strategy.board_evaluation import evaluate_board, WIN_CONDITION_SCORE, DEPTH_PENALTY
+from tree_search_strategy.board_evaluation import evaluate_board
+from tree_search_strategy.config import WIN_CONDITION_SCORE, DEPTH_PENALTY
 from typing import Optional, Callable
 
 

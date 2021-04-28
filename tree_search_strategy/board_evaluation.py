@@ -1,24 +1,8 @@
-from game.piece import PieceType
 from game.enums import GameResult
 from game.board import Board
+from tree_search_strategy.config import WIN_CONDITION_SCORE, TILE_SCORE_MULTIPLIER, PLACED_PIECE_SCORE
 
-WIN_CONDITION_SCORE = 900
-DEPTH_PENALTY = 10
-
-TILE_SCORE_MULTIPLIER = {
-    1: {1: 1, 2: 1, 3: 1},
-    2: {1: 1, 2: 2, 3: 1},
-    3: {1: 1, 2: 1, 3: 1},
-}
-
-
-PLACED_PIECE_SCORE = {
-    PieceType.one: 20,
-    PieceType.two: 30,
-    PieceType.three: 30,
-    PieceType.four: -10,
-    PieceType.five: 30,
-}
+BOARD_SCORE_CACHE = dict()
 
 
 def game_result_to_score(result: GameResult) -> int:
@@ -31,9 +15,16 @@ def game_result_to_score(result: GameResult) -> int:
 
 
 def evaluate_board(board: Board, player_id: int, opponent_id: int) -> int:
+    # First check if we have this score in the cache already #
+    cache_key = f"{player_id}#{board.to_string_notation()}"
+    if BOARD_SCORE_CACHE.get(cache_key):
+        return BOARD_SCORE_CACHE[cache_key]
+
     result = board.get_game_result(player_id, opponent_id)
-    if result is None:
-        score = 0
+    score = 0
+    if result is not None:
+        score = game_result_to_score(result)
+    else:
         pieces = board.get_board_pieces(exclude_perimeter=True)
         for piece in pieces:
             tile_multiplier = TILE_SCORE_MULTIPLIER[piece.tile.x][piece.tile.y]
@@ -42,6 +33,5 @@ def evaluate_board(board: Board, player_id: int, opponent_id: int) -> int:
                 score += piece_score
             else:
                 score -= piece_score
-        return score
-    else:
-        return game_result_to_score(result)
+    BOARD_SCORE_CACHE[cache_key] = score
+    return score
