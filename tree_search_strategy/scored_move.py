@@ -9,6 +9,7 @@ class ScoredMove(object):
         self.y = placement_move.tile.y if placement_move else None
         self.piece_type = placement_move.piece.type if placement_move else None
         self.score = score
+        self.owner_id = placement_move.piece.owner_id if placement_move else None
 
     def __str__(self):
         return f"{self.piece_type!s} -> ({self.x}, {self.y}) "

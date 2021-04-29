@@ -27,7 +27,7 @@ def evaluate_board(board: Board, player_id: int, opponent_id: int) -> int:
     else:
         pieces = board.get_board_pieces(exclude_perimeter=True)
         for piece in pieces:
-            tile_multiplier = TILE_SCORE_MULTIPLIER[piece.tile.x][piece.tile.y]
+            tile_multiplier = TILE_SCORE_MULTIPLIER[piece.tile.x][piece.tile.y][piece.direction]
             piece_score = PLACED_PIECE_SCORE[piece.type] * tile_multiplier
             if piece.owner_id == player_id:
                 score += piece_score
