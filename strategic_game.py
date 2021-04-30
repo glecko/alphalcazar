@@ -4,4 +4,4 @@ import sys
 
 sys.setrecursionlimit(100000)
 game = Game()
-game.play_game(build_tree_search_strategy(depth=2))
+game.play_game(build_tree_search_strategy(depth=3))

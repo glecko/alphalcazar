@@ -33,6 +33,18 @@ class TestBoard(object):
         board.get_tile(3, 3).place_piece(Piece(PLAYER_2_ID, PieceType.three))
         assert board.get_game_result(PLAYER_2_ID, PLAYER_1_ID) is GameResult.draw
 
+    def test_central_row_win_condition(self):
+        board = Board()
+        board.get_tile(2, 1).place_piece(Piece(PLAYER_1_ID, PieceType.two))
+        board.get_tile(2, 2).place_piece(Piece(PLAYER_1_ID, PieceType.one))
+        board.get_tile(2, 3).place_piece(Piece(PLAYER_1_ID, PieceType.five))
+
+        # Random pieces
+        board.get_tile(3, 3).place_piece(Piece(PLAYER_2_ID, PieceType.four))
+        board.get_tile(1, 1).place_piece(Piece(PLAYER_2_ID, PieceType.five))
+
+        assert board.get_game_result(PLAYER_1_ID, PLAYER_2_ID) is GameResult.win
+
     def test_diagonal_win_conditions(self):
         board = Board()
         board.get_tile(1, 1).place_piece(Piece(PLAYER_1_ID, PieceType.two))

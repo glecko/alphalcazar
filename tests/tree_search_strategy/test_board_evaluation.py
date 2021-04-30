@@ -44,6 +44,12 @@ class TestBoardEvaluation(object):
         just_entered_score = evaluate_board(board, PLAYER_1_ID, PLAYER_2_ID)
 
         board.get_tile(1, 1).remove_piece()
+        piece_two.set_movement_direction(Direction.south)
+        board.get_tile(3, 3).place_piece(piece_two)
+
+        assert evaluate_board(board, PLAYER_1_ID, PLAYER_2_ID) == just_entered_score
+
+        board.get_tile(3, 3).remove_piece()
         board.get_tile(2, 2).place_piece(piece_two)
 
         center_square_score = evaluate_board(board, PLAYER_1_ID, PLAYER_2_ID)
@@ -60,10 +66,15 @@ class TestBoardEvaluation(object):
 
         neutral_score = evaluate_board(board, PLAYER_1_ID, PLAYER_2_ID)
 
+        board.get_tile(2, 3).remove_piece()
+        piece_two.set_movement_direction(Direction.south)
+        board.get_tile(3, 2).place_piece(piece_two)
+
+        assert evaluate_board(board, PLAYER_1_ID, PLAYER_2_ID) == neutral_score
+
         assert center_square_score > neutral_score
         assert just_entered_score > neutral_score
         assert neutral_score > about_to_exit_score
-
 
     def test_win_condition_board_evaluation(self):
         board = Board()

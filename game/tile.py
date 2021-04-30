@@ -35,6 +35,8 @@ class Tile(object):
         return None
 
     def place_piece(self, piece: Piece):
+        if self.piece is not None:
+            raise ValueError(f"Tried placing {piece!r} on {self!r}, with an existing piece on it ({self.piece!r})")
         self.piece = piece
         piece.tile = self
 

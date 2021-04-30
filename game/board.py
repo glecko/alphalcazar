@@ -37,53 +37,53 @@ class Board(object):
 
         return tiles, coordinates_dict
 
-    def get_game_result(self, player, opponent):
-        if self.has_complete_row(player) and self.has_complete_row(opponent):
+    def get_game_result(self, player_id, opponent_id):
+        if self.has_complete_row(player_id) and self.has_complete_row(opponent_id):
             return GameResult.draw
-        if self.has_complete_row(player):
+        if self.has_complete_row(player_id):
             return GameResult.win
-        if self.has_complete_row(opponent):
+        if self.has_complete_row(opponent_id):
             return GameResult.loss
         return None
 
-    def has_complete_row(self, player):
+    def has_complete_row(self, player_id):
         # Check all rows
         for x in range(1, BOARD_SIZE + 1):
-            if self.check_row_completeness(player, x, vertical=False):
+            if self.check_row_completeness(player_id, x, vertical=False):
                 return True
         # Check all columns
         for y in range(1, BOARD_SIZE + 1):
-            if self.check_row_completeness(player, y, vertical=True):
+            if self.check_row_completeness(player_id, y, vertical=True):
                 return True
 
         # Diagonals
         center_coordinate = (BOARD_SIZE + 1) / 2
         center_tile = self.get_tile(x=center_coordinate, y=center_coordinate)
-        if center_tile.has_piece_of_player(player):
+        if center_tile.has_piece_of_player(player_id):
             diagonal_direction_offsets = [
                 [(-1, -1), (1, 1)],
                 [(-1, 1), (1, -1)]
             ]
             for direction_offsets in diagonal_direction_offsets:
-                if self.check_diagonal_completness(player, center_coordinate, direction_offsets):
+                if self.check_diagonal_completness(player_id, center_coordinate, direction_offsets):
                     return True
 
         return False
 
-    def check_diagonal_completness(self, player, center_coordinate, direction_offsets):
+    def check_diagonal_completness(self, player_id, center_coordinate, direction_offsets):
         for x, y in direction_offsets:
             tile = self.get_tile(x=center_coordinate + x, y=center_coordinate + y)
-            if not tile.has_piece_of_player(player):
+            if not tile.has_piece_of_player(player_id):
                 return False
         return True
 
-    def check_row_completeness(self, player, main_coordinate, vertical) -> bool:
+    def check_row_completeness(self, player_id, main_coordinate, vertical) -> bool:
         for secondary_coordinate in range(1, BOARD_SIZE + 1):
             if vertical:
                 tile = self.get_tile(x=secondary_coordinate, y=main_coordinate)
             else:
                 tile = self.get_tile(x=main_coordinate, y=secondary_coordinate)
-            if not tile.has_piece_of_player(player):
+            if not tile.has_piece_of_player(player_id):
                 return False
         return True
 

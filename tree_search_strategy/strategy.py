@@ -50,7 +50,7 @@ def find_best_next_move(
             initial_depth
         )
     else:
-        game.board.execute_board_movements(opponent.id)
+        game.board.execute_board_movements(game.starting_player.id)
         game.switch_starting_player()
         best_next_move = auto_callback(
             player,
@@ -68,10 +68,18 @@ def board_needs_to_be_evaluated(player: Player, opponent: Player, remaining_dept
     return is_first_move and (remaining_depth == 0 or player.board.get_game_result(player.id, opponent.id) is not None)
 
 
+def get_depth_adjusted_board_evaluation(player: Player, opponent: Player, initial_depth: int, remaining_depth: int) -> int:
+    score = evaluate_board(player.board, player.id, opponent.id)
+    if score > 0:
+        score -= (initial_depth - remaining_depth) * DEPTH_PENALTY
+    else:
+        score += (initial_depth - remaining_depth) * DEPTH_PENALTY
+    return score
+
+
 def max(player: Player, opponent: Player, remaining_depth: int, is_first_move: bool, alpha: int, beta: int, initial_depth: int) -> ScoredMove:
     if board_needs_to_be_evaluated(player, opponent, remaining_depth, is_first_move):
-        score = evaluate_board(player.board, player.id, opponent.id)
-        score -= (initial_depth - remaining_depth) * DEPTH_PENALTY
+        score = get_depth_adjusted_board_evaluation(player, opponent, initial_depth, remaining_depth)
         return ScoredMove(None, score)
     moves = get_legal_scored_moves(player)
     best_move = ScoredMove(None, -WIN_CONDITION_SCORE * 10)
@@ -93,8 +101,7 @@ def max(player: Player, opponent: Player, remaining_depth: int, is_first_move: b
 
 def min(player: Player, opponent: Player, remaining_depth: int, is_first_move: bool, alpha: int, beta: int, initial_depth: int) -> ScoredMove:
     if board_needs_to_be_evaluated(player, opponent, remaining_depth, is_first_move):
-        score = evaluate_board(player.board, player.id, opponent.id)
-        score += (initial_depth - remaining_depth) * DEPTH_PENALTY
+        score = get_depth_adjusted_board_evaluation(player, opponent, initial_depth, remaining_depth)
         return ScoredMove(None, score)
     moves = get_legal_scored_moves(opponent)
     best_move = ScoredMove(None, WIN_CONDITION_SCORE * 10)
