@@ -2,8 +2,8 @@ from game.constants import PLAYER_1_ID
 from game.player import PlacementMove
 from game.enums import PieceType, Direction, GameResult
 from game.game import Game
-from strategies.tree_search import get_best_move
-from strategies.tree_search import WIN_CONDITION_SCORE, DEPTH_PENALTY
+from strategies.tree_search.strategy import get_best_move
+from strategies.tree_search.config import WIN_CONDITION_SCORE, DEPTH_PENALTY
 
 
 class TestTreeSearch(object):

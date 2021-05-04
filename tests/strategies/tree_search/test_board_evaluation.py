@@ -3,7 +3,7 @@ from game.piece import Piece
 from game.enums import PieceType, Direction
 from game.board import Board
 from strategies.tree_search.board_evaluation import evaluate_board
-from strategies.tree_search import WIN_CONDITION_SCORE, TILE_SCORE_MULTIPLIER, PLACED_PIECE_SCORE
+from strategies.tree_search.config import WIN_CONDITION_SCORE, TILE_SCORE_MULTIPLIER, PLACED_PIECE_SCORE
 
 
 class TestBoardEvaluation(object):
