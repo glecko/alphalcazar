@@ -3,8 +3,7 @@ from game.piece import Piece
 from game.enums import PieceType
 from game.tile import Tile
 from game.board import Board
-from typing import List, Optional
-import random
+from typing import List
 
 # To avoid the cyclic import with Game, only needed for type checking
 from typing import TYPE_CHECKING
@@ -35,6 +34,12 @@ class Player(object):
         self.game = game
         self.pieces = self.setup_pieces()
 
+    def __str__(self):
+        return f"{self.id}"
+
+    def __repr__(self):
+        return f"<Player {self!s}>"
+
     def setup_pieces(self) -> List[Piece]:
         pieces = list()
         for piece_type in PieceType:
@@ -57,10 +62,4 @@ class Player(object):
                 move = PlacementMove(piece, tile)
                 legal_moves.append(move)
         return legal_moves
-
-    def play_random_piece(self) -> Optional[PlacementMove]:
-        legal_moves = self.get_legal_placement_moves()
-        if len(legal_moves) > 0:
-            return random.choice(legal_moves)
-        return None
 

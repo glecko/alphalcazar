@@ -3,6 +3,9 @@ from game.board import Board
 from game.player import Player, PlacementMove
 from game.constants import PLAYER_1_ID, PLAYER_2_ID
 from game.enums import GameResult
+from typing import Callable, Optional
+
+StrategyFunction = Callable[[Player, Player, bool], Optional[PlacementMove]]
 
 
 class Game(object):
@@ -18,16 +21,9 @@ class Game(object):
         self.turns = 0
         self.result = None
 
-    @staticmethod
-    def play_random_piece_strategy(player: Player, opponent: Player, is_starting: bool) -> PlacementMove:
-        return player.play_random_piece()
-
-    def play_random_game(self) -> GameResult:
-        return self.play_game(self.play_random_piece_strategy)
-
-    def play_game(self, player_strategy_fn) -> GameResult:
+    def play_game(self, player_1_strategy_fn: StrategyFunction, player_2_strategy_fn: StrategyFunction) -> GameResult:
         while self.result is None:
-            self.execute_player_moves(player_strategy_fn)
+            self.execute_player_moves(player_1_strategy_fn, player_2_strategy_fn)
             executed_movements = self.board.execute_board_movements(self.starting_player.id)
             self.turns += 1
             if executed_movements == 0 and self.board.is_full():
@@ -35,16 +31,15 @@ class Game(object):
                 return self.result
             self.switch_starting_player()
             self.result = self.get_current_result()
-        print(self.result)
         return self.result
 
-    def execute_player_moves(self, player_strategy_fn):
-        starting_move = player_strategy_fn(self.starting_player, self.get_secondary_player(), is_starting=True)
-        print(starting_move)
+    def execute_player_moves(self, player_1_strategy_fn: StrategyFunction, player_2_strategy_fn: StrategyFunction):
+        starting_strategy_fn = player_1_strategy_fn if self.starting_player.id == self.player_1.id else player_2_strategy_fn
+        starting_move = starting_strategy_fn(self.starting_player, self.get_secondary_player(), True)
         if starting_move is not None:
             starting_move.execute()
-        second_move = player_strategy_fn(self.get_secondary_player(), self.starting_player, is_starting=False)
-        print(second_move)
+        second_strategy_fn = player_1_strategy_fn if self.get_secondary_player().id == self.player_1.id else player_2_strategy_fn
+        second_move = second_strategy_fn(self.get_secondary_player(), self.starting_player, False)
         if second_move is not None:
             second_move.execute()
         self.player_moves[self.starting_player.id].append(starting_move)

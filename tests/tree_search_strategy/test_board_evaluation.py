@@ -2,8 +2,8 @@ from game.constants import PLAYER_1_ID, PLAYER_2_ID
 from game.piece import Piece
 from game.enums import PieceType, Direction
 from game.board import Board
-from tree_search_strategy.board_evaluation import evaluate_board
-from tree_search_strategy.config import WIN_CONDITION_SCORE, TILE_SCORE_MULTIPLIER, PLACED_PIECE_SCORE
+from strategies.tree_search.board_evaluation import evaluate_board
+from strategies.tree_search import WIN_CONDITION_SCORE, TILE_SCORE_MULTIPLIER, PLACED_PIECE_SCORE
 
 
 class TestBoardEvaluation(object):

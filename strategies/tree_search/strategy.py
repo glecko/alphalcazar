@@ -1,8 +1,8 @@
 from game.player import Player, PlacementMove
 from game.game import Game
-from tree_search_strategy.scored_move import ScoredMove, get_legal_scored_moves
-from tree_search_strategy.board_evaluation import evaluate_board
-from tree_search_strategy.config import WIN_CONDITION_SCORE, DEPTH_PENALTY
+from strategies.tree_search.scored_move import ScoredMove, get_legal_scored_moves
+from strategies.tree_search.board_evaluation import evaluate_board
+from strategies.tree_search.config import WIN_CONDITION_SCORE, DEPTH_PENALTY
 from typing import Optional, Callable
 
 MinMaxCallable = Callable[[Player, Player, int, bool, int, int, int], ScoredMove]
@@ -14,7 +14,9 @@ def build_tree_search_strategy(depth: int) -> Callable[[Player, Player, bool], O
             return None
 
         best_move = get_best_move(player, opponent, is_starting, depth)
-        return best_move.to_placement_move(player)
+        placement_move = best_move.to_placement_move(player)
+        print(f"{player!r} plays: {placement_move!s}")
+        return placement_move
     return tree_search_strategy
 
 

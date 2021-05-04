@@ -1,5 +1,5 @@
 from game.game import Game
-from tree_search_strategy.strategy import build_tree_search_strategy
+from strategies.tree_search.strategy import build_tree_search_strategy
 import cProfile, io
 import pstats
 from pstats import SortKey

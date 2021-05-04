@@ -1,6 +1,6 @@
 from game.enums import GameResult
 from game.board import Board
-from tree_search_strategy.config import WIN_CONDITION_SCORE, TILE_SCORE_MULTIPLIER, PLACED_PIECE_SCORE
+from strategies.tree_search.config import WIN_CONDITION_SCORE, TILE_SCORE_MULTIPLIER, PLACED_PIECE_SCORE
 
 BOARD_SCORE_CACHE = dict()
 
