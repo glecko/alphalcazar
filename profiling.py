@@ -18,7 +18,7 @@ def profile_function(callback: Callable):
 
 
 game = Game()
-strategy_fn = build_tree_search_strategy(depth=2)
+strategy_fn = build_tree_search_strategy(depth=3, multiprocessing=True)
 
 
 def function_to_profile():
