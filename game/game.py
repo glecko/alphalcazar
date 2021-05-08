@@ -54,7 +54,7 @@ class Game(object):
         elif player_id == PLAYER_2_ID:
             return self.player_2
         else:
-            raise ValueError(f"Unknown player ID specified: {player_id}")
+            raise ValueError(f"Unknown player ID specified: {player_id}.")
 
     def switch_starting_player(self):
         self.starting_player = self.get_secondary_player()
