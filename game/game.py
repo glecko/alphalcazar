@@ -61,6 +61,10 @@ class Game(object):
         else:
             raise ValueError(f"Unknown player ID specified: {player_id}.")
 
+    # Returns the player that is next to play
+    def get_active_player(self):
+        return self.get_secondary_player() if self.first_move_executed else self.starting_player
+
     def switch_starting_player(self):
         self.starting_player = self.get_secondary_player()
 

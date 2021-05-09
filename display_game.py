@@ -1,5 +1,4 @@
 from game.game import Game
-from game.enums import PieceType, Direction
 from ui.display import Display
 from strategies.ui_input.strategy import build_ui_input_strategy
 from strategies.tree_search.strategy import build_tree_search_strategy
