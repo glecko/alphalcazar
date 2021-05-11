@@ -3,6 +3,11 @@ from ui.display import Display
 from strategies.ui_input.strategy import build_ui_input_strategy
 from strategies.tree_search.strategy import build_tree_search_strategy
 import threading
+from time import sleep
+
+
+def on_player_moves_executed():
+    sleep(2)
 
 
 def thread_function(display: Display):
@@ -12,7 +17,7 @@ def thread_function(display: Display):
 
 
 print("Opening game...")
-game = Game()
+game = Game(on_player_moves_executed)
 ui = Display(game)
 game_logic = threading.Thread(target=thread_function, args=(ui,))
 game_logic.daemon = True

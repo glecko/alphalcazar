@@ -4,13 +4,13 @@ from game.player import Player, PlacementMove
 from game.constants import PLAYER_1_ID, PLAYER_2_ID
 from game.enums import GameResult
 from typing import Callable, Optional
-from time import sleep
 
 StrategyFunction = Callable[[Player, Player, bool], Optional[PlacementMove]]
 
 
 class Game(object):
-    def __init__(self):
+    def __init__(self, on_player_moves_executed: Optional[Callable] = None):
+        self.on_player_moves_executed = on_player_moves_executed
         self.board = Board()
         self.player_1 = Player(PLAYER_1_ID, self.board, self)
         self.player_2 = Player(PLAYER_2_ID, self.board, self)
@@ -27,7 +27,8 @@ class Game(object):
         while self.result is None:
             self.first_move_executed = False
             self.execute_player_moves(player_1_strategy_fn, player_2_strategy_fn)
-            sleep(2)
+            if self.on_player_moves_executed is not None:
+                self.on_player_moves_executed()
             executed_movements = self.board.execute_board_movements(self.starting_player.id)
             self.turns += 1
             if executed_movements == 0 and self.board.is_full():
