@@ -1,4 +1,4 @@
-from game.constants import BOARD_SIZE, PLAY_AREA_SIZE, PERIMETER_COORDINATES
+from game.constants import BOARD_SIZE, PLAY_AREA_SIZE, PERIMETER_COORDINATES, CENTER_COORDINATE
 from game.enums import GameResult
 from game.tile import Tile
 from game.piece import Piece
@@ -57,22 +57,21 @@ class Board(object):
                 return True
 
         # Diagonals
-        center_coordinate = (BOARD_SIZE + 1) / 2
-        center_tile = self.get_tile(x=center_coordinate, y=center_coordinate)
+        center_tile = self.get_tile(x=CENTER_COORDINATE, y=CENTER_COORDINATE)
         if center_tile.has_piece_of_player(player_id):
             diagonal_direction_offsets = [
                 [(-1, -1), (1, 1)],
                 [(-1, 1), (1, -1)]
             ]
             for direction_offsets in diagonal_direction_offsets:
-                if self.check_diagonal_completness(player_id, center_coordinate, direction_offsets):
+                if self.check_diagonal_completness(player_id, direction_offsets):
                     return True
 
         return False
 
-    def check_diagonal_completness(self, player_id, center_coordinate, direction_offsets):
+    def check_diagonal_completness(self, player_id, direction_offsets):
         for x, y in direction_offsets:
-            tile = self.get_tile(x=center_coordinate + x, y=center_coordinate + y)
+            tile = self.get_tile(x=CENTER_COORDINATE + x, y=CENTER_COORDINATE + y)
             if not tile.has_piece_of_player(player_id):
                 return False
         return True
@@ -106,14 +105,13 @@ class Board(object):
         return executed_movements
 
     def execute_piece_movement(self, piece: Piece) -> int:
-        source_tile = self.get_piece_tile(piece)
-        x, y = piece.get_movement_offsets()
-        target_tile = self.get_tile(x=source_tile.x + x, y=source_tile.y + y)
+        target_x, target_y = piece.get_target_coordinates()
+        target_tile = self.get_tile(target_x, target_y)
         if target_tile.piece is None:
-            self.commit_piece_movement(piece, source_tile, target_tile)
+            self.commit_piece_movement(piece, piece.tile, target_tile)
             return 1
         elif piece.is_pusher():
-            push_movements = self.get_chained_push_movements(source_tile, target_tile)
+            push_movements = self.get_chained_push_movements(piece.tile, target_tile)
             for push_source_tile, push_target_tile in reversed(push_movements):
                 if push_target_tile is None:
                     push_source_tile.piece.remove_from_play()
@@ -122,15 +120,16 @@ class Board(object):
                     self.commit_piece_movement(push_source_tile.piece, push_source_tile, push_target_tile)
             return len(push_movements)
         elif target_tile.piece.is_pushable() and not piece.is_pushable():
-            push_target_tile = self.get_tile(x=target_tile.x + x, y=target_tile.y + y)
+            dx, dy = piece.get_movement_offsets()
+            push_target_tile = self.get_tile(x=target_tile.x + dx, y=target_tile.y + dy)
             if push_target_tile is None or push_target_tile.piece is None:
                 self.commit_piece_movement(target_tile.piece, target_tile, push_target_tile)
-                self.commit_piece_movement(piece, source_tile, target_tile)
+                self.commit_piece_movement(piece, piece.tile, target_tile)
                 return 2
             else:
-                self.remove_piece_stuck_in_perimeter(source_tile, piece)
+                self.remove_piece_stuck_in_perimeter(piece.tile, piece)
         else:
-            self.remove_piece_stuck_in_perimeter(source_tile, piece)
+            self.remove_piece_stuck_in_perimeter(piece.tile, piece)
         return 0
 
     @staticmethod
@@ -176,12 +175,6 @@ class Board(object):
                 return False
         return True
 
-    def get_piece_tile(self, piece: Piece):
-        for tile in self.tiles:
-            if tile.piece == piece:
-                return tile
-        return None
-
     def get_tile(self, x, y) -> Optional[Tile]:
         x_dict = self.tiles_by_coordinates_dict.get(x)
         return x_dict.get(y) if x_dict is not None else None
@@ -191,6 +184,20 @@ class Board(object):
 
     def get_legal_tiles(self):
         return [tile for tile in self.tiles if tile.is_placement_legal()]
+
+    def get_tile_neighbors(self, tile: Tile, include_diagonals: bool) -> List[Tile]:
+        neighbor_tiles = list()
+        target_offsets = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        if include_diagonals:
+            target_offsets += [(1, 1), (-1, 1), (1, -1), (-1, -1)]
+        for target_tile in self.tiles:
+            offsets = target_tile.x - tile.x, target_tile.y - tile.y
+            if offsets in target_offsets:
+                neighbor_tiles.append(target_tile)
+        return neighbor_tiles
+
+    def get_tile_perimeter_neightbors(self, tile: Tile, include_diagonals: bool):
+        return [tile for tile in self.get_tile_neighbors(tile, include_diagonals) if tile.is_perimeter()]
 
     def to_string_notation(self) -> str:
         result = ""

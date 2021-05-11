@@ -5,13 +5,21 @@ from strategies.tree_search.config import WIN_CONDITION_SCORE
 from multiprocessing import Pool
 from itertools import repeat
 
-pool = Pool()
+pool = None
+
+
+def get_or_init_pool():
+    global pool
+    if pool is None:
+        pool = Pool()
+    return pool
 
 
 def max_multiprocess(player: Player, opponent: Player, depth: int, is_first_move: bool, alpha: int, beta: int):
     moves = get_legal_scored_moves(player)
     best_move = ScoredMove(None, -WIN_CONDITION_SCORE * 10)
-    next_scored_movements = pool.starmap(
+    pool_instance = get_or_init_pool()
+    next_scored_movements = pool_instance.starmap(
         find_best_next_move,
         zip(
             moves,

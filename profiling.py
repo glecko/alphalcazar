@@ -12,13 +12,13 @@ def profile_function(callback: Callable):
     callback()
     pr.disable()
     stream = io.StringIO()
-    profile_stream = pstats.Stats(pr, stream=stream).strip_dirs().sort_stats(SortKey.TIME)
+    profile_stream = pstats.Stats(pr, stream=stream).strip_dirs().sort_stats(SortKey.CUMULATIVE)
     profile_stream.print_stats()
     print(stream.getvalue())
 
 
 game = Game()
-strategy_fn = build_tree_search_strategy(depth=3)
+strategy_fn = build_tree_search_strategy(depth=2)
 
 
 def function_to_profile():
