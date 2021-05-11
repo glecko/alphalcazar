@@ -120,7 +120,7 @@ class TestTreeSearch(object):
 
         # Player 1 can win the game by placing a one in tile (2, 0) or a three/four on (3, 0)
         # But he only has piece one available in hand
-        best_move = get_best_move(game.player_1, game.player_2, is_first_move=False, depth=1, multiprocessing=False)
+        best_move = get_best_move(game.player_1, game.player_2, is_first_move=False, depth=1)
         assert best_move.x == 2
         assert best_move.y == 0
         assert best_move.piece_type == PieceType.one
@@ -142,13 +142,13 @@ class TestTreeSearch(object):
         game.board.get_tile(3, 2).place_piece(four)
 
         # Player 2 can only avoid losing this turn by playing anything on tile (2, 4)
-        best_move = get_best_move(game.player_2, game.player_1, is_first_move=True, depth=1, multiprocessing=False)
+        best_move = get_best_move(game.player_2, game.player_1, is_first_move=True, depth=1)
 
         assert best_move.x == 2
         assert best_move.y == 4
 
         # Should be true for any depth level (using 2 for test speed reasons)
-        best_move_depth_2 = get_best_move(game.player_2, game.player_1, is_first_move=True, depth=2, multiprocessing=False)
+        best_move_depth_2 = get_best_move(game.player_2, game.player_1, is_first_move=True, depth=2)
 
         assert best_move_depth_2.x == 2
         assert best_move_depth_2.y == 4
@@ -175,7 +175,7 @@ class TestTreeSearch(object):
 
         # Player 1 can only avoid losing this turn by player the four piece on either
         # the (2, 0) or the (2, 4) tile or on the (0, 3) tile
-        best_move = get_best_move(game.player_1, game.player_2, is_first_move=False, depth=1, multiprocessing=False)
+        best_move = get_best_move(game.player_1, game.player_2, is_first_move=False, depth=1)
 
         assert (best_move.x == 2 and best_move.y == 0) or (best_move.x == 2 and best_move.y == 4) or (best_move.x == 0 and best_move.y == 3)
         assert best_move.piece_type == PieceType.four
@@ -214,7 +214,7 @@ class TestTreeSearch(object):
         # and he can only prevent the diagonal.
         # Setting the depth to a ridiculous number should not make this test run forever, as on depth 1 it should
         # already return a score for all movements
-        best_move = get_best_move(game.player_1, game.player_2, is_first_move=False, depth=100, multiprocessing=False)
+        best_move = get_best_move(game.player_1, game.player_2, is_first_move=False, depth=100)
 
         assert best_move.score == -WIN_CONDITION_SCORE + DEPTH_PENALTY
 

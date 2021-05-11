@@ -9,12 +9,12 @@ strategy_options = [
     {
         "id": 1,
         "description": "Tree search (Depth 2)",
-        "strategy": build_tree_search_strategy(depth=2, multiprocessing=False),
+        "strategy": build_tree_search_strategy(depth=2),
     },
     {
         "id": 2,
         "description": "Tree search (Depth 3)",
-        "strategy": build_tree_search_strategy(depth=3, multiprocessing=True),
+        "strategy": build_tree_search_strategy(depth=3),
     },
     {
         "id": 3,

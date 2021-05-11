@@ -8,7 +8,7 @@ from typing import Optional, Callable
 MinMaxCallable = Callable[[Player, Player, int, bool, int, int, int], ScoredMove]
 
 
-def build_tree_search_strategy(depth: int, multiprocessing: bool) -> Callable[[Player, Player, bool], Optional[PlacementMove]]:
+def build_tree_search_strategy(depth: int, multiprocessing=False) -> Callable[[Player, Player, bool], Optional[PlacementMove]]:
     def tree_search_strategy(player: Player, opponent: Player, is_starting: bool) -> Optional[PlacementMove]:
         if len(player.get_legal_placement_moves()) == 0:
             return None
@@ -20,7 +20,7 @@ def build_tree_search_strategy(depth: int, multiprocessing: bool) -> Callable[[P
     return tree_search_strategy
 
 
-def get_best_move(player: Player, opponent: Player, is_first_move: bool, depth: int, multiprocessing: bool) -> ScoredMove:
+def get_best_move(player: Player, opponent: Player, is_first_move: bool, depth: int, multiprocessing=False) -> ScoredMove:
     alpha_starting_value = -WIN_CONDITION_SCORE - 1
     beta_starting_value = WIN_CONDITION_SCORE + 1
     if multiprocessing:
