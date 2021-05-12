@@ -22,6 +22,9 @@ class PlacementMove(object):
     def __repr__(self):
         return f"<PlacementMove {self!s}>"
 
+    def __eq__(self, other):
+        return self.piece == other.piece and self.tile == other.tile
+
     def execute(self):
         self.tile.place_piece(self.piece)
         self.piece.set_movement_direction(self.tile.legal_placement_direction)
