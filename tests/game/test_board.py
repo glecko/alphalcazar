@@ -87,7 +87,6 @@ class TestBoard(object):
 
         assert board.get_game_result(PLAYER_1_ID, PLAYER_2_ID) is None
 
-
     def test_board_pieces(self):
         board = Board()
         assert board.get_board_pieces() == []
@@ -98,3 +97,14 @@ class TestBoard(object):
 
         assert len(board.get_board_pieces()) == 3
         assert len(board.get_board_pieces(exclude_perimeter=True)) == 2
+
+    def test_tile_neighbors(self):
+        board = Board()
+
+        assert len(board.get_tile_neighbors(board.get_tile(2, 2), False)) == 4
+        assert len(board.get_tile_neighbors(board.get_tile(2, 2), True)) == 8
+        assert len(board.get_tile_perimeter_neightbors(board.get_tile(2, 2), True)) == 0
+        assert len(board.get_tile_perimeter_neightbors(board.get_tile(2, 2), False)) == 0
+
+        assert len(board.get_tile_perimeter_neightbors(board.get_tile(1, 1), False)) == 2
+        assert len(board.get_tile_perimeter_neightbors(board.get_tile(1, 1), True)) == 4
