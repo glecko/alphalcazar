@@ -19,17 +19,17 @@ def profile_function(callback: Callable):
 
 
 game = Game()
-strategy_fn = build_tree_search_strategy(depth=3)
+strategy_fn = build_tree_search_strategy(depth=2)
 
 
 def function_to_profile():
-    strategy_fn(game.player_1, game.player_2, True)
-    #results = list()
-    #for _ in range(0, 10):
-    #    game = Game()
-    #    game.play_game(strategy_fn, strategy_fn)
-    #    results.append(game)
-    #analyze_games(results)
+    #strategy_fn(game.player_1, game.player_2, True)
+    results = list()
+    for _ in range(0, 10):
+        game = Game()
+        game.play_game(strategy_fn, strategy_fn)
+        results.append(game)
+    analyze_games(results)
 
 
 profile_function(function_to_profile)
