@@ -2,7 +2,7 @@ from game.constants import PLAYER_1_ID, PLAYER_2_ID
 from game.player import PlacementMove
 from game.enums import PieceType, Direction
 from game.game import Game
-from strategies.tree_search.scored_move import get_legal_scored_moves
+from strategies.tree_search.abstract_move import get_legal_scored_moves
 
 
 class TestFilterSymmetricMovements(object):

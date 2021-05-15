@@ -11,7 +11,8 @@ class Piece(object):
         self.direction = None
 
     def __str__(self):
-        return f"{self.type} ({self.owner_id})"
+        direction_string = self.direction.name[0] if self.direction is not None else ""
+        return f"{self.type}{direction_string} ({self.owner_id})"
 
     def __repr__(self):
         return f"<Piece {self!s}>"
@@ -44,6 +45,7 @@ class Piece(object):
         return self.tile is not None
 
     def remove_from_play(self):
+        self.direction = None
         self.tile = None
 
     def set_movement_direction(self, direction):

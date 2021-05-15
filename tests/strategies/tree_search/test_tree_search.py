@@ -4,6 +4,16 @@ from game.enums import PieceType, Direction, GameResult
 from game.game import Game
 from strategies.tree_search.strategy import get_best_move
 from strategies.tree_search.config import WIN_CONDITION_SCORE, DEPTH_PENALTY
+from strategies.tree_search.transposition import TRANSPOSITION_DICT
+from strategies.tree_search.board_evaluation import BOARD_SCORE_CACHE
+import pytest
+
+
+@pytest.fixture(autouse=True, scope='function')
+def clean_tree_search_caches_before_tests():
+    TRANSPOSITION_DICT.clear()
+    BOARD_SCORE_CACHE.clear()
+    yield
 
 
 def black_widow_test(multiprocessing: bool):
@@ -54,14 +64,14 @@ def black_widow_test(multiprocessing: bool):
 
     # Play the moves
     best_move_player_2_round_1 = get_best_move(game.player_2, game.player_1, is_first_move=False, depth=2, multiprocessing=multiprocessing)
-    best_move_player_2_round_1.execute(game.player_2)
+    best_move_player_2_round_1.abstract_move.execute(game.player_2)
 
     game.board.execute_board_movements(starting_player_id=game.player_1.id)
     game.switch_starting_player()
     best_move_player_2_round_2 = get_best_move(game.player_2, game.player_1, is_first_move=True, depth=2, multiprocessing=multiprocessing)
-    best_move_player_2_round_2.execute(game.player_2)
+    best_move_player_2_round_2.abstract_move.execute(game.player_2)
     best_move_player_1_round_2 = get_best_move(game.player_1, game.player_2, is_first_move=False, depth=2, multiprocessing=multiprocessing)
-    best_move_player_1_round_2.execute(game.player_1)
+    best_move_player_1_round_2.abstract_move.execute(game.player_1)
 
     game.board.execute_board_movements(starting_player_id=game.player_2.id)
 
@@ -74,11 +84,11 @@ def black_widow_test(multiprocessing: bool):
 
     # Player 2 should play piece 5 in both movements
     # (first round its forced, on the second round its the winning move)
-    assert best_move_player_2_round_1.piece_type == PieceType.five
-    assert best_move_player_2_round_2.piece_type == PieceType.five
+    assert best_move_player_2_round_1.abstract_move.piece_type == PieceType.five
+    assert best_move_player_2_round_2.abstract_move.piece_type == PieceType.five
 
     # On the second round, player 2 should play the 5 on (2, 4), as its the winning move
-    assert best_move_player_2_round_2.x == 2 and best_move_player_2_round_2.y == 4
+    assert best_move_player_2_round_2.abstract_move.x == 2 and best_move_player_2_round_2.abstract_move.y == 4
 
 
 class TestTreeSearch(object):
@@ -121,9 +131,9 @@ class TestTreeSearch(object):
         # Player 1 can win the game by placing a one in tile (2, 0) or a three/four on (3, 0)
         # But he only has piece one available in hand
         best_move = get_best_move(game.player_1, game.player_2, is_first_move=False, depth=1)
-        assert best_move.x == 2
-        assert best_move.y == 0
-        assert best_move.piece_type == PieceType.one
+        assert best_move.abstract_move.x == 2
+        assert best_move.abstract_move.y == 0
+        assert best_move.abstract_move.piece_type == PieceType.one
         assert best_move.score == WIN_CONDITION_SCORE - DEPTH_PENALTY
 
     def test_obvious_first_movement(self):
@@ -144,14 +154,14 @@ class TestTreeSearch(object):
         # Player 2 can only avoid losing this turn by playing anything on tile (2, 4)
         best_move = get_best_move(game.player_2, game.player_1, is_first_move=True, depth=1)
 
-        assert best_move.x == 2
-        assert best_move.y == 4
+        assert best_move.abstract_move.x == 2
+        assert best_move.abstract_move.y == 4
 
         # Should be true for any depth level (using 2 for test speed reasons)
         best_move_depth_2 = get_best_move(game.player_2, game.player_1, is_first_move=True, depth=2)
 
-        assert best_move_depth_2.x == 2
-        assert best_move_depth_2.y == 4
+        assert best_move_depth_2.abstract_move.x == 2
+        assert best_move_depth_2.abstract_move.y == 4
 
     def test_player_must_use_four_piece(self):
         game = Game()
@@ -177,8 +187,10 @@ class TestTreeSearch(object):
         # the (2, 0) or the (2, 4) tile or on the (0, 3) tile
         best_move = get_best_move(game.player_1, game.player_2, is_first_move=False, depth=1)
 
-        assert (best_move.x == 2 and best_move.y == 0) or (best_move.x == 2 and best_move.y == 4) or (best_move.x == 0 and best_move.y == 3)
-        assert best_move.piece_type == PieceType.four
+        assert (best_move.abstract_move.x == 2 and best_move.abstract_move.y == 0) or\
+               (best_move.abstract_move.x == 2 and best_move.abstract_move.y == 4) or\
+               (best_move.abstract_move.x == 0 and best_move.abstract_move.y == 3)
+        assert best_move.abstract_move.piece_type == PieceType.four
 
     def test_hopeless_situation(self):
         # In this test we are going to set up a situation where player_1, moving second
