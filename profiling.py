@@ -29,6 +29,7 @@ def function_to_profile():
         game = Game()
         game.play_game(strategy_fn, strategy_fn)
         results.append(game)
+        print(game.result)
     analyze_games(results)
 
 

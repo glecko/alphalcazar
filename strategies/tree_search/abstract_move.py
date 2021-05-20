@@ -2,15 +2,14 @@ from game.player import Player, PlacementMove
 from game.enums import Direction
 from game.constants import CENTER_COORDINATE
 from typing import Optional, List
-import random
 
 
 class AbstractMove(object):
-    def __init__(self, placement_move: Optional[PlacementMove]):
-        self.x = placement_move.tile.x
-        self.y = placement_move.tile.y
-        self.piece_type = placement_move.piece.type
-        self.owner_id = placement_move.piece.owner_id
+    def __init__(self, placement_move: Optional[PlacementMove], player: Player):
+        self.x = placement_move.tile.x if placement_move is not None else None
+        self.y = placement_move.tile.y if placement_move is not None else None
+        self.piece_type = placement_move.piece.type if placement_move is not None else None
+        self.owner_id = player.id
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y and self.owner_id == other.owner_id and self.piece_type == other.piece_type
@@ -22,6 +21,8 @@ class AbstractMove(object):
         return f"<AbstractMove {self!s}>"
 
     def to_placement_move(self, player: Player) -> Optional[PlacementMove]:
+        if self.x is None or self.y is None or self.piece_type is None:
+            return None
         piece = player.get_piece_by_type(self.piece_type)
         tile = player.board.get_tile(self.x, self.y)
         return PlacementMove(piece, tile)
@@ -32,18 +33,16 @@ class AbstractMove(object):
             placement_move.execute()
 
 
-class ScoredMove(object):
-    def __init__(self, best_moves: List[AbstractMove], score: int):
-        self.abstract_move = None
-        if len(best_moves) > 0:
-            self.abstract_move: Optional[AbstractMove] = random.choice(best_moves)
+class ScoredMove(AbstractMove):
+    def __init__(self, abstract_move: AbstractMove, player: Player, score: int):
+        super().__init__(abstract_move.to_placement_move(player), player)
         self.score = score
 
-    def __eq__(self, other):
-        return self.abstract_move == other.abstract_move and self.score == other.score
+    def __repr__(self):
+        return f"<ScoredMove {self!s}>"
 
-    def to_placement_move(self, player: Player) -> Optional[PlacementMove]:
-        return self.abstract_move.to_placement_move(player) if self.abstract_move is not None else None
+    def __str__(self):
+        return f"{super().__str__()!s} ({self.score})"
 
 
 def filter_symmetric_movements(scored_moves: List[AbstractMove], player: Player) -> List[AbstractMove]:
@@ -75,7 +74,8 @@ def get_legal_scored_moves(player: Player) -> List[AbstractMove]:
     placement_moves = player.get_legal_placement_moves()
     scored_moves = list()
     for move in placement_moves:
-        scored_moves.append(AbstractMove(move))
+        scored_moves.append(AbstractMove(move, player))
     filtered_moves = filter_symmetric_movements(scored_moves, player)
-    random.shuffle(filtered_moves)
+    if len(filtered_moves) == 0:
+        filtered_moves.append(AbstractMove(None, player))
     return filtered_moves
