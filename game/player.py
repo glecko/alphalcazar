@@ -37,6 +37,9 @@ class Player(object):
         self.game = game
         self.pieces = self.setup_pieces()
 
+    def __eq__(self, other):
+        return self.id == other.id
+
     def __str__(self):
         return f"{self.id}"
 

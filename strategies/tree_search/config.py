@@ -1,4 +1,12 @@
 from game.enums import PieceType, Direction
+from enum import Enum
+
+
+class EvaluationType(Enum):
+    exact = 0
+    alpha_cutoff = 1
+    beta_cutoff = 2
+
 
 WIN_CONDITION_SCORE = 900
 DEPTH_PENALTY = 10
