@@ -1,6 +1,7 @@
 from game.player import Player, PlacementMove
 from game.enums import Direction
 from game.constants import CENTER_COORDINATE
+from strategies.tree_search.config import PIECE_TYPE_COORDINATE_SORTING_ORDER, PIECE_ENTRY_APPEARS_BLOCKED_ORDER
 from typing import Optional, List
 
 
@@ -20,12 +21,29 @@ class AbstractMove(object):
     def __repr__(self):
         return f"<AbstractMove {self!s}>"
 
+    def is_empty_movement(self):
+        return self.x is None or self.y is None or self.piece_type is None
+
+    def to_sorting_order(self, player: Player) -> int:
+        if self.is_empty_movement():
+            return 0
+
+        # We check for movements that appear would lead to our piece not entering and rank those last
+        placement_move = self.to_placement_move(player)
+        target_tile = placement_move.get_board_target_tile()
+        if target_tile.piece is not None and not placement_move.piece.is_pusher() and not target_tile.piece.is_pushable():
+            if target_tile.piece.is_exiting_board() or target_tile.piece.type > self.piece_type:
+                # It appears that our piece would not be able to enter
+                return PIECE_ENTRY_APPEARS_BLOCKED_ORDER
+
+        return PIECE_TYPE_COORDINATE_SORTING_ORDER[self.piece_type][self.x][self.y]
+
     def to_placement_move(self, player: Player) -> Optional[PlacementMove]:
-        if self.x is None or self.y is None or self.piece_type is None:
+        if self.is_empty_movement():
             return None
         piece = player.get_piece_by_type(self.piece_type)
         tile = player.board.get_tile(self.x, self.y)
-        return PlacementMove(piece, tile)
+        return PlacementMove(piece, tile, player.board)
 
     def execute(self, player: Player):
         placement_move = self.to_placement_move(player)
@@ -70,7 +88,7 @@ def filter_symmetric_movements(scored_moves: List[AbstractMove], player: Player)
     return filtered_moves
 
 
-def get_legal_scored_moves(player: Player) -> List[AbstractMove]:
+def get_legal_abstract_moves(player: Player) -> List[AbstractMove]:
     placement_moves = player.get_legal_placement_moves()
     scored_moves = list()
     for move in placement_moves:
@@ -78,4 +96,5 @@ def get_legal_scored_moves(player: Player) -> List[AbstractMove]:
     filtered_moves = filter_symmetric_movements(scored_moves, player)
     if len(filtered_moves) == 0:
         filtered_moves.append(AbstractMove(None, player))
+    filtered_moves.sort(key=lambda m: m.to_sorting_order(player), reverse=True)
     return filtered_moves

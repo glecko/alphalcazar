@@ -1,6 +1,7 @@
 from __future__ import annotations
 from game.board import Board
-from game.player import Player, PlacementMove
+from game.player import Player
+from game.placement_move import PlacementMove
 from game.constants import PLAYER_1_ID, PLAYER_2_ID
 from game.enums import GameResult
 from typing import Callable, Optional

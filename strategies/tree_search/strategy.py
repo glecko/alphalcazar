@@ -1,4 +1,5 @@
-from game.player import Player, PlacementMove
+from game.player import Player
+from game.placement_move import PlacementMove
 from strategies.tree_search.abstract_move import AbstractMove, ScoredMove
 from strategies.tree_search.config import WIN_CONDITION_SCORE
 from strategies.tree_search.min_max import max

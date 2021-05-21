@@ -88,3 +88,133 @@ TILE_SCORE_MULTIPLIER = {
         },
     },
 }
+
+PIECE_ENTRY_APPEARS_BLOCKED_ORDER = 1
+ONE_CORNER_ROW_ORDER = 2
+CORNER_ROW_ORDER = 3
+CENTRAL_ROW_ORDER = 4
+FOUR_CORNER_ROW_ORDER = 5
+FOUR_CENTRAL_ROW_ORDER = 6
+
+PIECE_TYPE_COORDINATE_SORTING_ORDER = {
+    PieceType.one: {
+        0: {
+            1: ONE_CORNER_ROW_ORDER,
+            2: CENTRAL_ROW_ORDER,
+            3: ONE_CORNER_ROW_ORDER,
+        },
+        1: {
+            0: ONE_CORNER_ROW_ORDER,
+            4: ONE_CORNER_ROW_ORDER,
+        },
+        2: {
+            0: CENTRAL_ROW_ORDER,
+            4: CENTRAL_ROW_ORDER,
+        },
+        3: {
+            0: ONE_CORNER_ROW_ORDER,
+            4: ONE_CORNER_ROW_ORDER,
+        },
+        4: {
+            1: ONE_CORNER_ROW_ORDER,
+            2: CENTRAL_ROW_ORDER,
+            3: ONE_CORNER_ROW_ORDER,
+        },
+    },
+    PieceType.two: {
+        0: {
+            1: CORNER_ROW_ORDER,
+            2: CENTRAL_ROW_ORDER,
+            3: CORNER_ROW_ORDER,
+        },
+        1: {
+            0: CORNER_ROW_ORDER,
+            4: CORNER_ROW_ORDER,
+        },
+        2: {
+            0: CENTRAL_ROW_ORDER,
+            4: CENTRAL_ROW_ORDER,
+        },
+        3: {
+            0: CORNER_ROW_ORDER,
+            4: CORNER_ROW_ORDER,
+        },
+        4: {
+            1: CORNER_ROW_ORDER,
+            2: CENTRAL_ROW_ORDER,
+            3: CORNER_ROW_ORDER,
+        },
+    },
+    PieceType.three: {
+        0: {
+            1: CORNER_ROW_ORDER,
+            2: CENTRAL_ROW_ORDER,
+            3: CORNER_ROW_ORDER,
+        },
+        1: {
+            0: CORNER_ROW_ORDER,
+            4: CORNER_ROW_ORDER,
+        },
+        2: {
+            0: CENTRAL_ROW_ORDER,
+            4: CENTRAL_ROW_ORDER,
+        },
+        3: {
+            0: CORNER_ROW_ORDER,
+            4: CORNER_ROW_ORDER,
+        },
+        4: {
+            1: CORNER_ROW_ORDER,
+            2: CENTRAL_ROW_ORDER,
+            3: CORNER_ROW_ORDER,
+        },
+    },
+    PieceType.four: {
+        0: {
+            1: FOUR_CORNER_ROW_ORDER,
+            2: FOUR_CENTRAL_ROW_ORDER,
+            3: FOUR_CORNER_ROW_ORDER,
+        },
+        1: {
+            0: FOUR_CORNER_ROW_ORDER,
+            4: FOUR_CORNER_ROW_ORDER,
+        },
+        2: {
+            0: FOUR_CENTRAL_ROW_ORDER,
+            4: FOUR_CENTRAL_ROW_ORDER,
+        },
+        3: {
+            0: FOUR_CORNER_ROW_ORDER,
+            4: FOUR_CORNER_ROW_ORDER,
+        },
+        4: {
+            1: FOUR_CORNER_ROW_ORDER,
+            2: FOUR_CENTRAL_ROW_ORDER,
+            3: FOUR_CORNER_ROW_ORDER,
+        },
+    },
+    PieceType.five: {
+        0: {
+            1: CORNER_ROW_ORDER,
+            2: CENTRAL_ROW_ORDER,
+            3: CORNER_ROW_ORDER,
+        },
+        1: {
+            0: CORNER_ROW_ORDER,
+            4: CORNER_ROW_ORDER,
+        },
+        2: {
+            0: CENTRAL_ROW_ORDER,
+            4: CENTRAL_ROW_ORDER,
+        },
+        3: {
+            0: CORNER_ROW_ORDER,
+            4: CORNER_ROW_ORDER,
+        },
+        4: {
+            1: CORNER_ROW_ORDER,
+            2: CENTRAL_ROW_ORDER,
+            3: CORNER_ROW_ORDER,
+        },
+    }
+}

@@ -1,3 +1,5 @@
+from game.enums import Direction
+
 BOARD_SIZE = 3
 PLAY_AREA_SIZE = BOARD_SIZE + 2
 CENTER_COORDINATE = (BOARD_SIZE + 1) / 2
@@ -5,3 +7,22 @@ PERIMETER_COORDINATES = [0, PLAY_AREA_SIZE - 1]
 
 PLAYER_1_ID = 1
 PLAYER_2_ID = 2
+
+DIRECTION_MOVEMENT_OFFSETS = {
+    Direction.north: (0, 1),
+    Direction.south: (0, -1),
+    Direction.east: (1, 0),
+    Direction.west: (-1, 0)
+}
+
+STRAIGHT_OFFSETS = [
+    DIRECTION_MOVEMENT_OFFSETS[Direction.north],
+    DIRECTION_MOVEMENT_OFFSETS[Direction.south],
+    DIRECTION_MOVEMENT_OFFSETS[Direction.east],
+    DIRECTION_MOVEMENT_OFFSETS[Direction.west]
+]
+
+NORTHEAST_DIAGONAL_OFFSETS = [(-1, -1), (1, 1)]
+SOUTHEAST_DIAGONAL_OFFSETS = [(-1, 1), (1, -1)]
+
+DIAGONAL_OFFSETS = NORTHEAST_DIAGONAL_OFFSETS + SOUTHEAST_DIAGONAL_OFFSETS

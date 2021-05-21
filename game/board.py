@@ -1,5 +1,6 @@
 from game.constants import BOARD_SIZE, PLAY_AREA_SIZE, PERIMETER_COORDINATES, CENTER_COORDINATE
 from game.enums import GameResult
+from game.constants import STRAIGHT_OFFSETS, DIAGONAL_OFFSETS, NORTHEAST_DIAGONAL_OFFSETS, SOUTHEAST_DIAGONAL_OFFSETS
 from game.tile import Tile
 from game.piece import Piece
 from typing import List, Tuple, Optional, Dict
@@ -59,11 +60,7 @@ class Board(object):
         # Diagonals
         center_tile = self.get_tile(x=CENTER_COORDINATE, y=CENTER_COORDINATE)
         if center_tile.has_piece_of_player(player_id):
-            diagonal_direction_offsets = [
-                [(-1, -1), (1, 1)],
-                [(-1, 1), (1, -1)]
-            ]
-            for direction_offsets in diagonal_direction_offsets:
+            for direction_offsets in [NORTHEAST_DIAGONAL_OFFSETS, SOUTHEAST_DIAGONAL_OFFSETS]:
                 if self.check_diagonal_completness(player_id, direction_offsets):
                     return True
 
@@ -186,10 +183,10 @@ class Board(object):
         return [tile for tile in self.tiles if tile.is_placement_legal()]
 
     def get_tile_neighbors(self, tile: Tile, include_diagonals: bool) -> List[Tile]:
-        neighbor_tiles = list()
-        target_offsets = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        neighbor_tiles, target_offsets = list(), list()
+        target_offsets += STRAIGHT_OFFSETS
         if include_diagonals:
-            target_offsets += [(1, 1), (-1, 1), (1, -1), (-1, -1)]
+            target_offsets += DIAGONAL_OFFSETS
         for target_tile in self.tiles:
             offsets = target_tile.x - tile.x, target_tile.y - tile.y
             if offsets in target_offsets:

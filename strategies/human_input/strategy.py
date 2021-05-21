@@ -1,5 +1,6 @@
 from game.enums import PieceType
-from game.player import Player, PlacementMove
+from game.player import Player
+from game.placement_move import PlacementMove
 from typing import Optional
 
 

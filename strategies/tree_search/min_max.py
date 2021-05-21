@@ -1,5 +1,5 @@
 from game.player import Player
-from strategies.tree_search.abstract_move import AbstractMove, get_legal_scored_moves
+from strategies.tree_search.abstract_move import AbstractMove, get_legal_abstract_moves
 from strategies.tree_search.board_evaluation import evaluate_board
 from strategies.tree_search.config import WIN_CONDITION_SCORE, DEPTH_PENALTY, EvaluationType
 from strategies.tree_search.transposition import store_in_transposition_dict, get_best_move_from_transposition_dict
@@ -31,7 +31,7 @@ def max(player: Player, opponent: Player, remaining_depth: int, is_first_move: b
     if cached_best_moves is not None:
         return cached_best_moves, cached_best_score, cached_eval_type
 
-    moves = get_legal_scored_moves(player)
+    moves = get_legal_abstract_moves(player)
     eval_type = EvaluationType.exact
     best_moves, best_score = list(), -WIN_CONDITION_SCORE * 10
     for move in moves:
@@ -44,7 +44,7 @@ def max(player: Player, opponent: Player, remaining_depth: int, is_first_move: b
             best_moves.append(move)
 
         alpha = best_score if best_score > alpha else alpha
-        if alpha >= beta:
+        if alpha > beta:
             eval_type = EvaluationType.beta_cutoff
             break
 
@@ -61,7 +61,7 @@ def min(player: Player, opponent: Player, remaining_depth: int, is_first_move: b
     if cached_best_moves is not None:
         return cached_best_moves, cached_best_score, cached_eval_type
 
-    moves = get_legal_scored_moves(opponent)
+    moves = get_legal_abstract_moves(opponent)
     eval_type = EvaluationType.exact
     best_moves, best_score = list(), WIN_CONDITION_SCORE * 10
     for move in moves:
@@ -74,7 +74,7 @@ def min(player: Player, opponent: Player, remaining_depth: int, is_first_move: b
             best_moves.append(move)
 
         beta = best_score if best_score < beta else beta
-        if beta <= alpha:
+        if beta < alpha:
             eval_type = EvaluationType.alpha_cutoff
             break
 
