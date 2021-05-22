@@ -1,5 +1,5 @@
 from game.enums import Direction, PieceType
-from game.constants import BOARD_SIZE
+from game.constants import BOARD_SIZE, DIRECTION_MOVEMENT_OFFSETS
 from typing import Tuple
 
 
@@ -27,15 +27,10 @@ class Piece(object):
         return self.type * 10 + 1
 
     def get_movement_offsets(self) -> Tuple[int, int]:
-        if self.direction == Direction.north:
-            return 0, 1
-        if self.direction == Direction.south:
-            return 0, -1
-        if self.direction == Direction.east:
-            return 1, 0
-        if self.direction == Direction.west:
-            return -1, 0
-        raise ValueError(f"Invalid direction ({self.direction}) was specified in {self!r}.")
+        offsets = DIRECTION_MOVEMENT_OFFSETS.get(self.direction)
+        if offsets is None:
+            raise ValueError(f"Invalid direction ({self.direction}) was specified in {self!r}.")
+        return offsets
 
     def get_target_coordinates(self) -> Tuple[int, int]:
         x, y = self.get_movement_offsets()

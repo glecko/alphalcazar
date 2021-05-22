@@ -3,7 +3,7 @@ from game.game import Game
 from game.tile import Tile
 from game.piece import Piece
 from game.enums import PieceType
-from game.player import PlacementMove
+from game.placement_move import PlacementMove
 from ui.selectables import SelectableEntity
 from ui.constants import *
 from typing import List
@@ -63,7 +63,7 @@ class Display(object):
         drop_tile: Tile = self.get_mouse_position_object(self.selectable_tiles)
         if drop_tile is not None:
             legal_moves = self.game.get_active_player().get_legal_placement_moves()
-            move = PlacementMove(self.selected_piece, drop_tile)
+            move = PlacementMove(self.selected_piece, drop_tile, self.game.board)
             if move in legal_moves:
                 self.consumable_move = move
                 self.move_input_event.set()

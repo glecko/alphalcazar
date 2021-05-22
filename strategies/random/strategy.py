@@ -1,4 +1,5 @@
-from game.player import Player, PlacementMove
+from game.player import Player
+from game.placement_move import PlacementMove
 from typing import Optional
 import random
 

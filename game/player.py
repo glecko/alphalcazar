@@ -1,7 +1,7 @@
 from __future__ import annotations
 from game.piece import Piece
 from game.enums import PieceType
-from game.tile import Tile
+from game.placement_move import PlacementMove
 from game.board import Board
 from typing import List
 
@@ -9,25 +9,6 @@ from typing import List
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from game.game import Game
-
-
-class PlacementMove(object):
-    def __init__(self, piece: Piece, tile: Tile):
-        self.piece = piece
-        self.tile = tile
-
-    def __str__(self):
-        return f"{self.piece!r} -> {self.tile!r}"
-
-    def __repr__(self):
-        return f"<PlacementMove {self!s}>"
-
-    def __eq__(self, other):
-        return self.piece == other.piece and self.tile == other.tile
-
-    def execute(self):
-        self.tile.place_piece(self.piece)
-        self.piece.set_movement_direction(self.tile.legal_placement_direction)
 
 
 class Player(object):
@@ -65,7 +46,7 @@ class Player(object):
         legal_moves: List[PlacementMove] = list()
         for tile in legal_tiles:
             for piece in available_pieces:
-                move = PlacementMove(piece, tile)
+                move = PlacementMove(piece, tile, self.board)
                 legal_moves.append(move)
         return legal_moves
 

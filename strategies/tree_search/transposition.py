@@ -12,12 +12,15 @@ def evaluation_type_valid(eval_type: EvaluationType, score: int, alpha: int, bet
         return True
 
     if eval_type == EvaluationType.beta_cutoff:
-        return score >= beta
+        # We know that the node was not evaluated completely because 1 of the nodes had a value higher than beta
+        # Which means the "real" value of the node is "score" or higher
+        # We can use this value if we are under similar circumstances (score is higher than our beta)
+        return score > beta
     if eval_type == EvaluationType.alpha_cutoff:
         # We know that the node was not evaluated completely because 1 of the nodes had a value lower than alpha
         # Which means the "real" value of the node is "score" or lower
         # We can use this value if we are under similar circumstances (score is lower than our alpha)
-        return score <= alpha
+        return score < alpha
     return False
 
 

@@ -1,5 +1,5 @@
 from game.constants import PLAYER_1_ID
-from game.player import PlacementMove
+from game.placement_move import PlacementMove
 from game.enums import PieceType, Direction, GameResult
 from game.game import Game
 from strategies.tree_search.strategy import get_best_move, get_best_moves
@@ -18,22 +18,26 @@ class TestTreeSearch(object):
 
         PlacementMove(
             piece=game.player_1.get_piece_by_type(PieceType.four),
-            tile=game.board.get_tile(0, 2)
+            tile=game.board.get_tile(0, 2),
+            board=game.board,
         ).execute()
         PlacementMove(
             piece=game.player_1.get_piece_by_type(PieceType.three),
-            tile=game.board.get_tile(0, 3)
+            tile=game.board.get_tile(0, 3),
+            board=game.board,
         ).execute()
         game.board.execute_board_movements(PLAYER_1_ID)
         game.board.execute_board_movements(PLAYER_1_ID)
 
         PlacementMove(
             piece=game.player_1.get_piece_by_type(PieceType.two),
-            tile=game.board.get_tile(0, 1)
+            tile=game.board.get_tile(0, 1),
+            board=game.board,
         ).execute()
         PlacementMove(
             piece=game.player_1.get_piece_by_type(PieceType.five),
-            tile=game.board.get_tile(4, 1)
+            tile=game.board.get_tile(4, 1),
+            board=game.board,
         ).execute()
 
         game.board.execute_board_movements(PLAYER_1_ID)
@@ -41,7 +45,8 @@ class TestTreeSearch(object):
 
         PlacementMove(
             piece=game.player_2.get_piece_by_type(PieceType.five),
-            tile=game.board.get_tile(4, 3)
+            tile=game.board.get_tile(4, 3),
+            board=game.board,
         ).execute()
 
         # Player 1 can win the game by placing a one in tile (2, 0) or a three/four on (3, 0)
@@ -275,16 +280,19 @@ class TestTreeSearch(object):
         five_p2.set_movement_direction(Direction.west)
         game.board.get_tile(2, 2).place_piece(five_p2)
 
-        # At this position, player 2 is losing at depth 2
-        # He can avoid losing this round by playing the 1 piece at (0, 3), but next round he will
-        # be unable to block both squares where P1 can mate, and will not have the 4 in hand
+        # At this position, player 2 is losing at depth 2. He can avoid losing this round by playing either:
+        # 1) The 1 piece at (0, 3) or (1, 4)
+        # 2) the 2 or 3 pieces at (3, 0) or (4, 1),
+        # but next round he will be unable to block both squares where P1 can mate, and will not have the 4 in hand
 
         best_moves_p2_t1, score = get_best_moves(game.player_2, game.player_1, is_first_move=True, depth=2)
-        assert len(best_moves_p2_t1) == 1
+        assert 6 >= len(best_moves_p2_t1) >= 1
         best_move_p2 = get_best_move(game.player_2, game.player_1, is_first_move=True, depth=2)
 
-        assert best_move_p2.x == 0 and best_move_p2.y == 3
-        assert best_move_p2.piece_type == PieceType.one
+        assert (best_move_p2.x == 0 and best_move_p2.y == 3 and best_move_p2.piece_type == PieceType.one) or \
+               (best_move_p2.x == 1 and best_move_p2.y == 4 and best_move_p2.piece_type == PieceType.one) or \
+               (best_move_p2.x == 3 and best_move_p2.y == 0 and best_move_p2.piece_type in [PieceType.two, PieceType.three]) or\
+               (best_move_p2.x == 4 and best_move_p2.y == 1 and best_move_p2.piece_type in [PieceType.two, PieceType.three])
         assert best_move_p2.score == -WIN_CONDITION_SCORE + DEPTH_PENALTY * 2
 
     def test_black_widow(self, clean_tree_search_caches_before_tests):
