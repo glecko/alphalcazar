@@ -291,7 +291,7 @@ class TestTreeSearch(object):
 
         assert (best_move_p2.x == 0 and best_move_p2.y == 3 and best_move_p2.piece_type == PieceType.one) or \
                (best_move_p2.x == 1 and best_move_p2.y == 4 and best_move_p2.piece_type == PieceType.one) or \
-               (best_move_p2.x == 3 and best_move_p2.y == 0 and best_move_p2.piece_type in [PieceType.two, PieceType.three]) or\
+               (best_move_p2.x == 3 and best_move_p2.y == 0 and best_move_p2.piece_type in [PieceType.two, PieceType.three]) or \
                (best_move_p2.x == 4 and best_move_p2.y == 1 and best_move_p2.piece_type in [PieceType.two, PieceType.three])
         assert best_move_p2.score == -WIN_CONDITION_SCORE + DEPTH_PENALTY * 2
 

@@ -1,8 +1,8 @@
 from game.enums import PieceType, Direction
-from enum import Enum
+from enum import IntEnum
 
 
-class EvaluationType(Enum):
+class EvaluationType(IntEnum):
     exact = 0
     alpha_cutoff = 1
     beta_cutoff = 2

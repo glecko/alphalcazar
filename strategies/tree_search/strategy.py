@@ -3,8 +3,12 @@ from game.placement_move import PlacementMove
 from strategies.tree_search.abstract_move import AbstractMove, ScoredMove
 from strategies.tree_search.config import WIN_CONDITION_SCORE
 from strategies.tree_search.min_max import max
+from strategies.tree_search.persistence import hydrate_transposition_cache
 from typing import Optional, Callable, Tuple, List
 import random
+import logging
+
+logger = logging.getLogger(__name__)
 
 MinMaxCallable = Callable[[Player, Player, int, bool, int, int, int], AbstractMove]
 
@@ -15,9 +19,11 @@ def build_tree_search_strategy(depth: int) -> Callable[[Player, Player, bool], O
             return None
 
         best_move = get_best_move(player, opponent, is_starting, depth)
-        print(f"{player!r} plays: {best_move!s}")
+        logger.info(f"{player!r} plays: {best_move!s}")
         placement_move = best_move.to_placement_move(player)
         return placement_move
+
+    hydrate_transposition_cache()
     return tree_search_strategy
 
 
@@ -30,6 +36,7 @@ def get_best_moves(player: Player, opponent: Player, is_first_move: bool, depth:
 
 def get_best_move(player: Player, opponent: Player, is_first_move: bool, depth: int) -> ScoredMove:
     best_moves, score = get_best_moves(player, opponent, is_first_move, depth)
+    logger.debug(f"Found {len(best_moves)} moves with score {score}.")
     best_move = None
     if len(best_moves) > 0:
         best_move = random.choice(best_moves)

@@ -2,15 +2,15 @@ from game.player import Player, PlacementMove
 from game.enums import Direction
 from game.constants import CENTER_COORDINATE
 from strategies.tree_search.config import PIECE_TYPE_COORDINATE_SORTING_ORDER, PIECE_ENTRY_APPEARS_BLOCKED_ORDER
-from typing import Optional, List
+from typing import Optional, List, Any, Dict
 
 
 class AbstractMove(object):
-    def __init__(self, placement_move: Optional[PlacementMove], player: Player):
+    def __init__(self, placement_move: Optional[PlacementMove], player: Optional[Player]):
         self.x = placement_move.tile.x if placement_move is not None else None
         self.y = placement_move.tile.y if placement_move is not None else None
         self.piece_type = placement_move.piece.type if placement_move is not None else None
-        self.owner_id = player.id
+        self.owner_id = player.id if player else None
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y and self.owner_id == other.owner_id and self.piece_type == other.piece_type
@@ -20,6 +20,23 @@ class AbstractMove(object):
 
     def __repr__(self):
         return f"<AbstractMove {self!s}>"
+
+    @classmethod
+    def from_json(cls, json_object: Dict[str, Any]):
+        move = cls(None, None)
+        move.x = json_object["x"]
+        move.y = json_object["y"]
+        move.piece_type = json_object["piece_type"]
+        move.owner_id = json_object["owner_id"]
+        return move
+
+    def to_json(self):
+        return {
+            "x": self.x,
+            "y": self.y,
+            "piece_type": int(self.piece_type) if self.piece_type else None,
+            "owner_id": self.owner_id
+        }
 
     def is_empty_movement(self):
         return self.x is None or self.y is None or self.piece_type is None

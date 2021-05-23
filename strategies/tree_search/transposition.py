@@ -3,8 +3,10 @@ from strategies.tree_search.abstract_move import AbstractMove
 from strategies.tree_search.config import EvaluationType
 from typing import Optional, Dict, List, Tuple
 
+TranspositionCache = Dict[str, Tuple[List[AbstractMove], int, int, EvaluationType]]
 
-TRANSPOSITION_DICT: Dict[str, Tuple[List[AbstractMove], int, int, EvaluationType]] = dict()
+
+TRANSPOSITION_DICT: TranspositionCache = dict()
 
 
 def evaluation_type_valid(eval_type: EvaluationType, score: int, alpha: int, beta: int) -> bool:
