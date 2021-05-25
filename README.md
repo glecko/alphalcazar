@@ -27,10 +27,18 @@ CREATE DATABASE alphalcazar;
 
 CREATE TABLE transposition_cache (
 	board_hash_key VARCHAR(255) PRIMARY KEY,
-	best_moves JSONB,
+	best_move_ids INTEGER[],
 	score INTEGER,
 	depth INTEGER,
 	evaluation_type INTEGER
+);
+
+CREATE TABLE moves (
+    id SERIAL PRIMARY KEY,
+	x INTEGER,
+	y INTEGER,
+	piece_type INTEGER,
+	owner_id INTEGER
 );
 ```
 

@@ -10,7 +10,7 @@ class TestFilterSymmetricMovements(object):
     def test_movement_order_sorting(self):
         game = Game()
 
-        moves = get_legal_abstract_moves(game.player_1)
+        moves = get_legal_abstract_moves(game.player_1, filter_symmetric_moves=True)
         assert len(moves) > 0
         assert moves[0].piece_type == PieceType.four
         assert moves[-1].piece_type == PieceType.one
@@ -27,7 +27,7 @@ class TestFilterSymmetricMovements(object):
         one.set_movement_direction(Direction.south)
         game.board.get_tile(1, 1).place_piece(one)
 
-        moves = get_legal_abstract_moves(game.player_1)
+        moves = get_legal_abstract_moves(game.player_1, False)
         first_piece_moves = moves[0:11]
         for move in first_piece_moves:
             assert move.piece_type == PieceType.four
@@ -42,7 +42,7 @@ class TestFilterSymmetricMovements(object):
         game = Game()
 
         # With an empty board, there should only be 2 valid tiles on which to play
-        assert len(get_legal_abstract_moves(game.player_1)) == 2 * len(game.player_1.pieces)
+        assert len(get_legal_abstract_moves(game.player_1, True)) == 2 * len(game.player_1.pieces)
 
         PlacementMove(
             piece=game.player_1.get_piece_by_type(PieceType.two),
@@ -58,14 +58,14 @@ class TestFilterSymmetricMovements(object):
 
         # Now both players should have 7 legal tiles at which to place their pieces
         # as the board now has x-axis symmetry
-        assert len(get_legal_abstract_moves(game.player_1)) == 7 * len(game.player_1.get_available_pieces())
-        assert len(get_legal_abstract_moves(game.player_2)) == 7 * len(game.player_2.get_available_pieces())
+        assert len(get_legal_abstract_moves(game.player_1, True)) == 7 * len(game.player_1.get_available_pieces())
+        assert len(get_legal_abstract_moves(game.player_2, True)) == 7 * len(game.player_2.get_available_pieces())
 
         game.board.execute_board_movements(PLAYER_2_ID)
 
         # The game still has x-axis symmetry
-        assert len(get_legal_abstract_moves(game.player_1)) == 7 * len(game.player_1.get_available_pieces())
-        assert len(get_legal_abstract_moves(game.player_2)) == 7 * len(game.player_2.get_available_pieces())
+        assert len(get_legal_abstract_moves(game.player_1, True)) == 7 * len(game.player_1.get_available_pieces())
+        assert len(get_legal_abstract_moves(game.player_2, True)) == 7 * len(game.player_2.get_available_pieces())
 
     def test_non_symmetric_center_row(self):
         game = Game()
@@ -83,7 +83,7 @@ class TestFilterSymmetricMovements(object):
         game.board.get_tile(2, 2).place_piece(five)
 
         # Game should not have y-axis symmetry because the center piece is facing east
-        assert len(get_legal_abstract_moves(game.player_2)) == 11 * len(game.player_2.pieces)
+        assert len(get_legal_abstract_moves(game.player_2, True)) == 11 * len(game.player_2.pieces)
 
     def test_non_symmetric_movements(self):
         game = Game()
@@ -95,8 +95,8 @@ class TestFilterSymmetricMovements(object):
         ).execute()
 
         # All tiles except 1 (the one occupied by player 1) should need to be considered
-        assert len(get_legal_abstract_moves(game.player_2)) == 11 * len(game.player_2.pieces)
+        assert len(get_legal_abstract_moves(game.player_2, True)) == 11 * len(game.player_2.pieces)
 
         # No after executing the movement, all possible movements need to be explored
         game.board.execute_board_movements(PLAYER_1_ID)
-        assert len(get_legal_abstract_moves(game.player_2)) == 12 * len(game.player_2.pieces)
+        assert len(get_legal_abstract_moves(game.player_2, True)) == 12 * len(game.player_2.pieces)

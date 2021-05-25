@@ -31,7 +31,7 @@ def max(player: Player, opponent: Player, remaining_depth: int, is_first_move: b
     if cached_best_moves is not None:
         return cached_best_moves, cached_best_score, cached_eval_type
 
-    moves = get_legal_abstract_moves(player)
+    moves = get_legal_abstract_moves(player, filter_symmetric_moves=True)
     eval_type = EvaluationType.exact
     best_moves, best_score = list(), -WIN_CONDITION_SCORE * 10
     for move in moves:
@@ -61,7 +61,7 @@ def min(player: Player, opponent: Player, remaining_depth: int, is_first_move: b
     if cached_best_moves is not None:
         return cached_best_moves, cached_best_score, cached_eval_type
 
-    moves = get_legal_abstract_moves(opponent)
+    moves = get_legal_abstract_moves(opponent, filter_symmetric_moves=False)
     eval_type = EvaluationType.exact
     best_moves, best_score = list(), WIN_CONDITION_SCORE * 10
     for move in moves:

@@ -63,7 +63,7 @@ class TestTransposition(object):
 
     def test_overwriting_transposition_dict(self, clean_tree_search_caches_before_tests):
         game = Game()
-        best_moves = get_legal_abstract_moves(game.player_1)[0:1]
+        best_moves = get_legal_abstract_moves(game.player_1, False)[0:1]
 
         store_in_transposition_dict(best_moves, 20, EvaluationType.exact, game.player_1, 2, False)
 
@@ -84,7 +84,7 @@ class TestTransposition(object):
 
     def test_using_valid_transposition_cache_cutoffs(self, clean_tree_search_caches_before_tests):
         game = Game()
-        best_moves = get_legal_abstract_moves(game.player_1)[0:1]
+        best_moves = get_legal_abstract_moves(game.player_1, False)[0:1]
 
         # We were searching a node with beta = 10 and found a move with value 35, which means the current node would
         # never happen in practice and we stored the lastly explored best value, 35

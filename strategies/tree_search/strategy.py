@@ -37,8 +37,6 @@ def get_best_moves(player: Player, opponent: Player, is_first_move: bool, depth:
 def get_best_move(player: Player, opponent: Player, is_first_move: bool, depth: int) -> ScoredMove:
     best_moves, score = get_best_moves(player, opponent, is_first_move, depth)
     logger.debug(f"Found {len(best_moves)} moves with score {score}.")
-    best_move = None
-    if len(best_moves) > 0:
-        best_move = random.choice(best_moves)
+    best_move = random.choice(best_moves)
     return ScoredMove(best_move, player, score)
 
