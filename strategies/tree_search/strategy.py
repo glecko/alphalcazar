@@ -30,7 +30,7 @@ def build_tree_search_strategy(depth: int) -> Callable[[Player, Player, bool], O
 def get_best_moves(player: Player, opponent: Player, is_first_move: bool, depth: int) -> Tuple[List[AbstractMove], int]:
     alpha_starting_value = -WIN_CONDITION_SCORE * 10
     beta_starting_value = WIN_CONDITION_SCORE * 10
-    best_moves, score, _ = max(player, opponent, depth, is_first_move, alpha_starting_value, beta_starting_value, depth)
+    best_moves, score, _ = max(player, opponent, depth, is_first_move, alpha_starting_value, beta_starting_value)
     return best_moves, score
 
 

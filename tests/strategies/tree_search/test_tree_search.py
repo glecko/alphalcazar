@@ -248,13 +248,13 @@ class TestTreeSearch(object):
         # He can avoid losing this round by playing the 4 piece at (2, 0), but next round he will
         # be unable to block both squares where P1 can mate, and will not have the 4 in hand
 
-        best_moves_p2_t1, score = get_best_moves(game.player_2, game.player_1, is_first_move=False, depth=2)
+        best_moves_p2_t1, score_p2_t1 = get_best_moves(game.player_2, game.player_1, is_first_move=False, depth=2)
         assert len(best_moves_p2_t1) == 1
         best_move_p2 = get_best_move(game.player_2, game.player_1, is_first_move=False, depth=2)
 
         assert best_move_p2.x == 2 and best_move_p2.y == 0
         assert best_move_p2.piece_type == PieceType.four
-        assert best_move_p2.score == -WIN_CONDITION_SCORE + DEPTH_PENALTY * 2
+        assert best_move_p2.score == score_p2_t1 == -WIN_CONDITION_SCORE + DEPTH_PENALTY * 2
 
     def test_game_is_lost_on_depth_2_alternative(self, clean_tree_search_caches_before_tests):
         game = Game()

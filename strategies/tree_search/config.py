@@ -2,6 +2,9 @@ from game.enums import PieceType, Direction
 from enum import IntEnum
 
 
+MIN_DEPTH_TO_PERSIST = 2
+
+
 class EvaluationType(IntEnum):
     exact = 0
     alpha_cutoff = 1

@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format=FORMAT)
 
 game = Game()
-strategy_fn = build_tree_search_strategy(depth=4)
+strategy_fn = build_tree_search_strategy(depth=2)
 
 # First, play a couple of normal games #
 for x in range(0, 25):

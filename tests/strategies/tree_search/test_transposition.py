@@ -1,7 +1,7 @@
 from game.enums import PieceType, Direction
 from game.game import Game
 from strategies.tree_search.strategy import get_best_move
-from strategies.tree_search.config import EvaluationType
+from strategies.tree_search.config import EvaluationType, DEPTH_PENALTY, WIN_CONDITION_SCORE
 from strategies.tree_search.abstract_move import get_legal_abstract_moves
 from strategies.tree_search.board_evaluation import BOARD_SCORE_CACHE
 from strategies.tree_search.transposition import get_best_move_from_transposition_dict, store_in_transposition_dict, \

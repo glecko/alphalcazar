@@ -1,12 +1,11 @@
 from strategies.tree_search.transposition import TRANSPOSITION_DICT, TranspositionCache
 from strategies.tree_search.abstract_move import AbstractMove, get_legal_abstract_moves
-from strategies.tree_search.config import EvaluationType
+from strategies.tree_search.config import EvaluationType, MIN_DEPTH_TO_PERSIST
 from game.game import Game
 from game.enums import PieceType
 from decouple import config
 from psycopg2.extras import execute_values
 from typing import Dict
-import json
 import psycopg2
 import logging
 
@@ -98,7 +97,7 @@ def persist_transposition_cache():
             for key, value in TRANSPOSITION_DICT.items():
                 best_moves, score, depth, evaluation_type = value
                 # For scalability purposes, for now we only store exact evaluations of depth >= 2
-                if evaluation_type != EvaluationType.exact or depth < 2:
+                if evaluation_type != EvaluationType.exact or depth < MIN_DEPTH_TO_PERSIST:
                     continue
                 best_move_ids = [moves_by_props[move.owner_id][move.piece_type][move.x][move.y] for move in best_moves]
                 entry_values = [key, best_move_ids, score, depth, int(evaluation_type)]

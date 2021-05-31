@@ -25,7 +25,7 @@ class Game(object):
             PLAYER_2_ID: list()
         }
         self.turns = 0
-        self.result = None
+        self.result: GameResult = None
 
     def play_game(self, player_1_strategy_fn: StrategyFunction, player_2_strategy_fn: StrategyFunction) -> GameResult:
         logger.info(f"Game starting...")
