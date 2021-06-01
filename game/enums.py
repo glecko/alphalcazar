@@ -18,6 +18,5 @@ class Direction(IntEnum):
 
 class GameResult(IntEnum):
     loss = -1
-    draw = 0
     win = 1
 

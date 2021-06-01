@@ -39,11 +39,11 @@ class Board(object):
         return tiles, coordinates_dict
 
     def get_game_result(self, player_id, opponent_id):
-        if self.has_complete_row(player_id) and self.has_complete_row(opponent_id):
-            return GameResult.draw
-        if self.has_complete_row(player_id):
+        player_complete_row = self.has_complete_row(player_id)
+        opponent_complete_row = self.has_complete_row(opponent_id)
+        if player_complete_row and not opponent_complete_row:
             return GameResult.win
-        if self.has_complete_row(opponent_id):
+        if opponent_complete_row and not player_complete_row:
             return GameResult.loss
         return None
 

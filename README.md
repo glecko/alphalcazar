@@ -2,6 +2,10 @@
 
 Python implementation of the advanced tic tac toe board game, invented by a friend of mine (Adrià Balcazar), together with several implementations of an AI for said game.
 
+## Rules
+
+The rules of the game can be found in the [rules document](docs/RULES.md).
+
 ## Setting up the project
 
 ### Installing dependencies

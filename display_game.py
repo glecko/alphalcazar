@@ -16,7 +16,7 @@ def on_player_moves_executed():
 
 
 def thread_function(display: Display):
-    game.play_game(build_ui_input_strategy(display), build_tree_search_strategy(depth=2))
+    game.play_game(build_ui_input_strategy(display), build_ui_input_strategy(display))
 
 
 logger.info("Opening game...")

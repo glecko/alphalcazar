@@ -17,8 +17,6 @@ def get_depth_adjusted_score(score: int) -> int:
 def game_result_to_score(result: GameResult) -> int:
     if result == GameResult.win:
         return WIN_CONDITION_SCORE
-    elif result == GameResult.draw:
-        return 0
     elif result == GameResult.loss:
         return -WIN_CONDITION_SCORE
 
