@@ -1,16 +1,16 @@
 from game.player import Player, PlacementMove
-from game.enums import Direction
+from game.enums import Direction, PieceType
 from game.constants import CENTER_COORDINATE
 from strategies.tree_search.config import PIECE_TYPE_COORDINATE_SORTING_ORDER, PIECE_ENTRY_APPEARS_BLOCKED_ORDER
 from typing import Optional, List
 
 
 class AbstractMove(object):
-    def __init__(self, placement_move: Optional[PlacementMove], player: Player):
+    def __init__(self, placement_move: Optional[PlacementMove], player: Optional[Player]):
         self.x = placement_move.tile.x if placement_move is not None else None
         self.y = placement_move.tile.y if placement_move is not None else None
         self.piece_type = placement_move.piece.type if placement_move is not None else None
-        self.owner_id = player.id
+        self.owner_id = player.id if player else None
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y and self.owner_id == other.owner_id and self.piece_type == other.piece_type
@@ -20,6 +20,12 @@ class AbstractMove(object):
 
     def __repr__(self):
         return f"<AbstractMove {self!s}>"
+
+    @classmethod
+    def from_raw_values(cls, x: int, y: int, piece_type: PieceType, owner_id: int):
+        move = cls(None, None)
+        move.x, move.y, move.piece_type, move.owner_id = x, y, piece_type, owner_id
+        return move
 
     def is_empty_movement(self):
         return self.x is None or self.y is None or self.piece_type is None
@@ -88,13 +94,14 @@ def filter_symmetric_movements(scored_moves: List[AbstractMove], player: Player)
     return filtered_moves
 
 
-def get_legal_abstract_moves(player: Player) -> List[AbstractMove]:
+def get_legal_abstract_moves(player: Player, filter_symmetric_moves: bool) -> List[AbstractMove]:
     placement_moves = player.get_legal_placement_moves()
-    scored_moves = list()
+    moves = list()
     for move in placement_moves:
-        scored_moves.append(AbstractMove(move, player))
-    filtered_moves = filter_symmetric_movements(scored_moves, player)
-    if len(filtered_moves) == 0:
-        filtered_moves.append(AbstractMove(None, player))
-    filtered_moves.sort(key=lambda m: m.to_sorting_order(player), reverse=True)
-    return filtered_moves
+        moves.append(AbstractMove(move, player))
+    if filter_symmetric_moves:
+        moves = filter_symmetric_movements(moves, player)
+    if len(moves) == 0:
+        moves.append(AbstractMove(None, player))
+    moves.sort(key=lambda m: m.to_sorting_order(player), reverse=True)
+    return moves

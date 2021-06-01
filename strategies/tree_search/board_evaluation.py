@@ -1,8 +1,17 @@
 from game.enums import GameResult
 from game.board import Board
-from strategies.tree_search.config import WIN_CONDITION_SCORE, TILE_SCORE_MULTIPLIER, PLACED_PIECE_SCORE
+from strategies.tree_search.config import WIN_CONDITION_SCORE, TILE_SCORE_MULTIPLIER, PLACED_PIECE_SCORE, DEPTH_PENALTY
 
 BOARD_SCORE_CACHE = dict()
+
+
+def get_depth_adjusted_score(score: int) -> int:
+    capped_offset = DEPTH_PENALTY if DEPTH_PENALTY < abs(score) else abs(score)
+    if score > 0:
+        score -= capped_offset
+    else:
+        score += capped_offset
+    return score
 
 
 def game_result_to_score(result: GameResult) -> int:

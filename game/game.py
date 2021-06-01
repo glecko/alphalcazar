@@ -5,6 +5,9 @@ from game.placement_move import PlacementMove
 from game.constants import PLAYER_1_ID, PLAYER_2_ID
 from game.enums import GameResult
 from typing import Callable, Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 StrategyFunction = Callable[[Player, Player, bool], Optional[PlacementMove]]
 
@@ -22,9 +25,10 @@ class Game(object):
             PLAYER_2_ID: list()
         }
         self.turns = 0
-        self.result = None
+        self.result: GameResult = None
 
     def play_game(self, player_1_strategy_fn: StrategyFunction, player_2_strategy_fn: StrategyFunction) -> GameResult:
+        logger.info(f"Game starting...")
         while self.result is None:
             self.first_move_executed = False
             self.execute_player_moves(player_1_strategy_fn, player_2_strategy_fn)
@@ -37,6 +41,7 @@ class Game(object):
                 return self.result
             self.switch_starting_player()
             self.result = self.get_current_result()
+        logger.info(f"Game finished in {self.turns} turns with result: {self.result}")
         return self.result
 
     def execute_player_moves(self, player_1_strategy_fn: StrategyFunction, player_2_strategy_fn: StrategyFunction):
@@ -45,10 +50,12 @@ class Game(object):
         if starting_move is not None:
             starting_move.execute()
         self.first_move_executed = True
+        logger.debug(f"{self.starting_player!r} executed move {starting_move!r}")
         second_strategy_fn = player_1_strategy_fn if self.get_secondary_player().id == self.player_1.id else player_2_strategy_fn
         second_move = second_strategy_fn(self.get_secondary_player(), self.starting_player, False)
         if second_move is not None:
             second_move.execute()
+        logger.debug(f"{self.get_secondary_player()!r} executed move {second_move!r}")
         self.player_moves[self.starting_player.id].append(starting_move)
         self.player_moves[self.get_secondary_player().id].append(second_move)
 
@@ -78,6 +85,7 @@ class Game(object):
     def clone(self) -> Game:
         clone_game = Game()
         clone_game.starting_player = clone_game.get_player_by_id(self.starting_player.id)
+        clone_game.first_move_executed = self.first_move_executed
         board_pieces = self.board.get_board_pieces()
         for board_piece in board_pieces:
             owner = clone_game.get_player_by_id(board_piece.owner_id)

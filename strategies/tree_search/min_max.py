@@ -1,41 +1,32 @@
 from game.player import Player
 from strategies.tree_search.abstract_move import AbstractMove, get_legal_abstract_moves
-from strategies.tree_search.board_evaluation import evaluate_board
-from strategies.tree_search.config import WIN_CONDITION_SCORE, DEPTH_PENALTY, EvaluationType
+from strategies.tree_search.board_evaluation import evaluate_board, get_depth_adjusted_score
+from strategies.tree_search.config import WIN_CONDITION_SCORE, EvaluationType
 from strategies.tree_search.transposition import store_in_transposition_dict, get_best_move_from_transposition_dict
 from typing import Callable, Tuple, List
 
 
-MinMaxCallable = Callable[[Player, Player, int, bool, int, int, int], Tuple[List[AbstractMove], int, EvaluationType]]
+MinMaxCallable = Callable[[Player, Player, int, bool, int, int], Tuple[List[AbstractMove], int, EvaluationType]]
 
 
 def board_needs_to_be_evaluated(player: Player, opponent: Player, remaining_depth: int, is_first_move: bool) -> bool:
     return is_first_move and (remaining_depth == 0 or player.board.get_game_result(player.id, opponent.id) is not None)
 
 
-def get_depth_adjusted_board_evaluation(player: Player, opponent: Player, initial_depth: int, remaining_depth: int) -> int:
-    score = evaluate_board(player.board, player.id, opponent.id)
-    if score > 0:
-        score -= (initial_depth - remaining_depth) * DEPTH_PENALTY
-    else:
-        score += (initial_depth - remaining_depth) * DEPTH_PENALTY
-    return score
-
-
-def max(player: Player, opponent: Player, remaining_depth: int, is_first_move: bool, alpha: int, beta: int, initial_depth: int) -> Tuple[List[AbstractMove], int, EvaluationType]:
+def max(player: Player, opponent: Player, remaining_depth: int, is_first_move: bool, alpha: int, beta: int) -> Tuple[List[AbstractMove], int, EvaluationType]:
     if board_needs_to_be_evaluated(player, opponent, remaining_depth, is_first_move):
-        score = get_depth_adjusted_board_evaluation(player, opponent, initial_depth, remaining_depth)
+        score = evaluate_board(player.board, player.id, opponent.id)
         return list(), score, EvaluationType.exact
 
     cached_best_moves, cached_best_score, cached_eval_type = get_best_move_from_transposition_dict(player, remaining_depth, False, alpha, beta)
     if cached_best_moves is not None:
         return cached_best_moves, cached_best_score, cached_eval_type
 
-    moves = get_legal_abstract_moves(player)
+    moves = get_legal_abstract_moves(player, filter_symmetric_moves=True)
     eval_type = EvaluationType.exact
     best_moves, best_score = list(), -WIN_CONDITION_SCORE * 10
     for move in moves:
-        best_next_moves, best_next_score, next_eval_type = find_best_next_move(move, max, min, player, opponent, remaining_depth, is_first_move, alpha, beta, initial_depth)
+        best_next_moves, best_next_score, next_eval_type = find_best_next_move(move, max, min, player, opponent, remaining_depth, is_first_move, alpha, beta)
 
         if best_next_score > best_score:
             move.score = best_next_score
@@ -52,20 +43,20 @@ def max(player: Player, opponent: Player, remaining_depth: int, is_first_move: b
     return best_moves, best_score, eval_type
 
 
-def min(player: Player, opponent: Player, remaining_depth: int, is_first_move: bool, alpha: int, beta: int, initial_depth: int) -> Tuple[List[AbstractMove], int, EvaluationType]:
+def min(player: Player, opponent: Player, remaining_depth: int, is_first_move: bool, alpha: int, beta: int) -> Tuple[List[AbstractMove], int, EvaluationType]:
     if board_needs_to_be_evaluated(player, opponent, remaining_depth, is_first_move):
-        score = get_depth_adjusted_board_evaluation(player, opponent, initial_depth, remaining_depth)
+        score = evaluate_board(player.board, player.id, opponent.id)
         return list(), score, EvaluationType.exact
 
     cached_best_moves, cached_best_score, cached_eval_type = get_best_move_from_transposition_dict(opponent, remaining_depth, True, alpha, beta)
     if cached_best_moves is not None:
         return cached_best_moves, cached_best_score, cached_eval_type
 
-    moves = get_legal_abstract_moves(opponent)
+    moves = get_legal_abstract_moves(opponent, filter_symmetric_moves=False)
     eval_type = EvaluationType.exact
     best_moves, best_score = list(), WIN_CONDITION_SCORE * 10
     for move in moves:
-        best_next_moves, best_next_score, next_eval_type = find_best_next_move(move, min, max, player, opponent, remaining_depth, is_first_move, alpha, beta, initial_depth)
+        best_next_moves, best_next_score, next_eval_type = find_best_next_move(move, min, max, player, opponent, remaining_depth, is_first_move, alpha, beta)
 
         if best_next_score < best_score:
             move.score = best_next_score
@@ -91,8 +82,7 @@ def find_best_next_move(
         remaining_depth: int,
         is_first_move: bool,
         alpha: int,
-        beta: int,
-        initial_depth: int
+        beta: int
 ) -> Tuple[List[AbstractMove], int, EvaluationType]:
     game_clone = player.game.clone()
     player_clone = game_clone.get_player_by_id(player.id)
@@ -106,8 +96,7 @@ def find_best_next_move(
             remaining_depth,
             False,
             alpha,
-            beta,
-            initial_depth
+            beta
         )
     else:
         game_clone.board.execute_board_movements(game_clone.starting_player.id)
@@ -119,7 +108,7 @@ def find_best_next_move(
             remaining_depth - 1,
             True,
             alpha,
-            beta,
-            initial_depth
+            beta
         )
+        best_next_score = get_depth_adjusted_score(best_next_score)
     return best_next_moves, best_next_score, eval_type

@@ -1,29 +1,33 @@
 from game.enums import PieceType, Direction
-from enum import Enum
+from enum import IntEnum
+
+MIN_DEPTH_TO_PERSIST = 2
 
 
-class EvaluationType(Enum):
+class EvaluationType(IntEnum):
     exact = 0
     alpha_cutoff = 1
     beta_cutoff = 2
 
 
-WIN_CONDITION_SCORE = 900
-DEPTH_PENALTY = 10
+WIN_CONDITION_SCORE = 1000
+
+# Depth penalty should be so low as to be guaranteed to never alter the result of a position
+DEPTH_PENALTY = 1
 
 # How much is each piece worth if on the board #
 PLACED_PIECE_SCORE = {
-    PieceType.one: 15,
-    PieceType.two: 30,
-    PieceType.three: 25,
-    PieceType.four: -10,
-    PieceType.five: 35,
+    PieceType.one: 80,
+    PieceType.two: 120,
+    PieceType.three: 140,
+    PieceType.four: -80,
+    PieceType.five: 100,
 }
 
-CENTER_PIECE_MULTIPLIER = 2.15
-PIECE_ABOUT_TO_EXIT_MULTIPLIER = 0.75
+CENTER_PIECE_MULTIPLIER = 2
+PIECE_ABOUT_TO_EXIT_MULTIPLIER = 0.70
 FRESH_CORNER_PIECE_MULTIPLIER = 1.55
-FRESH_CENTER_LANE_PIECE_MULTIPLIER = 1.85
+FRESH_CENTER_LANE_PIECE_MULTIPLIER = 1.70
 
 # Multiplier for pieces on the board based on their coordinates and direction #
 TILE_SCORE_MULTIPLIER = {

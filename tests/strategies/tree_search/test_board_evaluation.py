@@ -2,11 +2,16 @@ from game.constants import PLAYER_1_ID, PLAYER_2_ID
 from game.piece import Piece
 from game.enums import PieceType, Direction
 from game.board import Board
-from strategies.tree_search.board_evaluation import evaluate_board
-from strategies.tree_search.config import WIN_CONDITION_SCORE, TILE_SCORE_MULTIPLIER, PLACED_PIECE_SCORE
+from strategies.tree_search.board_evaluation import evaluate_board, get_depth_adjusted_score
+from strategies.tree_search.config import WIN_CONDITION_SCORE, TILE_SCORE_MULTIPLIER, PLACED_PIECE_SCORE, DEPTH_PENALTY
 
 
 class TestBoardEvaluation(object):
+
+    def test_get_depth_adjusted_score(self):
+        assert get_depth_adjusted_score(DEPTH_PENALTY) == 0 == get_depth_adjusted_score(-DEPTH_PENALTY)
+        assert get_depth_adjusted_score(10 + DEPTH_PENALTY) == 10
+        assert get_depth_adjusted_score(-10 - DEPTH_PENALTY) == -10
 
     def test_piece_board_evaluation(self):
         board = Board()
