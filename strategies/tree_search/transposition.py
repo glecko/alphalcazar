@@ -9,10 +9,11 @@ TranspositionCache = Dict[str, Tuple[List[AbstractMove], int, int, EvaluationTyp
 TRANSPOSITION_DICT: TranspositionCache = dict()
 
 
-def evaluation_type_valid(eval_type: EvaluationType, score: int, alpha: int, beta: int) -> bool:
+def evaluation_type_valid(eval_type: EvaluationType, score: int, alpha: int, beta: int, inverse_score: bool) -> bool:
     if eval_type == EvaluationType.exact:
         return True
 
+    score = score if not inverse_score else -score
     if eval_type == EvaluationType.beta_cutoff:
         # We know that the node was not evaluated completely because 1 of the nodes had a value higher than beta
         # Which means the "real" value of the node is "score" or higher
@@ -34,7 +35,7 @@ def get_best_move_from_transposition_dict(player: Player, remaining_depth: int, 
     board_hash_key = get_board_depth_hash_key(player)
     if TRANSPOSITION_DICT.get(board_hash_key) is not None:
         best_moves, best_score, explored_depth, evaluation_type = TRANSPOSITION_DICT[board_hash_key]
-        if explored_depth >= remaining_depth and evaluation_type_valid(evaluation_type, best_score, alpha, beta):
+        if explored_depth >= remaining_depth and evaluation_type_valid(evaluation_type, best_score, alpha, beta, inverse_score):
             if inverse_score:
                 return best_moves, -best_score, evaluation_type
             return best_moves, best_score, evaluation_type
