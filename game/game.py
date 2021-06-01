@@ -85,6 +85,7 @@ class Game(object):
     def clone(self) -> Game:
         clone_game = Game()
         clone_game.starting_player = clone_game.get_player_by_id(self.starting_player.id)
+        clone_game.first_move_executed = self.first_move_executed
         board_pieces = self.board.get_board_pieces()
         for board_piece in board_pieces:
             owner = clone_game.get_player_by_id(board_piece.owner_id)

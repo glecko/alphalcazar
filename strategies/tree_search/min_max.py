@@ -1,7 +1,7 @@
 from game.player import Player
 from strategies.tree_search.abstract_move import AbstractMove, get_legal_abstract_moves
-from strategies.tree_search.board_evaluation import evaluate_board
-from strategies.tree_search.config import WIN_CONDITION_SCORE, DEPTH_PENALTY, EvaluationType
+from strategies.tree_search.board_evaluation import evaluate_board, get_depth_adjusted_score
+from strategies.tree_search.config import WIN_CONDITION_SCORE, EvaluationType
 from strategies.tree_search.transposition import store_in_transposition_dict, get_best_move_from_transposition_dict
 from typing import Callable, Tuple, List
 
@@ -11,14 +11,6 @@ MinMaxCallable = Callable[[Player, Player, int, bool, int, int], Tuple[List[Abst
 
 def board_needs_to_be_evaluated(player: Player, opponent: Player, remaining_depth: int, is_first_move: bool) -> bool:
     return is_first_move and (remaining_depth == 0 or player.board.get_game_result(player.id, opponent.id) is not None)
-
-
-def get_depth_adjusted_score(score: int) -> int:
-    if score > 0:
-        score -= DEPTH_PENALTY
-    else:
-        score += DEPTH_PENALTY
-    return score
 
 
 def max(player: Player, opponent: Player, remaining_depth: int, is_first_move: bool, alpha: int, beta: int) -> Tuple[List[AbstractMove], int, EvaluationType]:

@@ -30,6 +30,7 @@ class TestTransposition(object):
         best_move = get_best_move(game.player_1, game.player_2, is_first_move=True, depth=1)
 
         cached_moves, cached_score, cached_eval_type = get_best_move_from_transposition_dict(game.player_1, 1, False, 0, 0)
+        assert cached_moves is not None
         assert best_move in cached_moves
         assert cached_eval_type == EvaluationType.exact
 
@@ -101,6 +102,40 @@ class TestTransposition(object):
         # in a beta cutoff, as the beta player is guaranteed a move that is better than "35 or higher"
         _, stored_score_2, _ = get_best_move_from_transposition_dict(game.player_1, 2, False, 0, 30)
         assert stored_score_2 is 35
+
+    def test_transposition_does_not_use_wrong_alphabeta_cutoffs(self, clean_tree_search_caches_before_tests):
+        game = Game()
+        game.starting_player = game.player_2
+        game.first_move_executed = True
+
+        one_p1 = game.player_1.get_piece_by_type(PieceType.one)
+        one_p1.set_movement_direction(Direction.south)
+        game.board.get_tile(2, 3).place_piece(one_p1)
+
+        one_p2 = game.player_2.get_piece_by_type(PieceType.one)
+        one_p2.set_movement_direction(Direction.west)
+        game.board.get_tile(3, 3).place_piece(one_p2)
+
+        five_p2 = game.player_2.get_piece_by_type(PieceType.five)
+        five_p2.set_movement_direction(Direction.west)
+        game.board.get_tile(4, 2).place_piece(five_p2)
+
+        best_move_p1_r1 = get_best_move(game.player_1, game.player_2, is_first_move=False, depth=2)
+
+        assert best_move_p1_r1.piece_type != PieceType.four or best_move_p1_r1.x != 0 or best_move_p1_r1.y != 3
+
+        # We ignore the correct movement and play a losing move (4 piece to (0, 3))
+
+        four_p1 = game.player_1.get_piece_by_type(PieceType.four)
+        four_p1.set_movement_direction(Direction.east)
+        game.board.get_tile(0, 3).place_piece(four_p1)
+
+        game.board.execute_board_movements(game.player_2.id)
+        game.switch_starting_player()
+
+        best_move_p1_r2 = get_best_move(game.player_1, game.player_2, is_first_move=True, depth=2)
+
+        assert best_move_p1_r2.score == -WIN_CONDITION_SCORE + DEPTH_PENALTY
 
     def test_cache_dictionaries_cleared_before_tests(self, clean_tree_search_caches_before_tests):
         assert len(TRANSPOSITION_DICT) == 0

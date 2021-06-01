@@ -42,6 +42,7 @@ def get_best_move_from_transposition_dict(player: Player, remaining_depth: int, 
 
 
 def store_in_transposition_dict(best_moves: List[AbstractMove], best_score: int, evaluation_type: EvaluationType, player: Player, depth: int, inverse_score: bool):
+
     board_hash_key = get_board_depth_hash_key(player)
 
     if TRANSPOSITION_DICT.get(board_hash_key) is not None:
