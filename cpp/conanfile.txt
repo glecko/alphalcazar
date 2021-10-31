@@ -1,0 +1,17 @@
+[requires]
+gtest/1.10.0@_/_
+
+[options]
+
+[generators]
+cmake
+
+[imports]
+bin, *.dll -> bin/Debug
+bin, *.dll -> bin/RelWithDebInfo
+bin, *.dll -> bin/Release
+
+lib, *.so.* -> platform/bin/Release
+lib, *.so.* -> platform/bin/Debug
+lib, *.so.* -> platform/bin/RelWithDebInfo
+
