@@ -2,6 +2,7 @@
 #include "parameters.hpp"
 
 namespace Alphalcazar::Game {
+	static constexpr Coordinate c_InvalidCoordinate = std::numeric_limits<Coordinate>::max();
 	/// The coordinate offset each direction represents
 	static std::unordered_map<Direction, Coordinates> c_DirectionOffsets = {
 		{ Direction::NORTH,  { 0, 1 } },
@@ -39,5 +40,13 @@ namespace Alphalcazar::Game {
 	Coordinates Coordinates::GetCoordinateInDirection(Direction direction, Coordinate distance) const {
 		Coordinates& offset = c_DirectionOffsets.at(direction);
 		return Coordinates(x + offset.x * distance, y + offset.y * distance);
+	}
+
+	bool Coordinates::Valid() const {
+		return x != c_InvalidCoordinate && y != c_InvalidCoordinate;
+	}
+
+	Coordinates Coordinates::Invalid() {
+		return Coordinates { c_InvalidCoordinate, c_InvalidCoordinate };
 	}
 }

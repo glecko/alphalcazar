@@ -1,6 +1,7 @@
 #pragma once
 
 #include "aliases.hpp"
+#include "Coordinates.hpp"
 #include <memory>
 
 namespace Alphalcazar::Game {
@@ -8,14 +9,16 @@ namespace Alphalcazar::Game {
 
 	class Tile {
 	public:
-		Tile();
+		Tile(const Coordinates& coordinates);
 		Tile(const Tile& other) = delete;
 		~Tile();
 
 		void PlacePiece(Piece* piece);
 		void RemovePiece();
+		const Coordinates& GetCoordinates() const;
 		Piece* GetPiece();
 	private:
 		Piece* mPiece = nullptr;
+		Coordinates mCoordinates;
 	};
 }

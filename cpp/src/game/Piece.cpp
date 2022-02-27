@@ -1,5 +1,4 @@
 #include "Piece.hpp"
-#include "Coordinates.hpp"
 #include "parameters.hpp"
 
 namespace Alphalcazar::Game {
@@ -10,9 +9,9 @@ namespace Alphalcazar::Game {
 
 	Piece::Piece(const Piece& other)
 		: mOwner { other.mOwner }
-		, mType{other.mType}
-		, mDirection{ other.mDirection }
-		, mInPlay { other.mInPlay }
+		, mType {other.mType}
+		, mDirection { other.mDirection }
+		, mCoordinates { other.mCoordinates }
 	{}
 
 	Piece::~Piece() {}
@@ -41,12 +40,21 @@ namespace Alphalcazar::Game {
 		mDirection = direction;
 	}
 
-	void Piece::SetInPlay(bool inPlay) {
-		mInPlay = inPlay;
+	bool Piece::IsInPlay() const {
+		return mCoordinates.Valid();
 	}
 
-	bool Piece::IsInPlay() const {
-		return mInPlay;
+	void Piece::SetCoordinates(const Coordinates& coordinates) {
+		mCoordinates = coordinates;
+	}
+
+	void Piece::RemoveFromPlay() {
+		mCoordinates = Coordinates::Invalid();
+		mDirection = Direction::NONE;
+	}
+
+	const Coordinates& Piece::GetCoordinates() const {
+		return mCoordinates;
 	}
 
 	bool Piece::operator==(const Piece& other) const {

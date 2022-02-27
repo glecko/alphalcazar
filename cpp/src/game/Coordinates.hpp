@@ -25,6 +25,12 @@ namespace Alphalcazar::Game {
 
 		/// Returns a new Coordinates object representing a movement at a fixed distance in the specified direction
 		Coordinates GetCoordinateInDirection(Direction direction, Coordinate distance) const;
+
+		/// Returns whether the current coordinates are valid
+		bool Valid() const;
+
+		/// Builds and returns an instance of invalid coordinates
+		static Coordinates Invalid();
 	};
 }
 

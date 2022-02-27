@@ -34,11 +34,12 @@ namespace Alphalcazar::Game {
 		/// Returns the tile at the given coordinates
 		Tile* GetTile(const Coordinates& coord) const;
 		Tile* GetTile(Coordinate x, Coordinate y) const;
+		/// Returns all tiles of the board
+		std::vector<Tile*> GetTiles() const;
 	private:
 		/// Moves the specified piece from the source tile to the target tile
-		void MovePiece(Piece* piece, Tile& source, Tile& target, Coordinates& targetCoordinates);
-		using MovementOrderedPiece = std::tuple<Coordinates, Tile*, Piece*>;
-		std::vector<MovementOrderedPiece> GetMovementOrderedPieces(PlayerId startingPlayerId) const;
+		void MovePiece(Piece* piece, Tile& source, Tile& target);
+		std::vector<Piece*> GetMovementOrderedPieces(PlayerId startingPlayerId) const;
 		/*!
 		 * \brief Returns the ID of the player that has completed the specified row, or nullptr if no player has done so.
 		 * 
@@ -55,6 +56,19 @@ namespace Alphalcazar::Game {
 		 * start coordinate and iterating in its attached direction until a perimeter tile is found
 		 */
 		std::vector<std::pair<Coordinates, Direction>> GetAllRowIterationDirections() const;
+
+		using MovementDescription = std::pair<Tile*, Tile*>;
+		/*!
+		 * \brief Returns a list of chained push movements that occur when a piece wants to move from the specified
+		 *        source coordinates in the specified direction.
+		 *
+		 * Each chained movement will be described as a pair of the source tile from which a piece needs to be moved from and
+		 * the target tile it needs to be moved to.
+		 * 
+		 * \note The list will be returned in the order the movements are supposed to be executed (with the last piece of the chain
+		 * first and the movement of the pushing piece last)
+		 */
+		std::vector<MovementDescription> GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction) const;
 
 		std::unordered_map<Coordinates, std::unique_ptr<Tile>> mTiles;
 	};

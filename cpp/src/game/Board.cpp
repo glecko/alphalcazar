@@ -1,4 +1,5 @@
 #include "Board.hpp"
+
 #include "parameters.hpp"
 #include "Player.hpp"
 #include "Tile.hpp"
@@ -7,21 +8,21 @@
 
 namespace Alphalcazar::Game {
 	Board::Board() {
-		for (Coordinate x = 0; x <= c_PlayAreaSize; x++) {
-			for (Coordinate y = 0; y <= c_PlayAreaSize; y++) {
+		for (Coordinate x = 0; x <= c_PlayAreaSize - 1; x++) {
+			for (Coordinate y = 0; y <= c_PlayAreaSize - 1; y++) {
 				Coordinates coordinates { x, y };
 				if (coordinates.IsCorner()) {
 					// Avoid creating tiles for corners of the play area
 					continue;
 				}
-				mTiles[coordinates] = std::make_unique<Tile>();
+				mTiles[coordinates] = std::make_unique<Tile>(coordinates);
 			}
 		}
 	}
 
 	Board::Board(const Board& other, std::vector<Piece*> newPieces) {
 		for (auto& [coordinates, tile] : other.mTiles) {
-			mTiles[coordinates] = std::make_unique<Tile>();
+			mTiles[coordinates] = std::make_unique<Tile>(coordinates);
 			auto piece = tile->GetPiece();
 			if (piece != nullptr) {
 				auto newPieceIt = std::find(newPieces.begin(), newPieces.end(), piece);
@@ -41,16 +42,34 @@ namespace Alphalcazar::Game {
 	BoardMovesCount Board::ExecuteMoves(PlayerId startingPlayerId) {
 		BoardMovesCount movedPieces = 0;
 		auto pieces = GetMovementOrderedPieces(startingPlayerId);
-		for (auto& [sourceCoordinates, sourceTile, piece] : pieces) {
+		for (auto* piece : pieces) {
+			if (!piece->IsInPlay()) {
+				// Check if the piece has been removed from play by another piece earlier in the loop
+				// (by being pushed outside the board) in which case this piece will not execute any movement
+				continue;
+			}
 			auto direction = piece->GetMovementDirection();
+			const auto& sourceCoordinates = piece->GetCoordinates();
+			auto* sourceTile = GetTile(sourceCoordinates);
 			auto targetCoordinates = sourceCoordinates.GetCoordinateInDirection(direction, 1);
 			if (auto* targetTile = GetTile(targetCoordinates)) {
 				auto* targetTilePiece = targetTile->GetPiece();
 				if (targetTilePiece == nullptr) {
-					MovePiece(piece, *sourceTile, *targetTile, targetCoordinates);
+					MovePiece(piece, *sourceTile, *targetTile);
 					movedPieces++;
 				} else if (piece->IsPusher()) {
-					// To-do
+					auto chainedMovements = GetChainedPushMovements(sourceCoordinates, direction);
+					// We execute the chained push movements in order
+					for (auto& [sourcePushTile, targetPushTile] : chainedMovements) {
+						if (targetPushTile != nullptr) {
+							MovePiece(sourcePushTile->GetPiece(), *sourcePushTile, *targetPushTile);
+						} else {
+							// If a piece is pushed to a non-existing tile (happens when a piece that is on the perimeter is pushed
+							// further outwards of the board) we simply remove the piece from play
+							sourcePushTile->RemovePiece();
+						}
+						movedPieces++;
+					}
 				} else if (targetTilePiece->IsPushable()) {
 					auto pushTargetCoordinates = sourceCoordinates.GetCoordinateInDirection(direction, 2);
 					auto* pushTargetTile = GetTile(pushTargetCoordinates);
@@ -58,8 +77,8 @@ namespace Alphalcazar::Game {
 					// it would be pushed to. It doesn't matter if the piece behind it is also pushable
 					if (pushTargetTile->GetPiece() == nullptr) {
 						// We first move the pushed piece, then the pushing piece
-						MovePiece(targetTilePiece, *targetTile, *pushTargetTile, pushTargetCoordinates);
-						MovePiece(piece, *sourceTile, *targetTile, targetCoordinates);
+						MovePiece(targetTilePiece, *targetTile, *pushTargetTile);
+						MovePiece(piece, *sourceTile, *targetTile);
 						movedPieces += 2;
 					} else if (sourceCoordinates.IsPerimeter()) {
 						// if a piece was unable to perform any movement on its turn while sitting on
@@ -76,10 +95,32 @@ namespace Alphalcazar::Game {
 		return movedPieces;
 	}
 
-	void Board::MovePiece(Piece* piece, Tile& source, Tile& target, Coordinates& targetCoordinates) {
+	std::vector<Board::MovementDescription> Board::GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction) const {
+		std::vector<Board::MovementDescription> result;
+		Coordinates nextCoordinate = sourceCoordinates;
+		Tile* nextTile = GetTile(nextCoordinate);
+		while (nextTile && nextTile->GetPiece() != nullptr) {
+			// Get the coordinates and tile this piece will be pushed to
+			auto pushToCoordinate = nextCoordinate.GetCoordinateInDirection(direction, 1);
+			auto pushToTile = GetTile(pushToCoordinate);
+
+			// Insert this movement (from the current tile to the tile we will push to) at the beginning
+			// of the vector, as the pushing movements will need to happen in order
+			// from the last piece on the chain to the first (pushing) piece
+			MovementDescription movement = std::make_pair(nextTile, pushToTile);
+			result.insert(result.begin(), movement);
+
+			// The tile and coordinates we are pushing to become the next tile/coordinates we evaluate
+			nextCoordinate = pushToCoordinate;
+			nextTile = pushToTile;
+		}
+		return result;
+	}
+
+	void Board::MovePiece(Piece* piece, Tile& source, Tile& target) {
 		source.RemovePiece();
 		// A piece that moves or is moved to a perimeter tile gets removed from play immediatelly
-		if (!targetCoordinates.IsPerimeter()) {
+		if (!target.GetCoordinates().IsPerimeter()) {
 			target.PlacePiece(piece);
 		}
 	}
@@ -94,6 +135,15 @@ namespace Alphalcazar::Game {
 	Tile* Board::GetTile(Coordinate x, Coordinate y) const {
 		Coordinates coord { x, y };
 		return GetTile(coord);
+	}
+
+	std::vector<Tile*> Board::GetTiles() const {
+		std::vector<Tile*> result;
+		result.reserve(mTiles.size());
+		for (auto& [_, tile] : mTiles) {
+			result.push_back(tile.get());
+		}
+		return result;
 	}
 
 	bool Board::IsFull() const {
@@ -179,18 +229,16 @@ namespace Alphalcazar::Game {
 		return candidateRowCompleter;
 	}
 
-	std::vector<Board::MovementOrderedPiece> Board::GetMovementOrderedPieces(PlayerId startingPlayerId) const {
-		std::vector<Board::MovementOrderedPiece> result;
+	std::vector<Piece*> Board::GetMovementOrderedPieces(PlayerId startingPlayerId) const {
+		std::vector<Piece*> result;
 		for (auto& [coordinates, tile] : mTiles) {
 			if (auto* piece = tile->GetPiece()) {
-				result.emplace_back(coordinates, tile.get(), piece);
+				result.push_back(piece);
 			}
 		}
 
 		// Sort by movement order
-		std::sort(result.begin(), result.end(), [startingPlayerId](const Board::MovementOrderedPiece& pieceATuple, const Board::MovementOrderedPiece& pieceBTuple) {
-			auto* pieceA = std::get<2>(pieceATuple);
-			auto* pieceB = std::get<2>(pieceBTuple);
+		std::sort(result.begin(), result.end(), [startingPlayerId](Piece* pieceA, Piece* pieceB) {
 			if (pieceA->GetType() == pieceB->GetType()) {
 				if (pieceA->GetOwner() == startingPlayerId) {
 					return true;

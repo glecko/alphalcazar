@@ -11,6 +11,8 @@ namespace Alphalcazar::Game {
 		Board board {};
 		EXPECT_EQ(board.IsFull(), false);
 		EXPECT_EQ(board.GetResult(), GameResult::NONE);
+		// We expect a square of c_PlayAreaSize size without the 4 corners
+		EXPECT_EQ(board.GetTiles().size(), c_PlayAreaSize * c_PlayAreaSize - 4);
 	}
 
 	TEST(Board, GetCompletRowResult) {
@@ -109,7 +111,7 @@ namespace Alphalcazar::Game {
 
 	TEST(Board, PiecePushedIntoPerimeter) {
 		Board board{};
-		Piece pieceOnePlayerOne { PlayerId::PLAYER_ONE, 1 };
+		Piece pieceOnePlayerOne { PlayerId::PLAYER_ONE, c_PushablePieceType };
 		Piece pieceTwoPlayerOne { PlayerId::PLAYER_ONE, 2 };
 		Piece pieceFivePlayerTwo { PlayerId::PLAYER_TWO, 5 };
 
@@ -139,15 +141,14 @@ namespace Alphalcazar::Game {
 
 	TEST(Board, PushablePieceMovements) {
 		Board board{};
-		Piece pieceOnePlayerOne { PlayerId::PLAYER_ONE, 1 };
+		Piece pieceOnePlayerOne { PlayerId::PLAYER_ONE, c_PushablePieceType };
 		Piece pieceTwoPlayerOne { PlayerId::PLAYER_ONE, 2 };
 
-		Piece pieceOnePlayerTwo { PlayerId::PLAYER_TWO, 1 };
+		Piece pieceOnePlayerTwo { PlayerId::PLAYER_TWO, c_PushablePieceType };
 		Piece pieceTwoPlayerTwo { PlayerId::PLAYER_TWO, 2 };
 		Piece pieceThreePlayerTwo { PlayerId::PLAYER_TWO, 3 };
 		Piece pieceFivePlayerTwo { PlayerId::PLAYER_TWO, 5 };
 		
-
 		// The pieces of player 2 move first.
 		// Piece 1 of player 2 on (3,2) will move freely to (2,2) (+1 movement)
 		// Piece 1 of player 1 on (2,1) will be blocked by piece 3 of player 2 on (3,1)
@@ -188,5 +189,129 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(pieceThreePlayerTwo.IsInPlay(), true);
 		EXPECT_EQ(pieceFivePlayerTwo.IsInPlay(), true);
 		EXPECT_EQ(pieceTwoPlayerOne.IsInPlay(), false);
+	}
+
+	TEST(Board, PushingPieceMovements) {
+		Board board {};
+		Piece pieceTwo { PlayerId::PLAYER_ONE, 2 };
+		Piece pieceThree { PlayerId::PLAYER_ONE, 3 };
+		Piece pushingPiece { PlayerId::PLAYER_ONE, c_PusherPieceType };
+
+		// Piece 2 (3,1) moves freely to (3,2) (+1 movement)
+		// Piece 3 (1,2) moves freely to (2,2) (+1 movement)
+		// The pushing piece (1,2) moves to (2,2), pushing piece 3 to (3,2)
+		// and piece 2 outside the board (+3 movements)
+		board.GetTile(3, 1)->PlacePiece(&pieceTwo);
+		pieceTwo.SetMovementDirection(Direction::NORTH);
+		board.GetTile(2, 3)->PlacePiece(&pieceThree);
+		pieceThree.SetMovementDirection(Direction::SOUTH);
+		board.GetTile(1, 2)->PlacePiece(&pushingPiece);
+		pushingPiece.SetMovementDirection(Direction::EAST);
+
+		auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
+		EXPECT_EQ(executedMoves, 5);
+
+		EXPECT_EQ(*board.GetTile(2, 2)->GetPiece(), pushingPiece);
+		EXPECT_EQ(*board.GetTile(3, 2)->GetPiece(), pieceThree);
+		EXPECT_EQ(board.GetTile(4, 2)->GetPiece(), nullptr);
+
+		EXPECT_EQ(pieceTwo.IsInPlay(), false);
+		EXPECT_EQ(pieceThree.IsInPlay(), true);
+		EXPECT_EQ(pushingPiece.IsInPlay(), true);
+	}
+
+	TEST(Board, PushingPiecesPushingEachOther) {
+		Board board{};
+		Piece pushingPieceOne{ PlayerId::PLAYER_ONE, c_PusherPieceType };
+		Piece pushingPieceTwo{ PlayerId::PLAYER_TWO, c_PusherPieceType };
+
+		// The two pushing pieces are facing each other
+		board.GetTile(2, 2)->PlacePiece(&pushingPieceOne);
+		pushingPieceOne.SetMovementDirection(Direction::SOUTH);
+		board.GetTile(2, 1)->PlacePiece(&pushingPieceTwo);
+		pushingPieceTwo.SetMovementDirection(Direction::NORTH);
+
+		{
+			// If player 2 is the starting player, we expect both pieces to push each other
+			// and end up in exactly the same positions, resulting in 4 movements (2 for each push)
+			auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
+			EXPECT_EQ(executedMoves, 4);
+
+			EXPECT_EQ(*board.GetTile(2, 2)->GetPiece(), pushingPieceOne);
+			EXPECT_EQ(*board.GetTile(2, 1)->GetPiece(), pushingPieceTwo);
+
+			EXPECT_EQ(pushingPieceOne.IsInPlay(), true);
+			EXPECT_EQ(pushingPieceTwo.IsInPlay(), true);
+		}
+
+		{
+			// However, on the next turn, when player 1 moves first, their pushing piece on (2,2)
+			// will push the pusher of player 2 off the board, after which the pusher of player 2
+			// will not execute any movement because it will have been removed from play
+			auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_ONE);
+			EXPECT_EQ(executedMoves, 2);
+
+			EXPECT_EQ(board.GetTile(2, 2)->GetPiece(), nullptr);
+			EXPECT_EQ(*board.GetTile(2, 1)->GetPiece(), pushingPieceOne);
+
+			EXPECT_EQ(pushingPieceOne.IsInPlay(), true);
+			EXPECT_EQ(pushingPieceTwo.IsInPlay(), false);
+		}
+	}
+
+	TEST(Board, ComplexBoardMovements) {
+		Board board{};
+		Piece pieceOnePlayerOne { PlayerId::PLAYER_ONE, c_PushablePieceType };
+		Piece pieceTwoPlayerOne { PlayerId::PLAYER_ONE, 2 };
+		Piece pieceFourPlayerOne { PlayerId::PLAYER_ONE, c_PusherPieceType };
+		Piece pieceFivePlayerOne { PlayerId::PLAYER_ONE, 5 };
+
+		Piece pieceThreePlayerTwo{ PlayerId::PLAYER_TWO, 3 };
+		Piece pieceFourPlayerTwo{ PlayerId::PLAYER_TWO, c_PusherPieceType };
+		Piece pieceFivePlayerTwo{ PlayerId::PLAYER_TWO, 5 };
+
+		// Player 2 moves first
+		// Piece 1 of player 1 (1,2) will move freely to (2,2) (+1 movement)
+		// Piece 2 of player 1 (3,2) will move to (2,2) pushing piece 1 back to (1,2) (+2 movements)
+		// Piece 3 of player 2 (4,1) will fail to move into the board from the perimetter as its
+		// target tile (3,1) is blocked by piece 5 of player 1 which hasn't moved yet.
+		// Piece 4 of player 2 (2,1) will move north to (2,2), pushing piece 2 to (2,3), piece 4
+		// of player 1 outside the board to (2,4) and piece 5 of player 2 (2,4 perimeter) 
+		// even further to a non-existing tile, also removing it from play (+4 movements)
+		// Piece 4 of player 1 will not move as it has been pushed outside the board
+		// Piece 5 of player 1 (3,1) will move freely to (2,1) (+1 movement)
+		board.GetTile(1, 2)->PlacePiece(&pieceOnePlayerOne);
+		pieceOnePlayerOne.SetMovementDirection(Direction::EAST);
+		board.GetTile(3, 2)->PlacePiece(&pieceTwoPlayerOne);
+		pieceTwoPlayerOne.SetMovementDirection(Direction::WEST);
+		board.GetTile(2, 3)->PlacePiece(&pieceFourPlayerOne);
+		pieceFourPlayerOne.SetMovementDirection(Direction::SOUTH);
+		board.GetTile(3, 1)->PlacePiece(&pieceFivePlayerOne);
+		pieceFivePlayerOne.SetMovementDirection(Direction::WEST);
+
+		board.GetTile(4, 1)->PlacePiece(&pieceThreePlayerTwo);
+		pieceThreePlayerTwo.SetMovementDirection(Direction::WEST);
+		board.GetTile(2, 1)->PlacePiece(&pieceFourPlayerTwo);
+		pieceFourPlayerTwo.SetMovementDirection(Direction::NORTH);
+		board.GetTile(2, 4)->PlacePiece(&pieceFivePlayerTwo);
+		pieceFivePlayerTwo.SetMovementDirection(Direction::SOUTH);
+
+		auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
+		EXPECT_EQ(executedMoves, 8);
+
+		EXPECT_EQ(*board.GetTile(1, 2)->GetPiece(), pieceOnePlayerOne);
+		EXPECT_EQ(*board.GetTile(2, 3)->GetPiece(), pieceTwoPlayerOne);
+		EXPECT_EQ(*board.GetTile(2, 1)->GetPiece(), pieceFivePlayerOne);
+		EXPECT_EQ(*board.GetTile(2, 2)->GetPiece(), pieceFourPlayerTwo);
+		EXPECT_EQ(board.GetTile(2, 4)->GetPiece(), nullptr);
+		EXPECT_EQ(board.GetTile(4, 1)->GetPiece(), nullptr);
+
+		EXPECT_EQ(pieceOnePlayerOne.IsInPlay(), true);
+		EXPECT_EQ(pieceTwoPlayerOne.IsInPlay(), true);
+		EXPECT_EQ(pieceFourPlayerOne.IsInPlay(), false);
+		EXPECT_EQ(pieceFivePlayerOne.IsInPlay(), true);
+		EXPECT_EQ(pieceThreePlayerTwo.IsInPlay(), false);
+		EXPECT_EQ(pieceFourPlayerTwo.IsInPlay(), true);
+		EXPECT_EQ(pieceFivePlayerTwo.IsInPlay(), false);
 	}
 }
