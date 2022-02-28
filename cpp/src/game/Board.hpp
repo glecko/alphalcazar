@@ -34,8 +34,16 @@ namespace Alphalcazar::Game {
 		/// Returns the tile at the given coordinates
 		Tile* GetTile(const Coordinates& coord) const;
 		Tile* GetTile(Coordinate x, Coordinate y) const;
+		/// 
+		/*!
+		 * \brief Returns the perimeter tile at the given coordinates.
+		 * Slightly faster than GetTile() if we know we are searching for a perimeter tile.
+		 */
+		Tile* GetPerimeterTile(const Coordinates& coord) const;
 		/// Returns all tiles of the board
 		std::vector<Tile*> GetTiles() const;
+		/// Returns a list of all tiles where a player may legally place a piece on their turn
+		std::vector<Tile*> GetLegalPlacementTiles() const;
 	private:
 		/// Moves the specified piece from the source tile to the target tile
 		void MovePiece(Piece* piece, Tile& source, Tile& target);
@@ -48,14 +56,7 @@ namespace Alphalcazar::Game {
 		 * \param startCoordinate The coordinate where the row starts.
 		 * \param direction The direction we follow to check for row completness, until a perimeter tile is found.
 		 */
-		std::optional<PlayerId> CheckRowCompleteness(const Coordinates& startCoordinate, Direction direction) const;
-		/*!
-		 * \brief Returns a vector of all row iteration directions that need to be checked for win conditions.
-		 * 
-		 * Each row will be descibed as a start coordinate and a direction. The row may then be fully iterated by starting at the
-		 * start coordinate and iterating in its attached direction until a perimeter tile is found
-		 */
-		std::vector<std::pair<Coordinates, Direction>> GetAllRowIterationDirections() const;
+		std::optional<PlayerId> CheckRowCompleteness(const Coordinates& startCoordinate, Direction direction, Coordinate length) const;
 
 		using MovementDescription = std::pair<Tile*, Tile*>;
 		/*!
@@ -70,6 +71,9 @@ namespace Alphalcazar::Game {
 		 */
 		std::vector<MovementDescription> GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction) const;
 
+		/// A map of all tiles of the board (both perimeter and board tiles) indexed by their coordinates
 		std::unordered_map<Coordinates, std::unique_ptr<Tile>> mTiles;
+		/// A map of the perimeter tiles of the board indexed by their coordinates
+		std::unordered_map<Coordinates, Tile*> mPerimeterTiles;
 	};
 }

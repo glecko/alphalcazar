@@ -25,6 +25,10 @@ namespace Alphalcazar::Game {
 		return mCoordinates;
 	}
 
+	Direction Tile::GetLegalPlacementDirection() const {
+		return mCoordinates.GetLegalPlacementDirection();
+	}
+
 	Piece* Tile::GetPiece() {
 		return mPiece;
 	};

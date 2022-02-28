@@ -26,6 +26,13 @@ namespace Alphalcazar::Game {
 		/// Returns a new Coordinates object representing a movement at a fixed distance in the specified direction
 		Coordinates GetCoordinateInDirection(Direction direction, Coordinate distance) const;
 
+		/*!
+		 * \brief Returns the direction in which pieces may be legally placed on a tile with these coordinates.
+		 *
+		 * Returns an invalid direction if the tile is not a perimeter tile.
+		 */
+		Direction GetLegalPlacementDirection() const;
+
 		/// Returns whether the current coordinates are valid
 		bool Valid() const;
 

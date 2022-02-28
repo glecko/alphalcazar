@@ -4,7 +4,10 @@
 #include "Player.hpp"
 #include "Tile.hpp"
 #include "Piece.hpp"
+#include "board_utils.hpp"
+
 #include <algorithm>
+#include <array>
 
 namespace Alphalcazar::Game {
 	Board::Board() {
@@ -16,6 +19,9 @@ namespace Alphalcazar::Game {
 					continue;
 				}
 				mTiles[coordinates] = std::make_unique<Tile>(coordinates);
+				if (coordinates.IsPerimeter()) {
+					mPerimeterTiles[coordinates] = mTiles[coordinates].get();
+				}
 			}
 		}
 	}
@@ -34,8 +40,13 @@ namespace Alphalcazar::Game {
 	Board::~Board() {}
 
 	void Board::PlacePiece(const Coordinates& coordinates, Piece* piece) {
-		if (auto* tile = GetTile(coordinates)) {
-			tile->PlacePiece(piece);
+		if (auto* tile = GetPerimeterTile(coordinates)) {
+			if (auto direction = tile->GetLegalPlacementDirection(); direction != Direction::NONE) {
+				tile->PlacePiece(piece);
+				piece->SetMovementDirection(tile->GetLegalPlacementDirection());
+			}
+		} else {
+			throw "Attempted to place a piece on a non-existing perimeter tile";
 		}
 	}
 
@@ -137,11 +148,32 @@ namespace Alphalcazar::Game {
 		return GetTile(coord);
 	}
 
+	Tile* Board::GetPerimeterTile(const Coordinates& coord) const {
+		if (mPerimeterTiles.find(coord) != mPerimeterTiles.end()) {
+			return mPerimeterTiles.at(coord);
+		}
+		return nullptr;
+	}
+
 	std::vector<Tile*> Board::GetTiles() const {
 		std::vector<Tile*> result;
 		result.reserve(mTiles.size());
 		for (auto& [_, tile] : mTiles) {
 			result.push_back(tile.get());
+		}
+		return result;
+	}
+
+	std::vector<Tile*> Board::GetLegalPlacementTiles() const {
+		std::vector<Tile*> result;
+		// Allocating the maximum amount of memory the vector could potentially
+		// take up. Will waste memory sometimes but we'll use all of it most of the times,
+		// and memory usage is not as much of an issue as CPU usage here
+		result.reserve(mPerimeterTiles.size());
+		for (auto& [_, tile] : mPerimeterTiles) {
+			if (tile->GetPiece() == nullptr) {
+				result.push_back(tile);
+			}
 		}
 		return result;
 	}
@@ -159,9 +191,12 @@ namespace Alphalcazar::Game {
 	GameResult Board::GetResult() const {
 		std::optional<PlayerId> candidateWinner = std::nullopt;
 
-		auto rows = GetAllRowIterationDirections();
-		for (auto& [startCoordinate, direction] : rows) {
-			if (auto playerId = CheckRowCompleteness(startCoordinate, direction); playerId.has_value()) {
+		// The list of coordinates/directions to check only depends on the board size constant
+		// and can be evaluated at compile time for better runtime performance
+		static constexpr auto c_BoardRows = GetAllRowIterationDirections();
+		for (auto& [x, y, direction, distance] : c_BoardRows) {
+			Coordinates startCoordinate { x, y };
+			if (auto playerId = CheckRowCompleteness(startCoordinate, direction, distance); playerId.has_value()) {
 				if (candidateWinner.has_value() && candidateWinner != playerId) {
 					// Both players have completed at least one row/column/diagonal
 					return c_AcceptDraws ? GameResult::DRAW : GameResult::NONE;
@@ -176,41 +211,14 @@ namespace Alphalcazar::Game {
 		return GameResult::NONE;
 	}
 
-	std::vector<std::pair<Coordinates, Direction>> Board::GetAllRowIterationDirections() const {
-		std::vector<std::pair<Coordinates, Direction>> result;
-		static constexpr std::size_t c_TotalBoardRows = 2 * c_BoardSize + 2;
-		result.reserve(c_TotalBoardRows);
-
-		// Add all columns by starting at their southmost tile of each and iterating north
-		for (Coordinate x = 1; x <= c_BoardSize; x++) {
-			Coordinates startCoordinate{ x, 1 };
-			result.emplace_back(startCoordinate, Direction::NORTH);
-		}
-
-		// Add all rows by starting at the westmost tile of each and iterating east
-		for (Coordinate y = 1; y <= c_BoardSize; y++) {
-			Coordinates startCoordinate{ 1, y };
-			result.emplace_back(startCoordinate, Direction::EAST);
-		}
-
-		// Add both diagonals
-		Coordinates southWestDiagonalStartCoordinate { 1, 1 };
-		result.emplace_back(southWestDiagonalStartCoordinate, Direction::NORTH_EAST);
-
-		Coordinates southEastDiagonalStartCoordinate{ c_BoardSize, 1 };
-		result.emplace_back(southEastDiagonalStartCoordinate, Direction::NORTH_WEST);
-
-		return result;
-	}
-
-	std::optional<PlayerId> Board::CheckRowCompleteness(const Coordinates& startCoordinate, Direction direction) const {
+	std::optional<PlayerId> Board::CheckRowCompleteness(const Coordinates& startCoordinate, Direction direction, Coordinate length) const {
 		// Here we keep track of the player that has a potential of completing this row.
 		// A single candidate is considered since a row will never be completed by a player if it has pieces of
 		// both players on it.
 		std::optional<PlayerId> candidateRowCompleter = std::nullopt;
 
-		Coordinates nextCoordinate = startCoordinate;
-		while (!nextCoordinate.IsPerimeter()) {
+		for (Coordinate distance = 0; distance < length; distance++) {
+			Coordinates nextCoordinate = startCoordinate.GetCoordinateInDirection(direction, distance);
 			if (auto* piece = mTiles.at(nextCoordinate)->GetPiece()) {
 				if (candidateRowCompleter == std::nullopt) {
 					// We appoint the owner of the first piece we find as our candidate
@@ -224,7 +232,6 @@ namespace Alphalcazar::Game {
 				// If a single tile of this row has no piece, it will not be complete
 				return std::nullopt;
 			}
-			nextCoordinate = nextCoordinate.GetCoordinateInDirection(direction, 1);
 		}
 		return candidateRowCompleter;
 	}

@@ -50,7 +50,6 @@ namespace Alphalcazar::Game {
 
 	void Piece::RemoveFromPlay() {
 		mCoordinates = Coordinates::Invalid();
-		mDirection = Direction::NONE;
 	}
 
 	const Coordinates& Piece::GetCoordinates() const {

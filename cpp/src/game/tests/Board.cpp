@@ -6,13 +6,72 @@
 #include "Piece.hpp"
 #include "parameters.hpp"
 
+#include <array>
+
 namespace Alphalcazar::Game {
+
+	static Piece c_AllPieces[] = {
+		{ PlayerId::PLAYER_ONE, 1 },
+		{ PlayerId::PLAYER_ONE, 2 },
+		{ PlayerId::PLAYER_ONE, 3 },
+		{ PlayerId::PLAYER_ONE, 4 },
+		{ PlayerId::PLAYER_ONE, 5 },
+		{ PlayerId::PLAYER_TWO, 1 },
+		{ PlayerId::PLAYER_TWO, 2 },
+		{ PlayerId::PLAYER_TWO, 3 },
+		{ PlayerId::PLAYER_TWO, 4 },
+		{ PlayerId::PLAYER_TWO, 5 },
+	};
+
 	TEST(Board, SetupTiles) {
 		Board board {};
 		EXPECT_EQ(board.IsFull(), false);
 		EXPECT_EQ(board.GetResult(), GameResult::NONE);
 		// We expect a square of c_PlayAreaSize size without the 4 corners
-		EXPECT_EQ(board.GetTiles().size(), c_PlayAreaSize * c_PlayAreaSize - 4);
+		auto tiles = board.GetTiles();
+		EXPECT_EQ(tiles.size(), c_PlayAreaSize * c_PlayAreaSize - 4);
+
+		// Check that all perimeter tiles can be found with GetPerimeterTile(), and only
+		// perimeter tiles can be found with that function.
+		for (auto* tile : tiles) {
+			if (tile->GetCoordinates().IsPerimeter()) {
+				EXPECT_NE(board.GetPerimeterTile(tile->GetCoordinates()), nullptr);
+			} else {
+				EXPECT_EQ(board.GetPerimeterTile(tile->GetCoordinates()), nullptr);
+			}
+		}		
+	}
+
+	TEST(Board, PlacePiece) {
+		Board board {};
+
+		std::size_t pieceIndex = 0;
+		for (auto* tile : board.GetTiles()) {
+			auto& coordinates = tile->GetCoordinates();
+			if (coordinates.IsPerimeter()) {
+				Piece* piece = &c_AllPieces[pieceIndex];
+				pieceIndex++;
+				board.PlacePiece(coordinates, piece);
+				EXPECT_EQ(board.GetTile(coordinates)->GetPiece(), piece);
+			}
+		}
+		// Board should still be empty as we have only placed on non-perimeter tiles
+		EXPECT_EQ(board.IsFull(), false);
+	}
+
+	TEST(Board, BoardIsFull) {
+		Board board {};
+
+		std::size_t pieceIndex = 0;
+		for (auto* tile : board.GetTiles()) {
+			auto& coordinates = tile->GetCoordinates();
+			if (!coordinates.IsPerimeter()) {
+				Piece* piece = &c_AllPieces[pieceIndex];
+				pieceIndex++;
+				board.GetTile(coordinates)->PlacePiece(piece);
+			}
+		}
+		EXPECT_EQ(board.IsFull(), true);
 	}
 
 	TEST(Board, GetCompletRowResult) {
@@ -313,5 +372,23 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(pieceThreePlayerTwo.IsInPlay(), false);
 		EXPECT_EQ(pieceFourPlayerTwo.IsInPlay(), true);
 		EXPECT_EQ(pieceFivePlayerTwo.IsInPlay(), false);
+	}
+
+	TEST(Board, LegalPlacementTiles) {
+		Board board {};
+		Piece pieceOne { PlayerId::PLAYER_ONE, 1 };
+		Piece pieceTwo { PlayerId::PLAYER_ONE, 2 };
+
+		auto legalPlacementTiles = board.GetLegalPlacementTiles();
+		// On an empty board we should have as many options as the size of the perimeter
+		// which is the play area size square minus the board size square minus the 4 corners
+		constexpr Coordinate perimeterSize = c_PlayAreaSize * c_PlayAreaSize - c_BoardSize * c_BoardSize - 4;
+		EXPECT_EQ(legalPlacementTiles.size(), perimeterSize);
+
+		board.PlacePiece(legalPlacementTiles[0]->GetCoordinates(), &pieceOne);
+		board.PlacePiece(legalPlacementTiles[1]->GetCoordinates(), &pieceTwo);
+
+		auto legalTilesAfterPlacement = board.GetLegalPlacementTiles();
+		EXPECT_EQ(legalTilesAfterPlacement.size(), perimeterSize - 2);
 	}
 }
