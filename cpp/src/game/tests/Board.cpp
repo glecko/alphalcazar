@@ -198,6 +198,28 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(pieceFivePlayerTwo.IsInPlay(), true);
 	}
 
+	TEST(Board, PushablePiecesDontPushEachOther) {
+		Board board {};
+		Piece pieceOnePlayerOne { PlayerId::PLAYER_ONE, c_PushablePieceType };
+		Piece pieceOnePlayerTwo { PlayerId::PLAYER_TWO, c_PushablePieceType };
+
+		// Two pushable pieces are facing each other. As pushable pieces cannot
+		// push another pushable piece, we expect no movements to happen in this setup
+		board.GetTile(2, 2)->PlacePiece(&pieceOnePlayerOne);
+		pieceOnePlayerOne.SetMovementDirection(Direction::NORTH);
+		board.GetTile(2, 3)->PlacePiece(&pieceOnePlayerTwo);
+		pieceOnePlayerTwo.SetMovementDirection(Direction::SOUTH);
+
+		auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_ONE);
+		EXPECT_EQ(executedMoves, 0);
+
+		EXPECT_EQ(*board.GetTile(2, 2)->GetPiece(), pieceOnePlayerOne);
+		EXPECT_EQ(*board.GetTile(2, 3)->GetPiece(), pieceOnePlayerTwo);
+
+		EXPECT_EQ(pieceOnePlayerOne.IsInPlay(), true);
+		EXPECT_EQ(pieceOnePlayerTwo.IsInPlay(), true);
+	}
+
 	TEST(Board, PushablePieceMovements) {
 		Board board{};
 		Piece pieceOnePlayerOne { PlayerId::PLAYER_ONE, c_PushablePieceType };

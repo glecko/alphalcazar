@@ -1,8 +1,11 @@
 #include "Game.hpp"
 #include "Board.hpp"
 #include "Player.hpp"
+#include "Tile.hpp"
 #include "PlacementMove.hpp"
+#include "parameters.hpp"
 #include "Strategy.hpp"
+#include "Piece.hpp"
 
 namespace Alphalcazar::Game {
 
@@ -40,15 +43,15 @@ namespace Alphalcazar::Game {
 
 	Game::~Game() {};
 
-	GameResult Game::Play(const Strategy& firstPlayerStrategy, const Strategy& secondPlayerStrategy) {
+	GameResult Game::Play(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy) {
 		GameResult result = GameResult::NONE;
 		while (result == GameResult::NONE) {
-			PlayTurn(firstPlayerStrategy, secondPlayerStrategy);
+			result = PlayTurn(firstPlayerStrategy, secondPlayerStrategy);
 		}
 		return result;
 	}
 
-	GameResult Game::PlayTurn(const Strategy& firstPlayerStrategy, const Strategy& secondPlayerStrategy) {
+	GameResult Game::PlayTurn(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy) {
 		ExecutePlayerMoves(firstPlayerStrategy, secondPlayerStrategy);
 		auto executedMoves = mBoard->ExecuteMoves(mState.PlayerWithInitiative);
 		mState.Turn += 1;
@@ -59,15 +62,20 @@ namespace Alphalcazar::Game {
 	bool Game::IsStalemate(BoardMovesCount executedMoves) const {
 		// Only check for stalemates if no moves were executed and the board is full
 		// There is no possible stalemate scenario without these conditions
-		if (executedMoves == 0 and mBoard->IsFull()) {
-			// TO-DO: Check that no player has a pusher piece in hand!
-			// Else it's not a true stalemate
-			return true;
+		if (executedMoves == 0 && mBoard->IsFull()) {
+			// Check that neither player have a pushing piece in their hand
+			// as a true stalemate cannot happen if a player can still place a pushing piece
+			if (!mPlayerOne->GetPiece(c_PusherPieceType)->IsInPlay() && !mPlayerTwo->GetPiece(c_PusherPieceType)->IsInPlay()) {
+				return true;
+			}
 		}
 		return false;
 	}
 
-	void Game::ExecutePlayerMoves(const Strategy& firstPlayerStrategy, const Strategy& secondPlayerStrategy) {
+	void Game::ExecutePlayerMoves(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy) {
+		// At the beginning of the turn, we reset the "first move executed" state
+		mState.FirstMoveExecuted = false;
+
 		// Play the first move for the player with initiative
 		if (mState.PlayerWithInitiative == PlayerId::PLAYER_ONE) {
 			ExecutePlayerMove(PlayerId::PLAYER_ONE, firstPlayerStrategy);
@@ -87,13 +95,31 @@ namespace Alphalcazar::Game {
 		mPlayerMovesExecutedCallbacks.Invoke();
 	}
 
-	void Game::ExecutePlayerMove(PlayerId playerId, const Strategy& strategy) {
-		auto& placementMove = strategy.Execute(playerId, *this);
-		if (placementMove.IsValid()) {
-			auto* player = GetPlayer(placementMove.GetPlayerId());
-			auto* piece = player->GetPiece(placementMove.GetPieceType());
-			mBoard->PlacePiece(placementMove.GetCoordinates(), piece);
+	void Game::ExecutePlayerMove(PlayerId playerId, Strategy& strategy) {
+		auto legalMoves = GetLegalMoves(playerId);
+		// If a player has no available legal moves, their turn is skipped
+		if (legalMoves.size() > 0) {
+			auto placementMoveIndex = strategy.Execute(playerId, legalMoves, *this);
+			if (placementMoveIndex < 0 || placementMoveIndex >= legalMoves.size()) {
+				throw "Invalid legal move index returned by player strategy";
+			}
+			auto& placementMove = legalMoves[placementMoveIndex];
+			auto* piece = GetPlayer(playerId)->GetPiece(placementMove.PieceType);
+			mBoard->PlacePiece(placementMove.Coordinates, piece);
 		}
+	}
+
+	std::vector<PlacementMove> Game::GetLegalMoves(PlayerId player) const {
+		std::vector<PlacementMove> result;
+		auto legalTiles = mBoard->GetLegalPlacementTiles();
+		auto pieces = GetPlayer(player)->GetPiecesInHand();
+		result.reserve(pieces.size() * legalTiles.size());
+		for (auto* tile : legalTiles) {
+			for (auto* piece : pieces) {
+				result.push_back({ tile->GetCoordinates(), piece->GetType(), player });
+			}
+		}
+		return result;
 	}
 
 	GameResult Game::EvaluateGameResult(BoardMovesCount executedMoves) {
@@ -129,6 +155,14 @@ namespace Alphalcazar::Game {
 				return GetPlayer(PlayerId::PLAYER_ONE);
 			}
 		}
+	}
+
+	const GameState& Game::GetState() const {
+		return mState;
+	}
+
+	const Board& Game::GetBoard() const {
+		return *mBoard;
 	}
 
 	Utils::CallbackHandler<Game::PlayerMovesExecutedCallback>& Game::OnPlayerMovesExecuted() {

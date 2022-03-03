@@ -2,9 +2,11 @@
 
 #include "aliases.hpp"
 
+#include <vector>
+
 namespace Alphalcazar::Game {
 	class Game;
-	class PlacementMove;
+	struct PlacementMove;
 
 	/*!
 	 * \brief Virtual class that represents how players will decide which move to play on their turn.
@@ -16,7 +18,16 @@ namespace Alphalcazar::Game {
 		Strategy() = default;
 		virtual ~Strategy() = default;
 
-		/// Returns the desired PlacementMove to execute given the state of the game and the player who executes the strategy
-		virtual PlacementMove& Execute([[maybe_unused]] PlayerId& playerId, [[maybe_unused]] const Game& game) const = 0;
+		/*!
+		 * \brief Returns the placement move index to execute given the state of the game 
+		          and the player who executes the strategy.
+	     *
+		 * \param playerId The ID of the player who's turn it is to play.
+		 * \param legalMoves The list of available legal moves the player currently has available.
+		 * \param game The game object. Can be used to factor in the state of the game and the board in order to chose a move.
+		 * 
+		 * \returns The index of the move (in the legalMoves parameter) of the move to be executed.
+		 */
+		virtual std::size_t Execute([[maybe_unused]] PlayerId& playerId, const std::vector<PlacementMove>& legalMoves, [[maybe_unused]] const Game& game) = 0;
 	};
 }

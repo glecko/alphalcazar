@@ -10,6 +10,7 @@ endif()
 
 # Build options
 option(BUILD_MINMAX_STRATEGY "Build minmax strategy" OFF)
+option(BUILD_RANDOM_STRATEGY "Build random strategy" OFF)
 option(BUILD_TESTS "Compile tests" ON)
 
 # Include conan cmake

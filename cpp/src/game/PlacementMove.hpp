@@ -4,18 +4,16 @@
 #include "aliases.hpp"
 
 namespace Alphalcazar::Game {
-	class PlacementMove {
-	public:
-		PlacementMove(Coordinates coordinates, PieceType pieceType, PlayerId playerId);
-		~PlacementMove();
-
-		bool IsValid() const;
-		Coordinates& GetCoordinates();
-		PieceType GetPieceType();
-		PlayerId GetPlayerId();
-	private:
-		Coordinates mCoordinates;
-		PieceType mPieceType;
-		PlayerId mPlayerId;
+	/*!
+  	 * \brief Data structure with the minimnal information needed to uniquely represent a placement move.
+	 * 
+	 * A placement move is defined as the action a player takes at the start of each turn,
+	 * where they take a piece they have in hand and place it on the perimeter of the board, facing
+	 * inwards.
+	 */
+	struct PlacementMove {
+		Coordinates Coordinates;
+		PieceType PieceType;
+		PlayerId PlayerId;
 	};
 }

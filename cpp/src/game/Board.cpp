@@ -81,12 +81,12 @@ namespace Alphalcazar::Game {
 						}
 						movedPieces++;
 					}
-				} else if (targetTilePiece->IsPushable()) {
+				} else if (targetTilePiece->IsPushable() && !piece->IsPushable()) {
 					auto pushTargetCoordinates = sourceCoordinates.GetCoordinateInDirection(direction, 2);
 					auto* pushTargetTile = GetTile(pushTargetCoordinates);
 					// A non-pushing piece cannot push a pushable piece if there is a piece on the tile
 					// it would be pushed to. It doesn't matter if the piece behind it is also pushable
-					if (pushTargetTile->GetPiece() == nullptr) {
+					if (!pushTargetTile->GetPiece()) {
 						// We first move the pushed piece, then the pushing piece
 						MovePiece(targetTilePiece, *targetTile, *pushTargetTile);
 						MovePiece(piece, *sourceTile, *targetTile);
@@ -160,6 +160,15 @@ namespace Alphalcazar::Game {
 		result.reserve(mTiles.size());
 		for (auto& [_, tile] : mTiles) {
 			result.push_back(tile.get());
+		}
+		return result;
+	}
+
+	std::vector<Tile*> Board::GetPerimeterTiles() const {
+		std::vector<Tile*> result;
+		result.reserve(mPerimeterTiles.size());
+		for (auto& [_, tile] : mPerimeterTiles) {
+			result.push_back(tile);
 		}
 		return result;
 	}

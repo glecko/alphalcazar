@@ -42,6 +42,8 @@ namespace Alphalcazar::Game {
 		Tile* GetPerimeterTile(const Coordinates& coord) const;
 		/// Returns all tiles of the board
 		std::vector<Tile*> GetTiles() const;
+		/// Returns all perimeter tiles of the board
+		std::vector<Tile*> GetPerimeterTiles() const;
 		/// Returns a list of all tiles where a player may legally place a piece on their turn
 		std::vector<Tile*> GetLegalPlacementTiles() const;
 	private:

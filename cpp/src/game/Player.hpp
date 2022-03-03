@@ -26,6 +26,8 @@ namespace Alphalcazar::Game {
 		Piece* GetPiece(PieceType type) const;
 		/// Returns a vector of all pieces owned by this player
 		std::vector<Piece*> GetPieces() const;
+		/// Returns a vector of all the pieces this player has in the hand (not in play)
+		std::vector<Piece*> GetPiecesInHand() const;
 	private:
 		PlayerId mId;
 		std::vector<std::unique_ptr<Piece>> mPieces;

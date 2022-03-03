@@ -1,4 +1,4 @@
-file(GLOB_RECURSE _sources
+file(GLOB _sources
     CONFIGURE_DEPENDS
     "*.cpp"
     "*.c"

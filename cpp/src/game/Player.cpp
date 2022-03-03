@@ -41,6 +41,16 @@ namespace Alphalcazar::Game {
         return result;
     }
 
+    std::vector<Piece*> Player::GetPiecesInHand() const {
+        std::vector<Piece*> result;
+        for (auto& piece : mPieces) {
+            if (!piece->IsInPlay()) {
+                result.push_back(piece.get());
+            }
+        }
+        return result;
+    }
+
     PlayerId Player::GetId() const {
         return mId;
     }
