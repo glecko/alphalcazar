@@ -15,5 +15,9 @@ namespace Alphalcazar::Game {
 		Coordinates Coordinates;
 		PieceType PieceType;
 		PlayerId PlayerId;
+
+		bool operator==(const PlacementMove& other) const {
+			return PieceType == other.PieceType && PlayerId == other.PlayerId && Coordinates == other.Coordinates;
+		}
 	};
 }

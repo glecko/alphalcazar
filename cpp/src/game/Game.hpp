@@ -10,6 +10,7 @@ namespace Alphalcazar::Game {
 	class Board;
 	class Player;
 	class Strategy;
+	class Piece;
 	struct PlacementMove;
 
 	struct GameState {
@@ -42,6 +43,15 @@ namespace Alphalcazar::Game {
 		GameResult Play(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy);
 		/// Plays out a single round of the game, given the player strategies to execute
 		GameResult PlayTurn(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy);
+		/*!
+		 * \brief Plays out the next step of a turn
+		 * 
+		 * \param move The placement move of the active player.
+		 * 
+		 * \returns The game result after the end of the turn if this function executed
+		 *          the second placement move of the turn, or GameState::NONE otherwise.
+		 */
+		GameResult PlayNextPlacementMove(const PlacementMove& move);
 
 		/// Returns a player instance given its ID
 		Player* GetPlayer(PlayerId player) const;
@@ -51,10 +61,14 @@ namespace Alphalcazar::Game {
 		Player* GetPlayerByInitiative(bool initiative) const;
 
 		/// Returns the current state of the game
+		GameState& GetState();
 		const GameState& GetState() const;
 
 		/// Returns the board of game
 		const Board& GetBoard() const;
+
+		/// Returns a list of all pieces that exist in the current game (of both players)
+		std::vector<Piece*> GetAllPieces() const;
 
 		/*!
 		 * \brief Returns a list of legal placement moves for the current player.
@@ -74,6 +88,14 @@ namespace Alphalcazar::Game {
 		void ExecutePlayerMoves(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy);
 		/// Makes a given player play his move
 		void ExecutePlayerMove(PlayerId playerId, Strategy& strategy);
+		/// Executes a single placement move on the board
+		void ExecutePlacementMove(PlayerId playerId, const PlacementMove& move);
+		/*!
+		 * \brief Executes the turn end operations after both players have played their placement move
+		 * 
+		 * \returns The game result at the end of this turn.
+		 */
+		GameResult EvaluateTurnEndPhase();
 		/// Returns what state the board is currently in.
 		GameResult EvaluateGameResult(BoardMovesCount executedMoves);
 

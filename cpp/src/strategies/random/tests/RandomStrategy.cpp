@@ -23,7 +23,7 @@ namespace Alphalcazar::Strategy::Random {
 			// The amount of legal moves for at least one player will have decreased by the amount of perimeter tiles there are
 			// as they will have 1 piece less in hand
 			auto playerOneMovesCount = game.GetLegalMoves(Game::PlayerId::PLAYER_ONE).size();
-			auto playerTwoMovesCount = game.GetLegalMoves(Game::PlayerId::PLAYER_ONE).size();
+			auto playerTwoMovesCount = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO).size();
 			auto expectedLegalMoves = initialLegalMoves - perimeterTilesCount;
 			EXPECT_TRUE(playerOneMovesCount == expectedLegalMoves || playerTwoMovesCount == expectedLegalMoves);
 

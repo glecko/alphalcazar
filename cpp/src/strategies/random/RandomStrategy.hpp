@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Strategy.hpp"
-#include "aliases.hpp"
+#include <Strategy.hpp>
+#include <aliases.hpp>
 
 #include <random>
 
@@ -19,7 +19,7 @@ namespace Alphalcazar::Strategy::Random {
 	class RandomStrategy : public Game::Strategy {
 	public:
 		RandomStrategy();
-		virtual std::size_t Execute(Game::PlayerId& playerId, const std::vector<Game::PlacementMove>& legalMoves, const Game::Game& game) override;
+		virtual Game::PlacementMoveIndex Execute(Game::PlayerId playerId, const std::vector<Game::PlacementMove>& legalMoves, const Game::Game& game) override;
 	private:
 		std::random_device mRandomDevice;
 		std::mt19937 mRandomEngine;

@@ -20,7 +20,7 @@ namespace Alphalcazar::Game {
 				}
 				mTiles[coordinates] = std::make_unique<Tile>(coordinates);
 				if (coordinates.IsPerimeter()) {
-					mPerimeterTiles[coordinates] = mTiles[coordinates].get();
+					mPerimeterTiles[coordinates] = mTiles.at(coordinates).get();
 				}
 			}
 		}
@@ -29,10 +29,17 @@ namespace Alphalcazar::Game {
 	Board::Board(const Board& other, std::vector<Piece*> newPieces) {
 		for (auto& [coordinates, tile] : other.mTiles) {
 			mTiles[coordinates] = std::make_unique<Tile>(coordinates);
+			if (coordinates.IsPerimeter()) {
+				mPerimeterTiles[coordinates] = mTiles.at(coordinates).get();
+			}
 			auto piece = tile->GetPiece();
 			if (piece != nullptr) {
-				auto newPieceIt = std::find(newPieces.begin(), newPieces.end(), piece);
-				mTiles[coordinates]->PlacePiece(*newPieceIt);
+				auto newPieceIt = std::find_if(newPieces.begin(), newPieces.end(), [piece] (Piece* newPiece) { return *newPiece == *piece; });
+				if (newPieceIt != newPieces.end()) {
+					mTiles.at(coordinates)->PlacePiece(*newPieceIt);
+				} else {
+					throw "Error while copying board: Could not find a tile's piece among the list of new pieces.";
+				}
 			}
 		}
 	}

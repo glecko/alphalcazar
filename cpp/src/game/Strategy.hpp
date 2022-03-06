@@ -28,6 +28,6 @@ namespace Alphalcazar::Game {
 		 * 
 		 * \returns The index of the move (in the legalMoves parameter) of the move to be executed.
 		 */
-		virtual std::size_t Execute([[maybe_unused]] PlayerId& playerId, const std::vector<PlacementMove>& legalMoves, [[maybe_unused]] const Game& game) = 0;
+		virtual PlacementMoveIndex Execute(PlayerId playerId, const std::vector<PlacementMove>& legalMoves, const Game& game) = 0;
 	};
 }

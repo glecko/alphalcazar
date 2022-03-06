@@ -23,10 +23,7 @@ namespace Alphalcazar::Game {
 	Coordinates::~Coordinates() {}
 
 	bool Coordinates::operator==(const Coordinates& coord) const {
-		if (x == coord.x && y == coord.y) {
-			return true;
-		}
-		return false;
+		return x == coord.x && y == coord.y;
 	}
 
 	bool Coordinates::IsPerimeter() const {

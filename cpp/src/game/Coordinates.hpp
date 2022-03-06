@@ -42,11 +42,30 @@ namespace Alphalcazar::Game {
 }
 
 namespace std {
-	// The \ref Coordinates class implements a hashing function to be able to be used as a key
-	// for ordered/unordered maps.
-	template <> struct hash<Alphalcazar::Game::Coordinates> {
+	/*
+	* The \ref Coordinates class implements a hashing function to be able to be used as a key
+	* for unordered maps.
+	*/
+	template <> 
+	struct hash<Alphalcazar::Game::Coordinates> {
 		std::size_t operator()(const Alphalcazar::Game::Coordinates& coordinates) const noexcept {
-			return ((hash<Alphalcazar::Game::Coordinate>()(coordinates.x) ^ (hash<Alphalcazar::Game::Coordinate>()(coordinates.y) << 1)) >> 1);
+			auto xHash = hash<Alphalcazar::Game::Coordinate>()(coordinates.x);
+			auto yHash = hash<Alphalcazar::Game::Coordinate>()(coordinates.y);
+			return ((xHash ^ (yHash << 1)) >> 1);
+		}
+	};
+
+	/*
+	* We also implement a hashing function for pairs of Coordinates with any other hashable type.
+	* This will be useful for using pairs of Coordinates with other types (like \ref Direction) as keys
+	* for unordered maps.
+	*/
+	template <class T> 
+	struct hash<std::pair<Alphalcazar::Game::Coordinates, T>> {
+		std::size_t operator()(const std::pair<Alphalcazar::Game::Coordinates, Alphalcazar::Game::Direction>& pair) const noexcept {
+			auto coordinatesHash = hash<Alphalcazar::Game::Coordinates>()(pair.first);
+			auto pairedValueHash = hash<T>()(pair.second);
+			return ((coordinatesHash ^ (pairedValueHash << 1)) >> 1);
 		}
 	};
 }

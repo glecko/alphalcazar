@@ -8,7 +8,6 @@
 #include "Piece.hpp"
 
 namespace Alphalcazar::Game {
-
 	GameState::GameState() {}
 
 	GameState::GameState(const GameState& other)
@@ -53,6 +52,21 @@ namespace Alphalcazar::Game {
 
 	GameResult Game::PlayTurn(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy) {
 		ExecutePlayerMoves(firstPlayerStrategy, secondPlayerStrategy);
+		return EvaluateTurnEndPhase();
+	}
+
+	GameResult Game::PlayNextPlacementMove(const PlacementMove& move) {
+		auto* player = GetActivePlayer();
+		auto result = GameResult::NONE;
+		ExecutePlacementMove(player->GetId(), move);
+		if (mState.FirstMoveExecuted) {
+			result = EvaluateTurnEndPhase();
+		}
+		mState.FirstMoveExecuted = !mState.FirstMoveExecuted;
+		return result;
+	}
+
+	GameResult Game::EvaluateTurnEndPhase() {
 		auto executedMoves = mBoard->ExecuteMoves(mState.PlayerWithInitiative);
 		mState.Turn += 1;
 		mState.SwapPlayerWithInitiative();
@@ -99,14 +113,18 @@ namespace Alphalcazar::Game {
 		auto legalMoves = GetLegalMoves(playerId);
 		// If a player has no available legal moves, their turn is skipped
 		if (legalMoves.size() > 0) {
-			auto placementMoveIndex = strategy.Execute(playerId, legalMoves, *this);
+			PlacementMoveIndex placementMoveIndex = strategy.Execute(playerId, legalMoves, *this);
 			if (placementMoveIndex < 0 || placementMoveIndex >= legalMoves.size()) {
 				throw "Invalid legal move index returned by player strategy";
 			}
 			auto& placementMove = legalMoves[placementMoveIndex];
-			auto* piece = GetPlayer(playerId)->GetPiece(placementMove.PieceType);
-			mBoard->PlacePiece(placementMove.Coordinates, piece);
+			ExecutePlacementMove(playerId, placementMove);
 		}
+	}
+
+	void Game::ExecutePlacementMove(PlayerId playerId, const PlacementMove& move) {
+		auto* piece = GetPlayer(playerId)->GetPiece(move.PieceType);
+		mBoard->PlacePiece(move.Coordinates, piece);
 	}
 
 	std::vector<PlacementMove> Game::GetLegalMoves(PlayerId player) const {
@@ -140,6 +158,18 @@ namespace Alphalcazar::Game {
 		}
 	}
 
+	std::vector<Piece*> Game::GetAllPieces() const {
+		auto playerOnePieces = GetPlayer(PlayerId::PLAYER_ONE)->GetPieces();
+		auto playerTwoPieces = GetPlayer(PlayerId::PLAYER_TWO)->GetPieces();
+
+		std::vector<Piece*> result;
+		result.reserve(playerOnePieces.size() + playerTwoPieces.size());
+		result.insert(result.end(), playerOnePieces.begin(), playerOnePieces.end());
+		result.insert(result.end(), playerTwoPieces.begin(), playerTwoPieces.end());
+
+		return result;
+	}
+
 	Player* Game::GetActivePlayer() const {
 		return GetPlayerByInitiative(!mState.FirstMoveExecuted);
 	}
@@ -155,6 +185,10 @@ namespace Alphalcazar::Game {
 				return GetPlayer(PlayerId::PLAYER_ONE);
 			}
 		}
+	}
+
+	GameState& Game::GetState() {
+		return mState;
 	}
 
 	const GameState& Game::GetState() const {
