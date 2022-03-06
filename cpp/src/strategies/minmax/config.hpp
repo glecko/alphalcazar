@@ -16,9 +16,9 @@ namespace Alphalcazar::Strategy::MinMax {
 	 */
 	static constexpr Score c_WinConditionScore = 1000;
 	/// The initial value of the "alpha" parameter of the minmax algorithm
-	static constexpr Score c_AlphaStartingValue = c_WinConditionScore * 10;
+	static constexpr Score c_AlphaStartingValue = -c_WinConditionScore * 10;
 	/// The initial value of the "beta" parameter of the minmax algorithm
-	static constexpr Score c_BetaStartingValue = -c_WinConditionScore * 10;
+	static constexpr Score c_BetaStartingValue = c_WinConditionScore * 10;
 	/*!
 	 * \brief A penalty that will be subtracted from a movement's score each movement for each level of depth.
 	 * 

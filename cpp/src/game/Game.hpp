@@ -65,6 +65,7 @@ namespace Alphalcazar::Game {
 		const GameState& GetState() const;
 
 		/// Returns the board of game
+		Board& GetBoard();
 		const Board& GetBoard() const;
 
 		/// Returns a list of all pieces that exist in the current game (of both players)

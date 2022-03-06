@@ -13,7 +13,7 @@ namespace Alphalcazar::Strategy::MinMax {
 	{}
 
 	Game::PlacementMoveIndex MinMaxStrategy::Execute(Game::PlayerId playerId, const std::vector<Game::PlacementMove>& legalMoves, const Game::Game& game) {
-		Score bestScore = c_BetaStartingValue;
+		Score bestScore = c_AlphaStartingValue;
 		Game::PlacementMoveIndex bestMoveIndex = 0;
 		Score alpha = c_AlphaStartingValue;
 		for (Game::PlacementMoveIndex i = 0; i < legalMoves.size(); i++) {
@@ -24,8 +24,8 @@ namespace Alphalcazar::Strategy::MinMax {
 				bestScore = moveScore;
 			}
 			alpha = std::max(bestScore, alpha);
-			// To-Do: Check if we really can't have alpha/beta cutoffs on the first level of depth
 		}
+		mLastExecutedMoveScore = bestScore;
 		return bestMoveIndex;
 	}
 
@@ -33,7 +33,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		if (depth == 0) {
 			return EvaluateBoard(playerId, game);
 		}
-		Score bestScore = c_BetaStartingValue;
+		Score bestScore = c_AlphaStartingValue;
 		// We are in "Max" so we are evaluating the player who is executing the strategy
 		auto legalMoves = game.GetLegalMoves(playerId);
 		for (Game::PlacementMoveIndex i = 0; i < legalMoves.size(); i++) {
@@ -53,7 +53,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		if (depth == 0) {
 			return EvaluateBoard(playerId, game);
 		}
-		Score bestScore = c_AlphaStartingValue;
+		Score bestScore = c_BetaStartingValue;
 		// We are in "Min" so we are evaluating the opponent
 		auto opponentId = playerId == Game::PlayerId::PLAYER_ONE ? Game::PlayerId::PLAYER_TWO : Game::PlayerId::PLAYER_ONE;
 		auto legalMoves = game.GetLegalMoves(opponentId);
@@ -92,5 +92,9 @@ namespace Alphalcazar::Strategy::MinMax {
 			}
 		}
 		return nextBestScore;
+	}
+
+	Score MinMaxStrategy::GetLastExecutedMoveScore() const {
+		return mLastExecutedMoveScore;
 	}
 }

@@ -33,9 +33,7 @@ namespace Alphalcazar::Game {
 		mPlayerTwo = std::make_unique<Player>(*other.mPlayerTwo);
 
 		// Fetch a combined vector of all player pieces
-		auto pieces = mPlayerOne->GetPieces();
-		auto playerTwoPieces = mPlayerTwo->GetPieces();
-		pieces.insert(pieces.end(), playerTwoPieces.begin(), playerTwoPieces.end());
+		auto pieces = GetAllPieces();
 
 		mBoard = std::make_unique<Board>(*other.mBoard, pieces);
 	}
@@ -193,6 +191,10 @@ namespace Alphalcazar::Game {
 
 	const GameState& Game::GetState() const {
 		return mState;
+	}
+
+	Board& Game::GetBoard() {
+		return *mBoard;
 	}
 
 	const Board& Game::GetBoard() const {
