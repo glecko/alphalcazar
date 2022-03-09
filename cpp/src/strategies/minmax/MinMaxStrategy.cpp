@@ -1,6 +1,7 @@
 #include "MinMaxStrategy.hpp"
 
 #include "BoardEvaluation.hpp"
+#include "LegalMovements.hpp"
 #include "config.hpp"
 
 #include <Game.hpp>
@@ -16,8 +17,10 @@ namespace Alphalcazar::Strategy::MinMax {
 		Score bestScore = c_AlphaStartingValue;
 		Game::PlacementMoveIndex bestMoveIndex = 0;
 		Score alpha = c_AlphaStartingValue;
-		for (Game::PlacementMoveIndex i = 0; i < legalMoves.size(); i++) {
-			auto move = legalMoves[i];
+		auto filteredMoves = legalMoves;
+		FilterSymmetricMovements(filteredMoves, game);
+		for (Game::PlacementMoveIndex i = 0; i < filteredMoves.size(); i++) {
+			auto move = filteredMoves[i];
 			auto moveScore = GetNextBestScore(playerId, move, mDepth, game, alpha, c_BetaStartingValue);
 			if (moveScore > bestScore) {
 				bestMoveIndex = i;
@@ -36,6 +39,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		Score bestScore = c_AlphaStartingValue;
 		// We are in "Max" so we are evaluating the player who is executing the strategy
 		auto legalMoves = game.GetLegalMoves(playerId);
+		FilterSymmetricMovements(legalMoves, game);
 		for (Game::PlacementMoveIndex i = 0; i < legalMoves.size(); i++) {
 			Game::PlacementMove move = legalMoves[i];
 			auto nextBestScore = GetNextBestScore(playerId, move, depth, game, alpha, beta);
@@ -57,12 +61,13 @@ namespace Alphalcazar::Strategy::MinMax {
 		// We are in "Min" so we are evaluating the opponent
 		auto opponentId = playerId == Game::PlayerId::PLAYER_ONE ? Game::PlayerId::PLAYER_TWO : Game::PlayerId::PLAYER_ONE;
 		auto legalMoves = game.GetLegalMoves(opponentId);
+		FilterSymmetricMovements(legalMoves, game);
 		for (Game::PlacementMoveIndex i = 0; i < legalMoves.size(); i++) {
 			Game::PlacementMove move = legalMoves[i];
 			auto nextBestScore = GetNextBestScore(playerId, move, depth, game, alpha, beta);
 			bestScore = std::min(nextBestScore, bestScore);
 			beta = std::min(bestScore, beta);
-			if (beta < beta) {
+			if (beta < alpha) {
 				break;
 			}
 		}

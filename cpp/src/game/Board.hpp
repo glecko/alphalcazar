@@ -18,7 +18,7 @@ namespace Alphalcazar::Game {
 	class Board {
 	public:
 		Board();
-		Board(const Board& other, std::vector<Piece*> pieces);
+		Board(const Board& other, const std::vector<Piece*>& pieces);
 		~Board();
 
 		/// Places a given piece at the tile at the specified coordinates

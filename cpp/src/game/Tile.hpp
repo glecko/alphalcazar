@@ -13,7 +13,7 @@ namespace Alphalcazar::Game {
 	class Tile {
 	public:
 		Tile(const Coordinates& coordinates);
-		Tile(const Tile& other) = delete;
+		Tile(const Tile& other);
 		~Tile();
 
 		/// Places a piece on this tile

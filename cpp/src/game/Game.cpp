@@ -157,12 +157,10 @@ namespace Alphalcazar::Game {
 	}
 
 	std::vector<Piece*> Game::GetAllPieces() const {
-		auto playerOnePieces = GetPlayer(PlayerId::PLAYER_ONE)->GetPieces();
+		std::vector<Piece*> result = GetPlayer(PlayerId::PLAYER_ONE)->GetPieces();
 		auto playerTwoPieces = GetPlayer(PlayerId::PLAYER_TWO)->GetPieces();
 
-		std::vector<Piece*> result;
-		result.reserve(playerOnePieces.size() + playerTwoPieces.size());
-		result.insert(result.end(), playerOnePieces.begin(), playerOnePieces.end());
+		result.reserve(result.size() + playerTwoPieces.size());
 		result.insert(result.end(), playerTwoPieces.begin(), playerTwoPieces.end());
 
 		return result;

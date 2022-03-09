@@ -40,7 +40,7 @@ endif()
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 conan_config_install(ITEM ${CMAKE_CURRENT_LIST_DIR}/conan_config/)
 conan_check(VERSION 1.23.0 REQUIRED)
-conan_cmake_run(CONANFILE "conanfile.txt" BASIC_SETUP CMAKE_TARGETS BUILD missing BUILD_TYPE "Debug")
+conan_cmake_run(CONANFILE "conanfile.txt" BASIC_SETUP CMAKE_TARGETS BUILD missing BUILD_TYPE CMAKE_TARGETS)
 
 # Enable GOogleTest to discover tests
 if(BUILD_TESTS)

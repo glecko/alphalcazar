@@ -14,6 +14,8 @@ set_target_properties(Alphalcazar.Game PROPERTIES LINKER_LANGUAGE CXX)
 
 target_include_directories(Alphalcazar.Game PUBLIC ${CMAKE_CURRENT_LIST_DIR} "${SHARED_DIR}")
 
+target_link_libraries(Alphalcazar.Game PUBLIC Alphalcazar.Utils)
+
 if (BUILD_TESTS)
   add_subdirectory(tests)
 endif()

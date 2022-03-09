@@ -10,6 +10,7 @@ namespace Alphalcazar::Game {
 
 	static constexpr Coordinate c_BoardSize = 3;
 	static constexpr Coordinate c_PlayAreaSize = c_BoardSize + 2;
+	static constexpr Coordinate c_CenterCoordinate = c_BoardSize / 2 + 1;
 	/*!
 	 * \brief Whether the game ends in a draw condition when both players complete a row.
 	 * 

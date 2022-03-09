@@ -9,20 +9,20 @@ namespace Alphalcazar::Game {
 	using PlacementMoveIndex = std::uint8_t;
 
 	enum class GameResult {
-		NONE,
+		NONE = 0,
 		DRAW,
 		PLAYER_ONE_WINS,
 		PLAYER_TWO_WINS,
 	};
 
 	enum class PlayerId {
-		NONE,
+		NONE = 0,
 		PLAYER_ONE,
 		PLAYER_TWO
 	};
 
 	enum class Direction {
-		NONE,
+		NONE = 0,
 		NORTH,
 		SOUTH,
 		EAST,

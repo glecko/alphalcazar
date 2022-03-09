@@ -12,7 +12,7 @@
 #include <PlacementMove.hpp>
 
 namespace Alphalcazar::Strategy::MinMax {
-
+	/// Data structure helper for describing a piece placement on the board
 	struct PieceSetup {
 		Game::PlayerId PlayerId;
 		Game::PieceType PieceType;

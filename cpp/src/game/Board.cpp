@@ -26,20 +26,23 @@ namespace Alphalcazar::Game {
 		}
 	}
 
-	Board::Board(const Board& other, std::vector<Piece*> newPieces) {
+	Board::Board(const Board& other, const std::vector<Piece*>& newPieces) {
 		for (auto& [coordinates, tile] : other.mTiles) {
-			mTiles[coordinates] = std::make_unique<Tile>(coordinates);
+			mTiles[coordinates] = std::make_unique<Tile>(*tile);
 			if (coordinates.IsPerimeter()) {
 				mPerimeterTiles[coordinates] = mTiles.at(coordinates).get();
 			}
-			auto piece = tile->GetPiece();
+			auto* piece = tile->GetPiece();
 			if (piece != nullptr) {
-				auto newPieceIt = std::find_if(newPieces.begin(), newPieces.end(), [piece] (Piece* newPiece) { return *newPiece == *piece; });
-				if (newPieceIt != newPieces.end()) {
-					mTiles.at(coordinates)->PlacePiece(*newPieceIt);
-				} else {
-					throw "Error while copying board: Could not find a tile's piece among the list of new pieces.";
-				}
+				// Since the vector of new pieces is guaranteed to be complete and ordered 
+				// (pieces 1-5 of player 1 and then pieces 1-5 of player 2) we can calculate the index
+				// at which our piece will be located given its type and owner, much faster than iterating
+				// through the vector
+				std::size_t pieceTypeIndexOffset = static_cast<std::size_t>(piece->GetType() - 1);
+				std::size_t pieceOwnerIndexOffset = c_PieceTypes * (static_cast<std::size_t>(piece->GetOwner()) - 1);
+				std::size_t pieceIndex = pieceTypeIndexOffset + pieceOwnerIndexOffset;
+				auto* newPiece = newPieces[pieceIndex];
+				mTiles.at(coordinates)->PlacePiece(newPiece);
 			}
 		}
 	}

@@ -6,6 +6,10 @@ namespace Alphalcazar::Game {
 		: mCoordinates{ coordinates }
 	{}
 
+	Tile::Tile(const Tile& other) 
+		: mCoordinates { other.mCoordinates }
+	{}
+
 	Tile::~Tile() {}
 
 	void Tile::PlacePiece(Piece* piece) {
