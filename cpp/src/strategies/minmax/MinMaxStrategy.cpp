@@ -7,29 +7,57 @@
 #include <Game.hpp>
 #include <PlacementMove.hpp>
 #include <Player.hpp>
+#include <util/Log.hpp>
 
 namespace Alphalcazar::Strategy::MinMax {
 	MinMaxStrategy::MinMaxStrategy(const Depth depth)
 		: mDepth { depth }
+		, mThreadPool {}
+		, mFirstLevelAlpha { c_AlphaStartingValue }
 	{}
 
 	Game::PlacementMoveIndex MinMaxStrategy::Execute(Game::PlayerId playerId, const std::vector<Game::PlacementMove>& legalMoves, const Game::Game& game) {
-		Score bestScore = c_AlphaStartingValue;
 		Game::PlacementMoveIndex bestMoveIndex = 0;
-		Score alpha = c_AlphaStartingValue;
+		// Reset the first level alpha when searching a new move
+		mFirstLevelAlpha = c_AlphaStartingValue;
 		auto filteredMoves = legalMoves;
 		FilterSymmetricMovements(filteredMoves, game);
-		for (Game::PlacementMoveIndex i = 0; i < filteredMoves.size(); i++) {
-			auto move = filteredMoves[i];
-			auto moveScore = GetNextBestScore(playerId, move, mDepth, game, alpha, c_BetaStartingValue);
+		std::vector<std::future<Score>> scoreFutures {};
+
+		for (auto& move : filteredMoves) {
+			auto lambda = [this] (Game::PlayerId playerId, const Game::PlacementMove& move, Depth depth, const Game::Game& game) { return GetNextBestScoreAsync(playerId, move, depth, game); };
+			std::future<Score> scoreFuture = mThreadPool.Execute(lambda, playerId, move, mDepth, game);
+			scoreFutures.push_back(std::move(scoreFuture));
+		}
+
+		Score bestScore = c_AlphaStartingValue;
+		for (Game::PlacementMoveIndex i = 0; i < scoreFutures.size(); i++) {
+			Score moveScore = scoreFutures[i].get();
+
 			if (moveScore > bestScore) {
 				bestMoveIndex = i;
 				bestScore = moveScore;
 			}
-			alpha = std::max(bestScore, alpha);
 		}
+
 		mLastExecutedMoveScore = bestScore;
+		Utils::LogDebug("Played {} with score {}.", legalMoves[bestMoveIndex], bestScore);
 		return bestMoveIndex;
+	}
+
+	void MinMaxStrategy::SetFirstLevelAlpha(Score alpha) {
+		// To-do: mutex
+		mFirstLevelAlpha = std::max(mFirstLevelAlpha, alpha);
+	}
+
+	Score MinMaxStrategy::GetFirstLevelAlpha() {
+		// To-do: mutex
+		return mFirstLevelAlpha;
+	}
+
+	Score MinMaxStrategy::GetNextBestScoreAsync(Game::PlayerId playerId, const Game::PlacementMove& move, Depth depth, const Game::Game& game) {
+		Score alpha = GetFirstLevelAlpha();
+		return GetNextBestScore(playerId, move, depth, game, alpha, c_BetaStartingValue);
 	}
 
 	Score MinMaxStrategy::Max(Game::PlayerId playerId, Depth depth, const Game::Game& game, Score alpha, Score beta) {

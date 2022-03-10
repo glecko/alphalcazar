@@ -1,13 +1,11 @@
 #pragma once
 
-#include <cstdint>
+#include "CallbackHandle.hpp"
+
 #include <functional>
 #include <algorithm>
 
 namespace Alphalcazar::Utils {
-
-	using CallbackHandle = std::uint32_t;
-
 	template <class T>
 	class CallbackHandler;
 

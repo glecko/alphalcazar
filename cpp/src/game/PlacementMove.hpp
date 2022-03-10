@@ -3,6 +3,8 @@
 #include "Coordinates.hpp"
 #include "aliases.hpp"
 
+#include <fmt/format.h>
+
 namespace Alphalcazar::Game {
 	/*!
   	 * \brief Data structure with the minimnal information needed to uniquely represent a placement move.
@@ -14,10 +16,22 @@ namespace Alphalcazar::Game {
 	struct PlacementMove {
 		Coordinates Coordinates;
 		PieceType PieceType;
-		PlayerId PlayerId;
 
 		bool operator==(const PlacementMove& other) const {
-			return PieceType == other.PieceType && PlayerId == other.PlayerId && Coordinates == other.Coordinates;
+			return PieceType == other.PieceType && Coordinates == other.Coordinates;
 		}
 	};
+
 }
+
+// We define the specializations of parse & format to make \ref PlacementMove formattable. Based on: https://fmt.dev/latest/api.html#format-api
+template <> struct fmt::formatter<Alphalcazar::Game::PlacementMove> {
+	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+		return ctx.begin();
+	}
+
+    template <typename FormatContext>
+    auto format(const Alphalcazar::Game::PlacementMove& move, FormatContext& ctx) -> decltype(ctx.out()) {
+        return format_to(ctx.out(), "Piece {} -> ({},{})", move.PieceType, move.Coordinates.x, move.Coordinates.y);
+    }
+};

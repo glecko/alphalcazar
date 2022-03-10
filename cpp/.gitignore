@@ -1,0 +1,11 @@
+# Build folder
+build/
+cmake-build-debug/
+
+# IDE's
+.vscode/
+.vs/
+.idea/
+
+# Conan
+conan_imports_manifest.txt

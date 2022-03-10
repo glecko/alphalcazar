@@ -16,7 +16,7 @@ namespace Alphalcazar::Strategy::Random {
 	 * \brief A very basic strategy that simply plays a random moves among
 	 *        the player's available legal moves.
 	 */
-	class RandomStrategy : public Game::Strategy {
+	class RandomStrategy final : public Game::Strategy {
 	public:
 		RandomStrategy();
 		virtual Game::PlacementMoveIndex Execute(Game::PlayerId playerId, const std::vector<Game::PlacementMove>& legalMoves, const Game::Game& game) override;
