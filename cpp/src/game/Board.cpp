@@ -1,13 +1,9 @@
 #include "Board.hpp"
 
-#include "parameters.hpp"
-#include "Player.hpp"
-#include "Tile.hpp"
 #include "Piece.hpp"
 #include "board_utils.hpp"
 
 #include <algorithm>
-#include <array>
 
 namespace Alphalcazar::Game {
 	Board::Board() {
@@ -18,109 +14,106 @@ namespace Alphalcazar::Game {
 					// Avoid creating tiles for corners of the play area
 					continue;
 				}
-				mTiles[coordinates] = std::make_unique<Tile>(coordinates);
-				if (coordinates.IsPerimeter()) {
-					mPerimeterTiles[coordinates] = mTiles.at(coordinates).get();
-				}
-			}
-		}
-	}
-
-	Board::Board(const Board& other, const std::vector<Piece*>& newPieces) {
-		for (auto& [coordinates, tile] : other.mTiles) {
-			mTiles[coordinates] = std::make_unique<Tile>(*tile);
-			if (coordinates.IsPerimeter()) {
-				mPerimeterTiles[coordinates] = mTiles.at(coordinates).get();
-			}
-			auto* piece = tile->GetPiece();
-			if (piece != nullptr) {
-				// Since the vector of new pieces is guaranteed to be complete and ordered 
-				// (pieces 1-5 of player 1 and then pieces 1-5 of player 2) we can calculate the index
-				// at which our piece will be located given its type and owner, much faster than iterating
-				// through the vector
-				std::size_t pieceTypeIndexOffset = static_cast<std::size_t>(piece->GetType() - 1);
-				std::size_t pieceOwnerIndexOffset = c_PieceTypes * (static_cast<std::size_t>(piece->GetOwner()) - 1);
-				std::size_t pieceIndex = pieceTypeIndexOffset + pieceOwnerIndexOffset;
-				auto* newPiece = newPieces[pieceIndex];
-				mTiles.at(coordinates)->PlacePiece(newPiece);
+				mTiles[x][y] = { coordinates };
 			}
 		}
 	}
 
 	Board::~Board() {}
 
-	void Board::PlacePiece(const Coordinates& coordinates, Piece* piece) {
-		if (auto* tile = GetPerimeterTile(coordinates)) {
-			if (auto direction = tile->GetLegalPlacementDirection(); direction != Direction::NONE) {
+	void Board::PlacePiece(const Coordinates& coordinates, Piece& piece) {
+		if (auto* tile = GetTile(coordinates)) {
+			auto direction = tile->GetLegalPlacementDirection();
+			if (direction != Direction::NONE) {
 				tile->PlacePiece(piece);
-				piece->SetMovementDirection(tile->GetLegalPlacementDirection());
+				tile->GetPiece()->SetMovementDirection(tile->GetLegalPlacementDirection());
+
+				SetPlacedPieceCoordinates(piece, coordinates);
 			}
 		} else {
 			throw "Attempted to place a piece on a non-existing perimeter tile";
 		}
 	}
 
-	BoardMovesCount Board::ExecuteMoves(PlayerId startingPlayerId) {
+	void Board::PlacePiece(const Coordinates& coordinates, Piece& piece, Direction direction) {
+		if (auto* tile = GetTile(coordinates)) {
+			tile->PlacePiece(piece);
+			tile->GetPiece()->SetMovementDirection(direction);
+
+			SetPlacedPieceCoordinates(piece, coordinates);
+		} else {
+			throw "Attempted to place a piece on a non-existing tile";
+		}
+	}
+
+	BoardMovesCount Board::ExecutePieceMove(const Piece& piece) {
 		BoardMovesCount movedPieces = 0;
-		auto pieces = GetMovementOrderedPieces(startingPlayerId);
-		for (auto* piece : pieces) {
-			if (!piece->IsInPlay()) {
-				// Check if the piece has been removed from play by another piece earlier in the loop
-				// (by being pushed outside the board) in which case this piece will not execute any movement
-				continue;
-			}
-			auto direction = piece->GetMovementDirection();
-			const auto& sourceCoordinates = piece->GetCoordinates();
-			auto* sourceTile = GetTile(sourceCoordinates);
-			auto targetCoordinates = sourceCoordinates.GetCoordinateInDirection(direction, 1);
-			if (auto* targetTile = GetTile(targetCoordinates)) {
-				auto* targetTilePiece = targetTile->GetPiece();
+		// Check if a tile exists with the specified piece to move
+		if (auto* originTile = GetPieceTile(piece)) {
+			const Coordinates& originCoordinates = originTile->GetCoordinates();
+			Piece* originPiece = originTile->GetPiece();
+
+			auto direction = originPiece->GetMovementDirection();
+			Coordinates targetCoordinates = originCoordinates.GetCoordinateInDirection(direction, 1);
+			if (Tile* targetTile = GetTile(targetCoordinates)) {
+				Piece* targetTilePiece = targetTile->GetPiece();
 				if (targetTilePiece == nullptr) {
-					MovePiece(piece, *sourceTile, *targetTile);
+					MovePiece(*originTile, *targetTile);
 					movedPieces++;
-				} else if (piece->IsPusher()) {
-					auto chainedMovements = GetChainedPushMovements(sourceCoordinates, direction);
+				} else if (originPiece->IsPusher()) {
+					auto chainedMovements = GetChainedPushMovements(originCoordinates, direction);
 					// We execute the chained push movements in order
 					for (auto& [sourcePushTile, targetPushTile] : chainedMovements) {
 						if (targetPushTile != nullptr) {
-							MovePiece(sourcePushTile->GetPiece(), *sourcePushTile, *targetPushTile);
+							MovePiece(*sourcePushTile, *targetPushTile);
 						} else {
 							// If a piece is pushed to a non-existing tile (happens when a piece that is on the perimeter is pushed
 							// further outwards of the board) we simply remove the piece from play
-							sourcePushTile->RemovePiece();
+							RemovePiece(*sourcePushTile);
 						}
 						movedPieces++;
 					}
-				} else if (targetTilePiece->IsPushable() && !piece->IsPushable()) {
-					auto pushTargetCoordinates = sourceCoordinates.GetCoordinateInDirection(direction, 2);
+				} else if (targetTilePiece->IsPushable() && !originPiece->IsPushable()) {
+					auto pushTargetCoordinates = originCoordinates.GetCoordinateInDirection(direction, 2);
 					auto* pushTargetTile = GetTile(pushTargetCoordinates);
 					// A non-pushing piece cannot push a pushable piece if there is a piece on the tile
 					// it would be pushed to. It doesn't matter if the piece behind it is also pushable
-					if (!pushTargetTile->GetPiece()) {
+					if (!pushTargetTile->HasPiece()) {
 						// We first move the pushed piece, then the pushing piece
-						MovePiece(targetTilePiece, *targetTile, *pushTargetTile);
-						MovePiece(piece, *sourceTile, *targetTile);
+						MovePiece(*targetTile, *pushTargetTile);
+						MovePiece(*originTile, *targetTile);
 						movedPieces += 2;
-					} else if (sourceCoordinates.IsPerimeter()) {
+					} else if (originCoordinates.IsPerimeter()) {
 						// if a piece was unable to perform any movement on its turn while sitting on
 						// a perimeter tile, it is immediatelly removed from play
-						sourceTile->RemovePiece();
+						RemovePiece(*originTile);
 					}
-				} else if (sourceCoordinates.IsPerimeter()) {
+				} else if (originCoordinates.IsPerimeter()) {
 					// if a piece was unable to perform any movement on its turn while sitting on
 					// a perimeter tile, it is immediatelly removed from play
-					sourceTile->RemovePiece();
+					RemovePiece(*originTile);
 				}
 			}
 		}
 		return movedPieces;
 	}
 
-	std::vector<Board::MovementDescription> Board::GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction) const {
+	BoardMovesCount Board::ExecuteMoves(PlayerId startingPlayerId) {
+		BoardMovesCount movedPieces = 0;
+		for (PieceType pieceTypeToMove = 1; pieceTypeToMove <= c_PieceTypes; pieceTypeToMove++) {
+			Piece startingPlayerPiece { startingPlayerId, pieceTypeToMove };
+			movedPieces += ExecutePieceMove(startingPlayerPiece);
+			Piece secondPlayerPiece { startingPlayerId == PlayerId::PLAYER_ONE ? PlayerId::PLAYER_TWO : PlayerId::PLAYER_ONE, pieceTypeToMove };
+			movedPieces += ExecutePieceMove(secondPlayerPiece);
+		}
+		return movedPieces;
+	}
+
+	std::vector<Board::MovementDescription> Board::GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction) {
 		std::vector<Board::MovementDescription> result;
 		Coordinates nextCoordinate = sourceCoordinates;
 		Tile* nextTile = GetTile(nextCoordinate);
-		while (nextTile && nextTile->GetPiece() != nullptr) {
+		while (nextTile && nextTile->HasPiece()) {
 			// Get the coordinates and tile this piece will be pushed to
 			auto pushToCoordinate = nextCoordinate.GetCoordinateInDirection(direction, 1);
 			auto pushToTile = GetTile(pushToCoordinate);
@@ -138,73 +131,113 @@ namespace Alphalcazar::Game {
 		return result;
 	}
 
-	void Board::MovePiece(Piece* piece, Tile& source, Tile& target) {
-		source.RemovePiece();
-		// A piece that moves or is moved to a perimeter tile gets removed from play immediatelly
-		if (!target.GetCoordinates().IsPerimeter()) {
-			target.PlacePiece(piece);
+	void Board::MovePiece(Tile& source, Tile& target) {
+		if (auto* piece = source.GetPiece()) {
+			// A piece that moves or is moved to a perimeter tile gets removed from play immediatelly
+			auto& targetCoordinates = target.GetCoordinates();
+			if (!targetCoordinates.IsPerimeter()) {
+				SetPlacedPieceCoordinates(*piece, targetCoordinates);
+				target.PlacePiece(*piece);
+			} else {
+				SetPlacedPieceCoordinates(*piece, Coordinates::Invalid());
+			}
+			source.RemovePiece();
 		}
 	}
 
-	Tile* Board::GetTile(const Coordinates& coord) const {
-		if (mTiles.find(coord) != mTiles.end()) {
-			return mTiles.at(coord).get();
+	void Board::RemovePiece(Tile& tile) {
+		if (auto* piece = tile.GetPiece()) {
+			SetPlacedPieceCoordinates(*piece, Coordinates::Invalid());
+			tile.RemovePiece();
+		}
+	}
+
+	Tile* Board::GetTile(const Coordinates& coord) {
+		if (coord.IsPlayArea()) {
+			return &mTiles[coord.x][coord.y];
 		}
 		return nullptr;
 	}
 
-	Tile* Board::GetTile(Coordinate x, Coordinate y) const {
+	Tile* Board::GetTile(Coordinate x, Coordinate y) {
 		Coordinates coord { x, y };
 		return GetTile(coord);
 	}
 
-	Tile* Board::GetPerimeterTile(const Coordinates& coord) const {
-		if (mPerimeterTiles.find(coord) != mPerimeterTiles.end()) {
-			return mPerimeterTiles.at(coord);
+	Tile* Board::GetPieceTile(const Piece& piece) {
+		Coordinates& coordinates = GetPlacedPieceCoordinates(piece);
+		if (coordinates.Valid()) {
+			return GetTile(coordinates);
 		}
 		return nullptr;
 	}
 
-	std::vector<Tile*> Board::GetTiles() const {
-		std::vector<Tile*> result;
+	std::vector<const Tile*> Board::GetTiles() const {
+		std::vector<const Tile*> result;
 		result.reserve(mTiles.size());
-		for (auto& [_, tile] : mTiles) {
-			result.push_back(tile.get());
-		}
+		LoopOverTiles([&result](const Coordinates&, const Tile& tile) {
+			result.push_back(&tile);
+		});
 		return result;
 	}
 
-	std::vector<Tile*> Board::GetPerimeterTiles() const {
-		std::vector<Tile*> result;
-		result.reserve(mPerimeterTiles.size());
-		for (auto& [_, tile] : mPerimeterTiles) {
-			result.push_back(tile);
-		}
+	std::vector<const Tile*> Board::GetPerimeterTiles() const {
+		std::vector<const Tile*> result;
+		result.reserve(mTiles.size());
+		LoopOverTiles([&result](const Coordinates& coordinates, const Tile& tile) {
+			if (coordinates.IsPerimeter()) {
+				result.push_back(&tile);
+			}
+		});
 		return result;
 	}
 
-	std::vector<Tile*> Board::GetLegalPlacementTiles() const {
-		std::vector<Tile*> result;
+	std::vector<const Tile*> Board::GetLegalPlacementTiles() const {
+		std::vector<const Tile*> result;
 		// Allocating the maximum amount of memory the vector could potentially
 		// take up. Will waste memory sometimes but we'll use all of it most of the times,
 		// and memory usage is not as much of an issue as CPU usage here
-		result.reserve(mPerimeterTiles.size());
-		for (auto& [_, tile] : mPerimeterTiles) {
-			if (tile->GetPiece() == nullptr) {
-				result.push_back(tile);
+		result.reserve(mTiles.size());
+		LoopOverTiles([&result](const Coordinates& coordinates, const Tile& tile) {
+			if (!tile.HasPiece() && coordinates.IsPerimeter()) {
+				result.push_back(&tile);
 			}
-		}
+		});
 		return result;
 	}
 
 	bool Board::IsFull() const {
-		for (auto& [coordinates, tile] : mTiles) {
+		bool result = true;
+		LoopOverTiles([&result](const Coordinates& coordinates, const Tile& tile) {
 			// If we find a single non-perimetter file that has no piece on it, we return false
-			if (!coordinates.IsPerimeter() && tile->GetPiece() == nullptr) {
-				return false;
+			if (!coordinates.IsPerimeter() && !tile.HasPiece()) {
+				result = false;
+				return;
 			}
-		}
-		return true;
+		});
+		return result;
+	}
+
+	std::vector<std::pair<Coordinates, Piece>> Board::GetPieces() const {
+		std::vector<std::pair<Coordinates, Piece>> result;
+		LoopOverTiles([&result](const Coordinates& coordinates, const Tile& tile) {
+			if (auto* piece = tile.GetPiece()) {
+				result.emplace_back(coordinates, *piece);
+			}
+		});
+		return result;
+	}
+
+	std::vector<std::pair<Coordinates, Piece>> Board::GetPieces(PlayerId player) const {
+		std::vector<std::pair<Coordinates, Piece>> result;
+		LoopOverTiles([&result, player](const Coordinates& coordinates, const Tile& tile) {
+			if (auto* piece = tile.GetPiece()) {
+				if (piece->GetOwner() == player) {
+					result.emplace_back(coordinates, *piece);
+				}
+			}
+		});
+		return result;
 	}
 
 	GameResult Board::GetResult() const {
@@ -212,7 +245,7 @@ namespace Alphalcazar::Game {
 
 		// The list of coordinates/directions to check only depends on the board size constant
 		// and can be evaluated at compile time for better runtime performance
-		static constexpr auto c_BoardRows = GetAllRowIterationDirections();
+		constexpr auto c_BoardRows = GetAllRowIterationDirections();
 		for (auto& [x, y, direction, distance] : c_BoardRows) {
 			Coordinates startCoordinate { x, y };
 			if (auto playerId = CheckRowCompleteness(startCoordinate, direction, distance); playerId.has_value()) {
@@ -238,7 +271,7 @@ namespace Alphalcazar::Game {
 
 		for (Coordinate distance = 0; distance < length; distance++) {
 			Coordinates nextCoordinate = startCoordinate.GetCoordinateInDirection(direction, distance);
-			if (auto* piece = mTiles.at(nextCoordinate)->GetPiece()) {
+			if (auto piece = mTiles[nextCoordinate.x][nextCoordinate.y].GetPiece()) {
 				if (candidateRowCompleter == std::nullopt) {
 					// We appoint the owner of the first piece we find as our candidate
 					candidateRowCompleter = piece->GetOwner();
@@ -255,26 +288,49 @@ namespace Alphalcazar::Game {
 		return candidateRowCompleter;
 	}
 
-	std::vector<Piece*> Board::GetMovementOrderedPieces(PlayerId startingPlayerId) const {
-		std::vector<Piece*> result;
-		for (auto& [coordinates, tile] : mTiles) {
-			if (auto* piece = tile->GetPiece()) {
-				result.push_back(piece);
+	/// Returns the index of the \ref mPlacedPieceCoordinates array of a given piece
+	std::size_t GetPlacePieceTypeIndex(const Piece& piece) {
+		std::size_t pieceTypeIndex = static_cast<std::size_t>(piece.GetType());
+		// The first 5 positions of the array are held by the (1-5) pieces of player one,
+		// the next 5 position by the (1-5) pieces of player 2. To get the index, we get the piece index
+		// and shift it forward by 5 for player 2 and by 0 for player 1.
+		std::size_t pieceOwnerOffset = static_cast<std::size_t>(piece.GetOwner()) - 1;
+		return pieceTypeIndex + (pieceOwnerOffset * c_PieceTypes) - 1;
+	}
+
+	Coordinates& Board::GetPlacedPieceCoordinates(const Piece& piece) {
+		std::size_t index = GetPlacePieceTypeIndex(piece);
+		return mPlacedPieceCoordinates[index];
+	}
+
+	void Board::SetPlacedPieceCoordinates(const Piece& piece, const Coordinates& coordinates) {
+		std::size_t index = GetPlacePieceTypeIndex(piece);
+		mPlacedPieceCoordinates[index] = coordinates;
+	}
+
+	void Board::LoopOverTiles(std::function<void(const Coordinates& coordinates, const Tile& tile)> action) const {
+		for (Coordinate x = 0; x <= c_PlayAreaSize - 1; x++) {
+			for (Coordinate y = 0; y <= c_PlayAreaSize - 1; y++) {
+				Coordinates coordinates { x, y };
+				if (coordinates.IsCorner()) {
+					// The corners of the play area don't exist
+					continue;
+				}
+				action(coordinates, mTiles[x][y]);
 			}
 		}
+	}
 
-		// Sort by movement order
-		std::sort(result.begin(), result.end(), [startingPlayerId](Piece* pieceA, Piece* pieceB) {
-			if (pieceA->GetType() == pieceB->GetType()) {
-				if (pieceA->GetOwner() == startingPlayerId) {
-					return true;
-				} else {
-					return false;
+	void Board::LoopOverTiles(std::function<void(const Coordinates& coordinates, Tile& tile)> action) {
+		for (Coordinate x = 0; x <= c_PlayAreaSize - 1; x++) {
+			for (Coordinate y = 0; y <= c_PlayAreaSize - 1; y++) {
+				Coordinates coordinates { x, y };
+				if (coordinates.IsCorner()) {
+					// The corners of the play area don't exist
+					continue;
 				}
+				action(coordinates, mTiles[x][y]);
 			}
-			return pieceB->GetType() > pieceA->GetType();
-		});
-
-		return result;
+		}
 	}
 }

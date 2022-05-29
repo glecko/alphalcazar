@@ -1,6 +1,5 @@
 #include "Game.hpp"
-#include "Board.hpp"
-#include "Player.hpp"
+
 #include "Tile.hpp"
 #include "PlacementMove.hpp"
 #include "parameters.hpp"
@@ -10,33 +9,11 @@
 namespace Alphalcazar::Game {
 	GameState::GameState() {}
 
-	GameState::GameState(const GameState& other)
-		: Turn{ other.Turn }
-		, PlayerWithInitiative{ other.PlayerWithInitiative }
-		, FirstMoveExecuted{ other.FirstMoveExecuted }
-	{}
-
 	void GameState::SwapPlayerWithInitiative() {
 		PlayerWithInitiative = PlayerWithInitiative == PlayerId::PLAYER_ONE ? PlayerId::PLAYER_TWO : PlayerId::PLAYER_ONE;
 	}
 
-	Game::Game() {
-		mBoard = std::make_unique<Board>();
-		mPlayerOne = std::make_unique<Player>(PlayerId::PLAYER_ONE);
-		mPlayerTwo = std::make_unique<Player>(PlayerId::PLAYER_TWO);
-	}
-
-	Game::Game(const Game& other)
-		: mState { other.mState }
-	{
-		mPlayerOne = std::make_unique<Player>(*other.mPlayerOne);
-		mPlayerTwo = std::make_unique<Player>(*other.mPlayerTwo);
-
-		// Fetch a combined vector of all player pieces
-		auto pieces = GetAllPieces();
-
-		mBoard = std::make_unique<Board>(*other.mBoard, pieces);
-	}
+	Game::Game() {}
 
 	Game::~Game() {};
 
@@ -54,9 +31,9 @@ namespace Alphalcazar::Game {
 	}
 
 	GameResult Game::PlayNextPlacementMove(const PlacementMove& move) {
-		auto* player = GetActivePlayer();
+		PlayerId activePlayer = GetActivePlayer();
 		auto result = GameResult::NONE;
-		ExecutePlacementMove(player->GetId(), move);
+		ExecutePlacementMove(activePlayer, move);
 		if (mState.FirstMoveExecuted) {
 			result = EvaluateTurnEndPhase();
 		}
@@ -65,23 +42,10 @@ namespace Alphalcazar::Game {
 	}
 
 	GameResult Game::EvaluateTurnEndPhase() {
-		auto executedMoves = mBoard->ExecuteMoves(mState.PlayerWithInitiative);
+		auto executedMoves = mBoard.ExecuteMoves(mState.PlayerWithInitiative);
 		mState.Turn += 1;
 		mState.SwapPlayerWithInitiative();
 		return EvaluateGameResult(executedMoves);
-	}
-
-	bool Game::IsStalemate(BoardMovesCount executedMoves) const {
-		// Only check for stalemates if no moves were executed and the board is full
-		// There is no possible stalemate scenario without these conditions
-		if (executedMoves == 0 && mBoard->IsFull()) {
-			// Check that neither player have a pushing piece in their hand
-			// as a true stalemate cannot happen if a player can still place a pushing piece
-			if (!mPlayerOne->GetPiece(c_PusherPieceType)->IsInPlay() && !mPlayerTwo->GetPiece(c_PusherPieceType)->IsInPlay()) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	void Game::ExecutePlayerMoves(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy) {
@@ -121,64 +85,59 @@ namespace Alphalcazar::Game {
 	}
 
 	void Game::ExecutePlacementMove(PlayerId playerId, const PlacementMove& move) {
-		auto* piece = GetPlayer(playerId)->GetPiece(move.PieceType);
-		mBoard->PlacePiece(move.Coordinates, piece);
+		Piece piece = { playerId, move.PieceType };
+		mBoard.PlacePiece(move.Coordinates, piece);
 	}
 
-	std::vector<PlacementMove> Game::GetLegalMoves(PlayerId player) const {
-		std::vector<PlacementMove> result;
-		auto legalTiles = mBoard->GetLegalPlacementTiles();
-		auto pieces = GetPlayer(player)->GetPiecesInHand();
-		result.reserve(pieces.size() * legalTiles.size());
-		for (auto* tile : legalTiles) {
-			for (auto* piece : pieces) {
-				result.push_back({ tile->GetCoordinates(), piece->GetType() });
+	std::vector<Piece> Game::GetPiecesInHand(PlayerId player) const {
+		auto boardPieces = mBoard.GetPieces(player);
+		std::vector<Piece> result;
+		result.reserve(c_PieceTypes - boardPieces.size());
+		// If all pieces are on the board, immediatelly return an empty vector
+		if (boardPieces.size() != c_PieceTypes) {
+			for (PieceType type = 1; type <= c_PieceTypes; type++) {
+				// Check if the player already has a piece of this type on the board
+				auto boardPieceIter = std::find_if(boardPieces.begin(), boardPieces.end(), [type](const std::pair<Coordinates, const Piece>& pair) {
+					return pair.second.GetType() == type;
+					});
+
+				if (boardPieceIter == boardPieces.end()) {
+					result.emplace_back(player, type);
+				}
 			}
 		}
 		return result;
 	}
 
-	GameResult Game::EvaluateGameResult(BoardMovesCount executedMoves) {
-		if (IsStalemate(executedMoves)) {
-			return GameResult::DRAW;
+	std::vector<PlacementMove> Game::GetLegalMoves(PlayerId player) const {
+		std::vector<PlacementMove> result;
+		auto legalTiles = mBoard.GetLegalPlacementTiles();
+		std::vector<Piece> pieces = GetPiecesInHand(player);
+		result.reserve(pieces.size() * legalTiles.size());
+		for (auto* tile : legalTiles) {
+			for (auto& piece : pieces) {
+				result.push_back({ tile->GetCoordinates(), piece.GetType() });
+			}
 		}
-		return mBoard->GetResult();
-	}
-
-	Player* Game::GetPlayer(PlayerId playerId) const {
-		switch (playerId) {
-		case PlayerId::PLAYER_ONE:
-			return mPlayerOne.get();
-		case PlayerId::PLAYER_TWO:
-			return mPlayerTwo.get();
-		default:
-			return nullptr;
-		}
-	}
-
-	std::vector<Piece*> Game::GetAllPieces() const {
-		std::vector<Piece*> result = GetPlayer(PlayerId::PLAYER_ONE)->GetPieces();
-		auto playerTwoPieces = GetPlayer(PlayerId::PLAYER_TWO)->GetPieces();
-
-		result.reserve(result.size() + playerTwoPieces.size());
-		result.insert(result.end(), playerTwoPieces.begin(), playerTwoPieces.end());
-
 		return result;
 	}
 
-	Player* Game::GetActivePlayer() const {
+	GameResult Game::EvaluateGameResult(BoardMovesCount) {
+		return mBoard.GetResult();
+	}
+
+	PlayerId Game::GetActivePlayer() const {
 		return GetPlayerByInitiative(!mState.FirstMoveExecuted);
 	}
 
-
-	Player* Game::GetPlayerByInitiative(bool initiative) const {
+	PlayerId Game::GetPlayerByInitiative(bool initiative) const {
 		if (initiative) {
-			return GetPlayer(mState.PlayerWithInitiative);
+			return mState.PlayerWithInitiative;
 		} else {
 			if (mState.PlayerWithInitiative == PlayerId::PLAYER_ONE) {
-				return GetPlayer(PlayerId::PLAYER_TWO);
+				return PlayerId::PLAYER_TWO;
 			} else {
-				return GetPlayer(PlayerId::PLAYER_ONE);
+				return PlayerId::PLAYER_ONE;
 			}
 		}
 	}
@@ -192,11 +151,11 @@ namespace Alphalcazar::Game {
 	}
 
 	Board& Game::GetBoard() {
-		return *mBoard;
+		return mBoard;
 	}
 
 	const Board& Game::GetBoard() const {
-		return *mBoard;
+		return mBoard;
 	}
 
 	Utils::CallbackHandler<Game::PlayerMovesExecutedCallback>& Game::OnPlayerMovesExecuted() {

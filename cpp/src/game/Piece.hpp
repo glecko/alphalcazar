@@ -12,6 +12,8 @@ namespace Alphalcazar::Game {
 	 */
 	class Piece {
 	public:
+		/// Default constructor for \ref Piece, constructs an invalid piece
+		Piece();
 		Piece(PlayerId owner, PieceType type);
 		Piece(const Piece& other);
 		~Piece();
@@ -21,21 +23,17 @@ namespace Alphalcazar::Game {
 		PieceType GetType() const;
 		PlayerId GetOwner() const;
 		Direction GetMovementDirection() const;
-		const Coordinates& GetCoordinates() const;
 
 		bool IsPushable() const;
 		bool IsPusher() const;
-		bool IsInPlay() const;
+
+		bool IsValid() const;
 
 		void SetMovementDirection(Direction direction);
-		void SetCoordinates(const Coordinates& coordinates);
-		void RemoveFromPlay();
 	private:
 		/// The movement direction of the piece while it is in play on the board
 		Direction mDirection = Direction::NONE;
-		/// The coordinates at which the piece is currently located, or invalid coordinates if the piece is not in play
-		Coordinates mCoordinates = Coordinates::Invalid();
-		PieceType mType;
-		PlayerId mOwner;
+		PieceType mType = c_InvalidPieceType;
+		PlayerId mOwner = PlayerId::NONE;
 	};
 }

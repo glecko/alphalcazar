@@ -30,7 +30,7 @@ namespace Alphalcazar::Strategy::Random {
 			// After a single turn has been played, we expect either 2 or 1 pieces on the board 
 			// (1 if the entering piece of the first player blocked the entrance of the piece of the second player)
 			auto pieces = 0;
-			for (auto& tile : board.GetTiles()) {
+			for (const auto* tile : board.GetTiles()) {
 				if (tile->GetPiece()) {
 					pieces += 1;
 				}

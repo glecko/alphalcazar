@@ -16,7 +16,7 @@ namespace Alphalcazar::Utils {
 
 					mCondition.wait(lock, [this]() {
 						return !mJobsQueue.empty() || mTerminatePool;
-						});
+					});
 					job = mJobsQueue.front();
 					mJobsQueue.pop();
 				}

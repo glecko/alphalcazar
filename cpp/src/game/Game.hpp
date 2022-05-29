@@ -5,17 +5,15 @@
 #include <memory>
 #include "aliases.hpp"
 #include "util/CallbackHandler.hpp"
+#include "Board.hpp"
 
 namespace Alphalcazar::Game {
-	class Board;
-	class Player;
 	class Strategy;
 	class Piece;
 	struct PlacementMove;
 
 	struct GameState {
 		GameState();
-		GameState(const GameState& other);
 
 		/// What turn the game is currently on
 		std::uint16_t Turn = 0;
@@ -36,7 +34,6 @@ namespace Alphalcazar::Game {
 	class Game {
 	public:
 		Game();
-		Game(const Game& other);
 		~Game();
 
 		/// Play the game and return the result
@@ -53,12 +50,10 @@ namespace Alphalcazar::Game {
 		 */
 		GameResult PlayNextPlacementMove(const PlacementMove& move);
 
-		/// Returns a player instance given its ID
-		Player* GetPlayer(PlayerId player) const;
-		/// Returns the player that needs to play next
-		Player* GetActivePlayer() const;
-		/// Returns the player has the corresponding initiative this turn (goes first or goes second, depending on the value of "initiative")
-		Player* GetPlayerByInitiative(bool initiative) const;
+		/// Returns the ID of the player that needs to play next
+		PlayerId GetActivePlayer() const;
+		/// Returns the ID of the player has the corresponding initiative this turn (goes first or goes second, depending on the value of \param initiative)
+		PlayerId GetPlayerByInitiative(bool initiative) const;
 
 		/// Returns the current state of the game
 		GameState& GetState();
@@ -68,9 +63,6 @@ namespace Alphalcazar::Game {
 		Board& GetBoard();
 		const Board& GetBoard() const;
 
-		/// Returns a list of all pieces that exist in the current game (of both players)
-		std::vector<Piece*> GetAllPieces() const;
-
 		/*!
 		 * \brief Returns a list of legal placement moves for the current player.
 		 * 
@@ -79,12 +71,13 @@ namespace Alphalcazar::Game {
 		 */
 		std::vector<PlacementMove> GetLegalMoves(PlayerId player) const;
 
+		/// Returns a list of all pieces that the specified player has in hand (are not placed on the board)
+		std::vector<Piece> GetPiecesInHand(PlayerId player) const;
+
 		using PlayerMovesExecutedCallback = void();
 		/// Callback executed after both players have placed their piece on the board, and before board movements are executed
 		Utils::CallbackHandler<PlayerMovesExecutedCallback>& OnPlayerMovesExecuted();
 	private:
-		/// Checks if the game is currently in a stalemate position
-		bool IsStalemate(BoardMovesCount executedMoves) const;
 		/// Makes both players play their moves
 		void ExecutePlayerMoves(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy);
 		/// Makes a given player play his move
@@ -97,14 +90,16 @@ namespace Alphalcazar::Game {
 		 * \returns The game result at the end of this turn.
 		 */
 		GameResult EvaluateTurnEndPhase();
-		/// Returns what state the board is currently in.
+		/*!
+		 * \brief Returns what state the game is currently in.
+		 *
+		 * \param executedMoves The amount of moves executed on the last turn.
+		 */
 		GameResult EvaluateGameResult(BoardMovesCount executedMoves);
 
 		Utils::CallbackHandler<PlayerMovesExecutedCallback> mPlayerMovesExecutedCallbacks;
 
 		GameState mState;
-		std::unique_ptr<Board> mBoard;
-		std::unique_ptr<Player> mPlayerOne;
-		std::unique_ptr<Player> mPlayerTwo;
+		Board mBoard;
 	};
 }

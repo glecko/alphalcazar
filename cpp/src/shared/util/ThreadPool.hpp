@@ -35,7 +35,7 @@ namespace Alphalcazar::Utils {
         std::unique_lock<std::mutex> lock(mQueueMutex);
 
         std::shared_ptr<std::promise<retType>> promisePtr = std::make_shared();
-        std::future<retType> future = promise->get().get_future();
+        std::future<retType> future = promisePtr->get().get_future();
 
         mJobsQueue.emplace([promisePtr, task, args...] {
             retType result = task(args...);

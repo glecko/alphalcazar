@@ -2,7 +2,8 @@
 #include "parameters.hpp"
 
 namespace Alphalcazar::Game {
-	static constexpr Coordinate c_InvalidCoordinate = std::numeric_limits<Coordinate>::max();
+	constexpr Coordinate c_InvalidCoordinate = std::numeric_limits<Coordinate>::max();
+
 	/// The coordinate offset each direction represents
 	static std::unordered_map<Direction, Coordinates> c_DirectionOffsets = {
 		{ Direction::NORTH,  { 0, 1 } },
@@ -15,6 +16,11 @@ namespace Alphalcazar::Game {
 		{ Direction::NORTH_WEST, { -1, 1 } },
 	};
 
+	Coordinates::Coordinates()
+		: x { c_InvalidCoordinate }
+		, y { c_InvalidCoordinate }
+	{}
+
 	Coordinates::Coordinates(Coordinate x, Coordinate y)
 		: x(x)
 		, y(y)
@@ -24,6 +30,10 @@ namespace Alphalcazar::Game {
 
 	bool Coordinates::operator==(const Coordinates& coord) const {
 		return x == coord.x && y == coord.y;
+	}
+
+	bool Coordinates::IsPlayArea() const {
+		return x >= 0 && x < c_PlayAreaSize&& y >= 0 && y < c_PlayAreaSize && !IsCorner();
 	}
 
 	bool Coordinates::IsPerimeter() const {

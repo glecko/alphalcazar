@@ -6,7 +6,6 @@
 #include <aliases.hpp>
 
 #include <future>
-#include <util/ThreadPool.hpp>
 
 namespace Alphalcazar::Game {
 	struct PlacementMove;
@@ -27,19 +26,8 @@ namespace Alphalcazar::Strategy::MinMax {
 		Score Max(Game::PlayerId playerId, Depth depth, const Game::Game& game, Score alpha, Score beta);
 		Score Min(Game::PlayerId playerId, Depth depth, const Game::Game& game, Score alpha, Score beta);
 		Score GetNextBestScore(Game::PlayerId playerId, const Game::PlacementMove& move, Depth depth, const Game::Game& game, Score alpha, Score beta);
-		Score GetNextBestScoreAsync(Game::PlayerId playerId, const Game::PlacementMove& move, Depth depth, const Game::Game& game);
-		Score GetFirstLevelAlpha();
-		void SetFirstLevelAlpha(Score alpha);
 
 		Depth mDepth;
 		Score mLastExecutedMoveScore = 0;
-		/*!
-		 * \brief The value of alpha at the first level of branching (where the branches are sepparated into different threads).
-		 * 
-		 * Since the different branches will be explored in parallel, each thread needs to make sure to atomically update this alpha value
-		 * so that alpha-pruning can take place in the parallel running branches.
-		 */
-		Score mFirstLevelAlpha;
-		Utils::ThreadPool mThreadPool;
 	};
 }

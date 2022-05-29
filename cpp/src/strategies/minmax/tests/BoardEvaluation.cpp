@@ -7,21 +7,19 @@
 #include <Board.hpp>
 #include <PlacementMove.hpp>
 #include <Tile.hpp>
-#include <Player.hpp>
 #include <Piece.hpp>
 
 namespace Alphalcazar::Strategy::MinMax {
 	TEST(BoardEvaluation, EvaluateBoard) {
 		Game::Game game {};
 
-		Game::Piece* pieceOnePlayerOne = game.GetPlayer(Game::PlayerId::PLAYER_ONE)->GetPiece(1);
-		pieceOnePlayerOne->SetMovementDirection(Game::Direction::NORTH);
-
-		Game::Piece* pieceFivePlayerOne = game.GetPlayer(Game::PlayerId::PLAYER_ONE)->GetPiece(5);
-		pieceFivePlayerOne->SetMovementDirection(Game::Direction::WEST);
+		Game::Piece pieceOnePlayerOne { Game::PlayerId::PLAYER_ONE, 1 };
+		Game::Piece pieceFivePlayerOne { Game::PlayerId::PLAYER_ONE, 5 };
 
 		game.GetBoard().GetTile(2, 2)->PlacePiece(pieceOnePlayerOne);
+		game.GetBoard().GetTile(2, 2)->GetPiece()->SetMovementDirection(Game::Direction::NORTH);
 		game.GetBoard().GetTile(1, 1)->PlacePiece(pieceFivePlayerOne);
+		game.GetBoard().GetTile(1, 1)->GetPiece()->SetMovementDirection(Game::Direction::WEST);
 
 		Score score = EvaluateBoard(Game::PlayerId::PLAYER_ONE, game);
 		Score opponentScore = EvaluateBoard(Game::PlayerId::PLAYER_TWO, game);
@@ -32,27 +30,27 @@ namespace Alphalcazar::Strategy::MinMax {
 
 	TEST(BoardEvaluation, EvaluatePieceLifeTime) {
 		Game::Game perimeterGame {};
-		Game::Piece* pieceTwoPerimeter = perimeterGame.GetPlayer(Game::PlayerId::PLAYER_ONE)->GetPiece(2);
-		pieceTwoPerimeter->SetMovementDirection(Game::Direction::NORTH);
+		Game::Piece pieceTwoPerimeter { Game::PlayerId::PLAYER_ONE, 2 };
 		perimeterGame.GetBoard().GetTile(1, 0)->PlacePiece(pieceTwoPerimeter);
+		perimeterGame.GetBoard().GetTile(1, 0)->GetPiece()->SetMovementDirection(Game::Direction::NORTH);
 		Score perimeterScore = EvaluateBoard(Game::PlayerId::PLAYER_ONE, perimeterGame);
 
 		Game::Game justEnteredGame {};
-		Game::Piece* pieceTwoJustEntered = justEnteredGame.GetPlayer(Game::PlayerId::PLAYER_ONE)->GetPiece(2);
-		pieceTwoJustEntered->SetMovementDirection(Game::Direction::NORTH);
+		Game::Piece pieceTwoJustEntered { Game::PlayerId::PLAYER_ONE, 2 };
 		justEnteredGame.GetBoard().GetTile(1, 1)->PlacePiece(pieceTwoJustEntered);
+		justEnteredGame.GetBoard().GetTile(1, 1)->GetPiece()->SetMovementDirection(Game::Direction::NORTH);
 		Score justEnteredScore = EvaluateBoard(Game::PlayerId::PLAYER_ONE, justEnteredGame);
 
 		Game::Game centerTileGame {};
-		Game::Piece* pieceTwoCenterTile = centerTileGame.GetPlayer(Game::PlayerId::PLAYER_ONE)->GetPiece(2);
-		pieceTwoCenterTile->SetMovementDirection(Game::Direction::NORTH);
+		Game::Piece pieceTwoCenterTile { Game::PlayerId::PLAYER_ONE, 2 };
 		centerTileGame.GetBoard().GetTile(1, 2)->PlacePiece(pieceTwoCenterTile);
+		centerTileGame.GetBoard().GetTile(1, 2)->GetPiece()->SetMovementDirection(Game::Direction::NORTH);
 		Score centerTileScore = EvaluateBoard(Game::PlayerId::PLAYER_ONE, centerTileGame);
 
 		Game::Game aboutToExitGame {};
-		Game::Piece* pieceTwoAboutToExit = aboutToExitGame.GetPlayer(Game::PlayerId::PLAYER_ONE)->GetPiece(2);
-		pieceTwoAboutToExit->SetMovementDirection(Game::Direction::NORTH);
+		Game::Piece pieceTwoAboutToExit { Game::PlayerId::PLAYER_ONE, 2 };
 		aboutToExitGame.GetBoard().GetTile(1, 3)->PlacePiece(pieceTwoAboutToExit);
+		aboutToExitGame.GetBoard().GetTile(1, 3)->GetPiece()->SetMovementDirection(Game::Direction::NORTH);
 		Score aboutToExitScore = EvaluateBoard(Game::PlayerId::PLAYER_ONE, aboutToExitGame);
 
 		// Pieces on the perimeter don't contribute to score

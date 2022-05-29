@@ -13,6 +13,7 @@ namespace Alphalcazar::Game {
 	 */
 	struct Coordinates {
 		Coordinate x, y;
+		Coordinates();
 		Coordinates(Coordinate x, Coordinate y);
 		~Coordinates();
 
@@ -22,6 +23,8 @@ namespace Alphalcazar::Game {
 		bool IsPerimeter() const;
 		/// Indicates if the coordinates represent a corner of the board. No tile will exist at these coordinates.
 		bool IsCorner() const;
+		/// Indicates if the coordinates represent a valid play area tile.
+		bool IsPlayArea() const;
 
 		/// Returns a new Coordinates object representing a movement at a fixed distance in the specified direction
 		Coordinates GetCoordinateInDirection(Direction direction, Coordinate distance) const;

@@ -21,20 +21,19 @@ namespace Alphalcazar::Strategy::MinMax {
 
 	Score EvaluateBoard(Game::PlayerId playerId, const Game::Game& game) {
 		Score totalScore = 0;
-		auto pieces = game.GetAllPieces();
-		for (auto* piece : pieces) {
-			auto& coordinates = piece->GetCoordinates();
-			if (piece->IsInPlay() && !coordinates.IsPerimeter()) {
-				auto direction = piece->GetMovementDirection();
+		auto pieces = game.GetBoard().GetPieces();
+		for (auto& [coordinates, piece] : pieces) {
+			if (!coordinates.IsPerimeter()) {
+				auto direction = piece.GetMovementDirection();
 				float coordinatesScoreMultiplier = c_CoordinatesScoreMultiplier.at(std::make_pair(coordinates, direction));
 				// The piece on board score array stores all piece types in order, meaning that
 				// the score of a certain piece type will be located at index (type - 1)
-				Score pieceOnBoardScore = c_PieceOnBoardScores[piece->GetType() - 1];
+				Score pieceOnBoardScore = c_PieceOnBoardScores[piece.GetType() - 1];
 				Score pieceScore = static_cast<Score>(pieceOnBoardScore * coordinatesScoreMultiplier);
 
 				// Add the score if the piece belongs to the player for which we are evaluating the score
 				// or subtract it if it belongs to the opponent
-				if (piece->GetOwner() == playerId) {
+				if (piece.GetOwner() == playerId) {
 					totalScore += pieceScore;
 				} else {
 					totalScore -= pieceScore;

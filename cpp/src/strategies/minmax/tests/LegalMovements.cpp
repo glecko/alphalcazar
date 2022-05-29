@@ -7,7 +7,6 @@
 #include <Piece.hpp>
 #include <Tile.hpp>
 #include <Board.hpp>
-#include <Player.hpp>
 #include <parameters.hpp>
 #include <PlacementMove.hpp>
 
@@ -22,18 +21,16 @@ namespace Alphalcazar::Strategy::MinMax {
 		EXPECT_TRUE(xSymmetryEmpty);
 		EXPECT_TRUE(ySymmetryEmpty);
 
-		Game::Piece* pieceOne = game.GetPlayer(Game::PlayerId::PLAYER_ONE)->GetPiece(1);
-		pieceOne->SetMovementDirection(Game::Direction::NORTH);
-		game.GetBoard().GetTile(2, 2)->PlacePiece(pieceOne);
+		Game::Piece pieceOne { Game::PlayerId::PLAYER_ONE, 1 };
+		game.GetBoard().PlacePiece({ 2, 2 }, pieceOne, Game::Direction::NORTH);
 
 		// A piece in the center pointing north should create Y symmetry
 		auto [xSymmetryCenterPiece, ySymmetryCenterPiece] = GetBoardSymmetries(game);
 		EXPECT_FALSE(xSymmetryCenterPiece);
 		EXPECT_TRUE(ySymmetryCenterPiece);
 
-		Game::Piece* pieceTwo = game.GetPlayer(Game::PlayerId::PLAYER_ONE)->GetPiece(2);
-		pieceTwo->SetMovementDirection(Game::Direction::EAST);
-		game.GetBoard().GetTile(2, 3)->PlacePiece(pieceTwo);
+		Game::Piece pieceTwo { Game::PlayerId::PLAYER_ONE, 2 };
+		game.GetBoard().PlacePiece({ 2, 3 }, pieceTwo, Game::Direction::EAST);
 
 		// Once we have added a second piece, still in the center row but facing east, all symmetries should be broken
 		auto [xSymmetryTwoPieces, ySymmetryTwoPieces] = GetBoardSymmetries(game);
@@ -44,9 +41,9 @@ namespace Alphalcazar::Strategy::MinMax {
 	TEST(LegalMovements, CornerSymmetries) {
 		Game::Game game {};
 
-		Game::Piece* pieceOne = game.GetPlayer(Game::PlayerId::PLAYER_ONE)->GetPiece(1);
-		pieceOne->SetMovementDirection(Game::Direction::NORTH);
+		Game::Piece pieceOne { Game::PlayerId::PLAYER_ONE, 1 };
 		game.GetBoard().GetTile(1, 1)->PlacePiece(pieceOne);
+		game.GetBoard().GetTile(1, 1)->GetPiece()->SetMovementDirection(Game::Direction::NORTH);
 
 		// A single piece on a corner breaks X and Y symmetries
 		auto [xSymmetry, ySymmetry] = GetBoardSymmetries(game);
@@ -57,9 +54,8 @@ namespace Alphalcazar::Strategy::MinMax {
 	TEST(LegalMovements, PerimeterSymmetries) {
 		Game::Game game {};
 
-		Game::Piece* pieceOne = game.GetPlayer(Game::PlayerId::PLAYER_ONE)->GetPiece(1);
-		pieceOne->SetMovementDirection(Game::Direction::WEST);
-		game.GetBoard().GetTile(4, 2)->PlacePiece(pieceOne);
+		Game::Piece pieceOne { Game::PlayerId::PLAYER_ONE, 1 };
+		game.GetBoard().PlacePiece({ 4, 2 }, pieceOne, Game::Direction::WEST);
 
 		// The perimeter piece is on the x-axis and faces west, meaning we should still have
 		// x-axis symmetry
@@ -67,9 +63,8 @@ namespace Alphalcazar::Strategy::MinMax {
 		EXPECT_TRUE(xSymmetry);
 		EXPECT_FALSE(ySymmetry);
 
-		Game::Piece* pieceTwo = game.GetPlayer(Game::PlayerId::PLAYER_ONE)->GetPiece(2);
-		pieceTwo->SetMovementDirection(Game::Direction::SOUTH);
-		game.GetBoard().GetTile(2, 4)->PlacePiece(pieceTwo);
+		Game::Piece pieceTwo { Game::PlayerId::PLAYER_ONE, 2 };
+		game.GetBoard().PlacePiece({ 2, 4 }, pieceTwo, Game::Direction::SOUTH);
 
 		// After placing a second piece (which on its own would still make the board have x-axis symmetry)
 		// we check that the combination of both pieces breaks both symmetries, each piece breaking 1 axis.
@@ -93,9 +88,8 @@ namespace Alphalcazar::Strategy::MinMax {
 	TEST(LegalMovements, FilterXAxisSymmetryMovements) {
 		Game::Game game {};
 
-		Game::Piece* pieceFour = game.GetPlayer(Game::PlayerId::PLAYER_ONE)->GetPiece(4);
-		pieceFour->SetMovementDirection(Game::Direction::SOUTH);
-		game.GetBoard().GetTile(2, 1)->PlacePiece(pieceFour);
+		Game::Piece pieceFour { Game::PlayerId::PLAYER_ONE, 4 };
+		game.GetBoard().PlacePiece({ 2, 1 }, pieceFour, Game::Direction::SOUTH);
 
 		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
 		FilterSymmetricMovements(legalMoves, game);
@@ -114,13 +108,11 @@ namespace Alphalcazar::Strategy::MinMax {
 	TEST(LegalMovements, FilterNoSymmetryMovements) {
 		Game::Game game {};
 
-		Game::Piece* pieceTwo = game.GetPlayer(Game::PlayerId::PLAYER_ONE)->GetPiece(2);
-		pieceTwo->SetMovementDirection(Game::Direction::SOUTH);
-		game.GetBoard().GetTile(2, 3)->PlacePiece(pieceTwo);
+		Game::Piece pieceTwo { Game::PlayerId::PLAYER_ONE, 2 };
+		game.GetBoard().PlacePiece({ 2, 3 }, pieceTwo, Game::Direction::SOUTH);
 
-		Game::Piece* pieceFour = game.GetPlayer(Game::PlayerId::PLAYER_ONE)->GetPiece(4);
-		pieceFour->SetMovementDirection(Game::Direction::EAST);
-		game.GetBoard().GetTile(2, 1)->PlacePiece(pieceFour);
+		Game::Piece pieceFour { Game::PlayerId::PLAYER_ONE, 4 };
+		game.GetBoard().PlacePiece({ 2, 1 }, pieceFour, Game::Direction::EAST);
 
 		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_ONE);
 		auto legalMovesSize = legalMoves.size();

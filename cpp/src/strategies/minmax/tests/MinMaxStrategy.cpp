@@ -5,7 +5,6 @@
 
 #include <Game.hpp>
 #include <Board.hpp>
-#include <Player.hpp>
 #include <Tile.hpp>
 #include <Piece.hpp>
 #include <parameters.hpp>
@@ -27,9 +26,8 @@ namespace Alphalcazar::Strategy::MinMax {
 		game.GetState().PlayerWithInitiative = playerWithInitiative;
 
 		for (auto& pieceSetup : pieceSetups) {
-			auto* piece = game.GetPlayer(pieceSetup.PlayerId)->GetPiece(pieceSetup.PieceType);
-			piece->SetMovementDirection(pieceSetup.Direction);
-			game.GetBoard().GetTile(pieceSetup.Coordinates)->PlacePiece(piece);
+			Game::Piece piece { pieceSetup.PlayerId, pieceSetup.PieceType };
+			game.GetBoard().PlacePiece(pieceSetup.Coordinates, piece, pieceSetup.Direction);
 		}
 		return game;
 	}

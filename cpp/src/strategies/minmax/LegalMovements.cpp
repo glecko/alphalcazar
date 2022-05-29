@@ -11,20 +11,17 @@ namespace Alphalcazar::Strategy::MinMax {
 	std::pair<bool, bool> GetBoardSymmetries(const Game::Game& game) {
 		bool xSymmetry = true;
 		bool ySymmetry = true;
-		for (auto* piece : game.GetAllPieces()) {
-			if (piece->IsInPlay()) {
-				auto direction = piece->GetMovementDirection();
-				const auto& coordinates = piece->GetCoordinates();
-				if (coordinates.y != Game::c_CenterCoordinate || direction == Game::Direction::NORTH || direction == Game::Direction::SOUTH) {
-					// x-axis symmetry can only exist if all pieces (including perimeter ones) are placed along the horizontal center row
-					// and all pieces are pointing east or west. A single piece not following these conditions breaks symmetry.
-					xSymmetry = false;
-				}
-				if (coordinates.x != Game::c_CenterCoordinate || direction == Game::Direction::EAST || direction == Game::Direction::WEST) {
-					// y-axis symmetry can only exist if all pieces (including perimeter ones) are placed along the vertical center row
-					// and all pieces are pointing north or south. A single piece not following these conditions breaks symmetry.
-					ySymmetry = false;
-				}
+		for (auto& [coordinates, piece] : game.GetBoard().GetPieces()) {
+			auto direction = piece.GetMovementDirection();
+			if (coordinates.y != Game::c_CenterCoordinate || direction == Game::Direction::NORTH || direction == Game::Direction::SOUTH) {
+				// x-axis symmetry can only exist if all pieces (including perimeter ones) are placed along the horizontal center row
+				// and all pieces are pointing east or west. A single piece not following these conditions breaks symmetry.
+				xSymmetry = false;
+			}
+			if (coordinates.x != Game::c_CenterCoordinate || direction == Game::Direction::EAST || direction == Game::Direction::WEST) {
+				// y-axis symmetry can only exist if all pieces (including perimeter ones) are placed along the vertical center row
+				// and all pieces are pointing north or south. A single piece not following these conditions breaks symmetry.
+				ySymmetry = false;
 			}
 			if (!ySymmetry && !xSymmetry) {
 				// If we have already determined that the board has neither x nor y symmatry, there is no point

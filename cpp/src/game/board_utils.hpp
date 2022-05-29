@@ -5,7 +5,13 @@
 #include <array>
 
 namespace Alphalcazar::Game {
-	static constexpr std::size_t c_RowIterationDirectionsCount = 2 * c_BoardSize + 2;
+	/*!
+	 * \brief The amount of rows that need to be checked for win conditions.
+	 * 
+	 * Its value consists of: Every individual row, every invidual column (2 times the board size)
+	 * and the 2 diagonals of the board.
+	 */
+	constexpr std::size_t c_RowIterationDirectionsCount = 2 * c_BoardSize + 2;
 
 	/// Data structure used to represent a row that can be iterated on
 	struct RowIterationDirection {
