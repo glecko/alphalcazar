@@ -42,9 +42,9 @@ namespace Alphalcazar::Game {
 		GameResult PlayTurn(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy);
 		/*!
 		 * \brief Plays out the next step of a turn
-		 * 
+		 *
 		 * \param move The placement move of the active player.
-		 * 
+		 *
 		 * \returns The game result after the end of the turn if this function executed
 		 *          the second placement move of the turn, or GameState::NONE otherwise.
 		 */
@@ -65,8 +65,8 @@ namespace Alphalcazar::Game {
 
 		/*!
 		 * \brief Returns a list of legal placement moves for the current player.
-		 * 
-		 * A legal placement moves is defined as any combination of free perimeter tile and 
+		 *
+		 * A legal placement moves is defined as any combination of free perimeter tile and
 		 * available piece (in hand) the player has available.
 		 */
 		std::vector<PlacementMove> GetLegalMoves(PlayerId player) const;
@@ -86,7 +86,7 @@ namespace Alphalcazar::Game {
 		void ExecutePlacementMove(PlayerId playerId, const PlacementMove& move);
 		/*!
 		 * \brief Executes the turn end operations after both players have played their placement move
-		 * 
+		 *
 		 * \returns The game result at the end of this turn.
 		 */
 		GameResult EvaluateTurnEndPhase();

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "minmax_aliases.hpp"
-#include "parameters.hpp"
-#include "Coordinates.hpp"
+#include "minmax/minmax_aliases.hpp"
+#include "game/parameters.hpp"
+#include "game/Coordinates.hpp"
 
 #include <array>
 #include <unordered_map>
@@ -11,7 +11,7 @@ namespace Alphalcazar::Strategy::MinMax {
 	/*!
 	 * \brief The score associated with a move/board position that makes the player win.
 	 * Should be high enough to completely override any other possible score accumulations.
-	 * 
+	 *
 	 * \note A loss will be represented with the negated win condition score.
 	 */
 	static constexpr Score c_WinConditionScore = 1000;
@@ -21,11 +21,11 @@ namespace Alphalcazar::Strategy::MinMax {
 	static constexpr Score c_BetaStartingValue = c_WinConditionScore * 10;
 	/*!
 	 * \brief A penalty that will be subtracted from a movement's score each movement for each level of depth.
-	 * 
-	 * This will ensure that if several moves lead to the same position/result (a win, for example), the 
+	 *
+	 * This will ensure that if several moves lead to the same position/result (a win, for example), the
 	 * move that achieves this in the least amount of moves will be chosen. On the contrary, this will ensure
 	 * that an inevitable loss will be posponed as much as possible.
-	 * 
+	 *
 	 * \note The value of this penalty should be low enough to never have an impact on the score appart
 	 * from deciding between moves with equal score but different depth.
 	 */
@@ -47,7 +47,7 @@ namespace Alphalcazar::Strategy::MinMax {
 
 	/*!
 	 * \brief A map of score multipliers in relation to all combinations of coordinates and piece directions.
-	 * 
+	 *
 	 * The multipliers of this map will be multiplied with the piece score of each piece on the board when evaluating a total board score.
 	 * The general idea is to give higher score values to pieces that have strategic locations (like the center) or have a long expected
 	 * lifespan (just entered the board and have 3 movements ahead), and lower scores to pieces that are about to exit the board.

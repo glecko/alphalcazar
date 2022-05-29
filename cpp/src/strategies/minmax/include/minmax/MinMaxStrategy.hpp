@@ -1,9 +1,9 @@
 #pragma once
 
-#include "minmax_aliases.hpp"
+#include "minmax/minmax_aliases.hpp"
 
-#include <Strategy.hpp>
-#include <aliases.hpp>
+#include <game/Strategy.hpp>
+#include <game/aliases.hpp>
 
 #include <future>
 
@@ -15,7 +15,7 @@ namespace Alphalcazar::Game {
 namespace Alphalcazar::Strategy::MinMax {
 
 	/*!
-	 * \brief 
+	 * \brief
 	 */
 	class MinMaxStrategy final : public Game::Strategy {
 	public:

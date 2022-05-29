@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Strategy.hpp>
-#include <aliases.hpp>
+#include <game/Strategy.hpp>
+#include <game/aliases.hpp>
 
 #include <random>
 

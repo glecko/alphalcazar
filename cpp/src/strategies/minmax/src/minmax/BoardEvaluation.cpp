@@ -1,8 +1,8 @@
-#include "BoardEvaluation.hpp"
-#include "config.hpp"
+#include "minmax/BoardEvaluation.hpp"
+#include "minmax/config.hpp"
 
-#include <Game.hpp>
-#include <Piece.hpp>
+#include <game/Game.hpp>
+#include <game/Piece.hpp>
 #include <algorithm>
 
 namespace Alphalcazar::Strategy::MinMax {
@@ -39,7 +39,7 @@ namespace Alphalcazar::Strategy::MinMax {
 					totalScore -= pieceScore;
 				}
 			}
-			
+
 		}
 		return totalScore;
 	}

@@ -1,11 +1,11 @@
-#include "LegalMovements.hpp"
-#include "config.hpp"
+#include "minmax/LegalMovements.hpp"
+#include "minmax/config.hpp"
 
-#include <Game.hpp>
-#include <Piece.hpp>
-#include <parameters.hpp>
-#include <Coordinates.hpp>
-#include <PlacementMove.hpp>
+#include <game/Game.hpp>
+#include <game/Piece.hpp>
+#include <game/parameters.hpp>
+#include <game/Coordinates.hpp>
+#include <game/PlacementMove.hpp>
 
 namespace Alphalcazar::Strategy::MinMax {
 	std::pair<bool, bool> GetBoardSymmetries(const Game::Game& game) {

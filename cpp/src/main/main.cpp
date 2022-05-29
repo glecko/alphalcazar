@@ -1,6 +1,6 @@
-#include <Game.hpp>
-#include <PlacementMove.hpp>
-#include <MinMaxStrategy.hpp>
+#include <game/Game.hpp>
+#include <game/PlacementMove.hpp>
+#include <minmax/MinMaxStrategy.hpp>
 
 #include <util/Log.hpp>
 
@@ -9,7 +9,7 @@
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 	auto start = std::chrono::high_resolution_clock::now();
 
-	static constexpr Alphalcazar::Strategy::MinMax::Depth c_MaxDepth = 5;
+	constexpr Alphalcazar::Strategy::MinMax::Depth c_MaxDepth = 5;
 	for (Alphalcazar::Strategy::MinMax::Depth depth = 1; depth <= c_MaxDepth; depth++) {
 		Alphalcazar::Strategy::MinMax::MinMaxStrategy strategy { depth };
 		Alphalcazar::Game::Game game {};

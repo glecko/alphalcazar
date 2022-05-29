@@ -11,7 +11,8 @@ namespace Alphalcazar::Utils {
 
 	/*!
 	 * \brief Generic callback handler utility class.
-	 * Use the Register() method to register new callbacks to it, and the Invoke() method to execute them.
+	 * 
+	 * Use the \ref Register method to register new callbacks to it, and the \ref Invoke method to execute them.
 	 */
 	template <typename T, typename...Args>
 	class CallbackHandler<T(Args...)> {
@@ -22,12 +23,12 @@ namespace Alphalcazar::Utils {
 
 		/// Registers a new callback and returns its handle.
 		[[nodiscard]] CallbackHandle Register(CallbackType callback) {
-			auto handle = ++mNextHandle;
+			auto handle = ++mHandle;
 			mCallbacks[handle] = callback;
 			return handle;
 		}
 
-		/// Removes a previously registered callback given its handle (returned from Register())
+		/// Removes a previously registered callback given its handle returned from \ref Register
 		void Remove(CallbackHandle handle) {
 			mCallbacks.erase(handle);
 		}
@@ -40,7 +41,7 @@ namespace Alphalcazar::Utils {
 		}
 	private:
 		std::unordered_map<CallbackHandle, CallbackType> mCallbacks;
-		CallbackHandle mNextHandle = 1;
+		CallbackHandle mHandle = 1;
 	};
 
 }

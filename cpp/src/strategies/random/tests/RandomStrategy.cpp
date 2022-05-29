@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "Game.hpp"
-#include "Board.hpp"
-#include "Tile.hpp"
-#include "parameters.hpp"
-#include "RandomStrategy.hpp"
-#include "PlacementMove.hpp"
+#include "game/Game.hpp"
+#include "game/Board.hpp"
+#include "game/Tile.hpp"
+#include "game/parameters.hpp"
+#include "random/RandomStrategy.hpp"
+#include "game/PlacementMove.hpp"
 
 namespace Alphalcazar::Strategy::Random {
 	TEST(RandomStrategy, TestSingleTurn) {

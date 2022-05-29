@@ -1,5 +1,5 @@
-#include "Coordinates.hpp"
-#include "parameters.hpp"
+#include "game/Coordinates.hpp"
+#include "game/parameters.hpp"
 
 namespace Alphalcazar::Game {
 	constexpr Coordinate c_InvalidCoordinate = std::numeric_limits<Coordinate>::max();

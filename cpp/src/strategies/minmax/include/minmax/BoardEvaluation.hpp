@@ -1,7 +1,7 @@
 #pragma once
 
-#include "aliases.hpp"
-#include "minmax_aliases.hpp"
+#include "game/aliases.hpp"
+#include "minmax/minmax_aliases.hpp"
 
 namespace Alphalcazar::Game {
 	class Game;

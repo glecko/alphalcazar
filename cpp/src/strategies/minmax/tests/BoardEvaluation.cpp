@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
 
-#include "BoardEvaluation.hpp"
-#include "config.hpp"
+#include "minmax/BoardEvaluation.hpp"
+#include "minmax/config.hpp"
 
-#include <Game.hpp>
-#include <Board.hpp>
-#include <PlacementMove.hpp>
-#include <Tile.hpp>
-#include <Piece.hpp>
+#include <game/Game.hpp>
+#include <game/Board.hpp>
+#include <game/PlacementMove.hpp>
+#include <game/Tile.hpp>
+#include <game/Piece.hpp>
 
 namespace Alphalcazar::Strategy::MinMax {
 	TEST(BoardEvaluation, EvaluateBoard) {

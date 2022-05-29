@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
 
-#include "LegalMovements.hpp"
-#include "config.hpp"
+#include "minmax/LegalMovements.hpp"
+#include "minmax/config.hpp"
 
-#include <Game.hpp>
-#include <Piece.hpp>
-#include <Tile.hpp>
-#include <Board.hpp>
-#include <parameters.hpp>
-#include <PlacementMove.hpp>
+#include <game/Game.hpp>
+#include <game/Piece.hpp>
+#include <game/Tile.hpp>
+#include <game/Board.hpp>
+#include <game/parameters.hpp>
+#include <game/PlacementMove.hpp>
 
 #include <vector>
 

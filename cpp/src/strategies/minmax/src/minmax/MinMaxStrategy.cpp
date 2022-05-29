@@ -1,11 +1,11 @@
-#include "MinMaxStrategy.hpp"
+#include "minmax/MinMaxStrategy.hpp"
 
-#include "BoardEvaluation.hpp"
-#include "LegalMovements.hpp"
-#include "config.hpp"
+#include "minmax/BoardEvaluation.hpp"
+#include "minmax/LegalMovements.hpp"
+#include "minmax/config.hpp"
 
-#include <Game.hpp>
-#include <PlacementMove.hpp>
+#include <game/Game.hpp>
+#include <game/PlacementMove.hpp>
 #include <util/Log.hpp>
 
 namespace Alphalcazar::Strategy::MinMax {

@@ -1,6 +1,4 @@
-set(SHARED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/shared")
-
-add_subdirectory(shared)
+add_subdirectory(util)
 add_subdirectory(game)
 
 if(BUILD_MINMAX_STRATEGY OR BUILD_RANDOM_STRATEGY)

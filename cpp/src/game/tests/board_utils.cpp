@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "board_utils.hpp"
+#include "game/board_utils.hpp"
 
 namespace Alphalcazar::Game {
 	TEST(BoardUtils, RowIterationDirections) {

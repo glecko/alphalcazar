@@ -1,7 +1,7 @@
-#include "Board.hpp"
+#include "game/Board.hpp"
 
-#include "Piece.hpp"
-#include "board_utils.hpp"
+#include "game/Piece.hpp"
+#include "game/board_utils.hpp"
 
 #include <algorithm>
 

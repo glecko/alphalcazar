@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
 
-#include "MinMaxStrategy.hpp"
-#include "config.hpp"
+#include "minmax/MinMaxStrategy.hpp"
+#include "minmax/config.hpp"
 
-#include <Game.hpp>
-#include <Board.hpp>
-#include <Tile.hpp>
-#include <Piece.hpp>
-#include <parameters.hpp>
-#include <PlacementMove.hpp>
+#include <game/Game.hpp>
+#include <game/Board.hpp>
+#include <game/Tile.hpp>
+#include <game/Piece.hpp>
+#include <game/parameters.hpp>
+#include <game/PlacementMove.hpp>
 
 namespace Alphalcazar::Strategy::MinMax {
 	/// Data structure helper for describing a piece placement on the board

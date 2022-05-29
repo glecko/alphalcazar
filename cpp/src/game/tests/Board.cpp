@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "aliases.hpp"
-#include "Board.hpp"
-#include "Tile.hpp"
-#include "Piece.hpp"
-#include "parameters.hpp"
+#include "game/aliases.hpp"
+#include "game/Board.hpp"
+#include "game/Tile.hpp"
+#include "game/Piece.hpp"
+#include "game/parameters.hpp"
 
 #include <array>
 
@@ -46,7 +46,7 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(board.GetResult(), GameResult::NONE);
 		// We expect a square of c_PlayAreaSize size without the 4 corners
 		auto tiles = board.GetTiles();
-		EXPECT_EQ(tiles.size(), c_PlayAreaSize * c_PlayAreaSize - 4);	
+		EXPECT_EQ(tiles.size(), c_PlayAreaSize * c_PlayAreaSize - 4);
 	}
 
 	TEST(Board, PlacePiece) {
@@ -88,7 +88,7 @@ namespace Alphalcazar::Game {
 		Piece pieceTwo { PlayerId::PLAYER_ONE, 2 };
 		Piece pieceThree { PlayerId::PLAYER_ONE, 3 };
 
-		// We complete the south-most row of the board with pieces of 
+		// We complete the south-most row of the board with pieces of
 		// player 1, so that player should win
 		board.GetTile(1, 1)->PlacePiece(pieceOne);
 		EXPECT_EQ(board.GetResult(), GameResult::NONE);
@@ -300,13 +300,13 @@ namespace Alphalcazar::Game {
 	TEST(Board, ComplexBoardMovements) {
 		/*
 		 * Player 2 moves first
-		 * 
+		 *
 		 * - Piece 1 of player 1 (1,2) will move freely to (2,2) (+1 movement)
 		 * - Piece 2 of player 1 (3,2) will move to (2,2) pushing piece 1 back to (1,2) (+2 movements)
 		 * - Piece 3 of player 2 (4,1) will fail to move into the board from the perimetter as its
 		 *   target tile (3,1) is blocked by piece 5 of player 1 which hasn't moved yet.
 		 * - Piece 4 of player 2 (2,1) will move north to (2,2), pushing piece 2 to (2,3), piece 4
-		 *   of player 1 outside the board to (2,4) and piece 5 of player 2 (2,4 perimeter) 
+		 *   of player 1 outside the board to (2,4) and piece 5 of player 2 (2,4 perimeter)
 		 *   even further to a non-existing tile, also removing it from play (+4 movements)
 		 * - Piece 4 of player 1 will not move as it has been pushed outside the board
 		 * - Piece 5 of player 1 (3,1) will move freely to (2,1) (+1 movement)

@@ -1,5 +1,5 @@
-#include "Tile.hpp"
-#include "Piece.hpp"
+#include "game/Piece.hpp"
+#include "game/Tile.hpp"
 
 namespace Alphalcazar::Game {
 	Tile::Tile() {}
@@ -8,7 +8,7 @@ namespace Alphalcazar::Game {
 		: mCoordinates{ coordinates }
 	{}
 
-	Tile::Tile(const Tile& other) 
+	Tile::Tile(const Tile& other)
 		: mCoordinates { other.mCoordinates }
 		, mPiece { other.mPiece }
 	{}

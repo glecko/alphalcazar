@@ -1,5 +1,5 @@
-#include "Piece.hpp"
-#include "parameters.hpp"
+#include "game/Piece.hpp"
+#include "game/parameters.hpp"
 
 namespace Alphalcazar::Game {
 	Piece::Piece() {}

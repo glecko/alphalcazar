@@ -1,10 +1,10 @@
-#include "Game.hpp"
+#include "game/Game.hpp"
 
-#include "Tile.hpp"
-#include "PlacementMove.hpp"
-#include "parameters.hpp"
-#include "Strategy.hpp"
-#include "Piece.hpp"
+#include "game/Tile.hpp"
+#include "game/PlacementMove.hpp"
+#include "game/parameters.hpp"
+#include "game/Strategy.hpp"
+#include "game/Piece.hpp"
 
 namespace Alphalcazar::Game {
 	GameState::GameState() {}

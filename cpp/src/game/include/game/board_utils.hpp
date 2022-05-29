@@ -1,13 +1,13 @@
 #pragma once
 
-#include "aliases.hpp"
-#include "parameters.hpp"
+#include "game/aliases.hpp"
+#include "game/parameters.hpp"
 #include <array>
 
 namespace Alphalcazar::Game {
 	/*!
 	 * \brief The amount of rows that need to be checked for win conditions.
-	 * 
+	 *
 	 * Its value consists of: Every individual row, every invidual column (2 times the board size)
 	 * and the 2 diagonals of the board.
 	 */

@@ -1,7 +1,7 @@
-#include "RandomStrategy.hpp"
+#include "random/RandomStrategy.hpp"
 
-#include <Game.hpp>
-#include <PlacementMove.hpp>
+#include <game/Game.hpp>
+#include <game/PlacementMove.hpp>
 
 namespace Alphalcazar::Strategy::Random {
 	RandomStrategy::RandomStrategy() 
