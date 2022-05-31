@@ -3,7 +3,7 @@ from game.placement_move import PlacementMove
 from game.enums import PieceType, Direction, GameResult
 from game.game import Game
 from strategies.tree_search.strategy import get_best_move, get_best_moves
-from strategies.tree_search.config import WIN_CONDITION_SCORE, DEPTH_PENALTY
+from strategies.tree_search.config import WIN_CONDITION_SCORE, DEPTH_PENALTY, EvaluationType
 from tests.strategies.tree_search.utils import clean_tree_search_caches_before_tests
 
 
@@ -76,8 +76,9 @@ class TestTreeSearch(object):
         opponent_four.set_movement_direction(Direction.west)
         game.board.get_tile(1, 3).place_piece(opponent_four)
 
-        best_moves, _ = get_best_moves(game.player_2, game.player_1, is_first_move=True, depth=1)
+        best_moves, _, eval_type = get_best_moves(game.player_2, game.player_1, is_first_move=True, depth=1)
         assert len(best_moves) == 1
+        assert eval_type == EvaluationType.exact
 
         # Player 2 can only avoid losing this turn by playing anything on tile (2, 4)
         best_move = get_best_move(game.player_2, game.player_1, is_first_move=True, depth=1)
@@ -248,8 +249,9 @@ class TestTreeSearch(object):
         # He can avoid losing this round by playing the 4 piece at (2, 0), but next round he will
         # be unable to block both squares where P1 can mate, and will not have the 4 in hand
 
-        best_moves_p2_t1, score_p2_t1 = get_best_moves(game.player_2, game.player_1, is_first_move=False, depth=2)
+        best_moves_p2_t1, score_p2_t1, eval_type_p2_t1 = get_best_moves(game.player_2, game.player_1, is_first_move=False, depth=2)
         assert len(best_moves_p2_t1) == 1
+        assert eval_type_p2_t1 == EvaluationType.exact
         best_move_p2 = get_best_move(game.player_2, game.player_1, is_first_move=False, depth=2)
 
         assert best_move_p2.x == 2 and best_move_p2.y == 0
@@ -285,8 +287,9 @@ class TestTreeSearch(object):
         # 2) the 2 or 3 pieces at (3, 0) or (4, 1),
         # but next round he will be unable to block both squares where P1 can mate, and will not have the 4 in hand
 
-        best_moves_p2_t1, score = get_best_moves(game.player_2, game.player_1, is_first_move=True, depth=2)
+        best_moves_p2_t1, score, eval_type = get_best_moves(game.player_2, game.player_1, is_first_move=True, depth=2)
         assert 6 >= len(best_moves_p2_t1) >= 1
+        assert eval_type == EvaluationType.exact
         best_move_p2 = get_best_move(game.player_2, game.player_1, is_first_move=True, depth=2)
 
         assert (best_move_p2.x == 0 and best_move_p2.y == 3 and best_move_p2.piece_type == PieceType.one) or \
@@ -341,7 +344,7 @@ class TestTreeSearch(object):
         player_2_four.set_movement_direction(Direction.east)
         game.board.get_tile(2, 2).place_piece(player_2_four)
 
-        best_moves_player_2_round_1, player_2_round_1_score = get_best_moves(game.player_2, game.player_1, is_first_move=False, depth=2)
+        best_moves_player_2_round_1, player_2_round_1_score, _ = get_best_moves(game.player_2, game.player_1, is_first_move=False, depth=2)
 
         for candidate_move in best_moves_player_2_round_1:
             clone_game = game.clone()
@@ -370,7 +373,7 @@ class TestTreeSearch(object):
         game.board.execute_board_movements(starting_player_id=game.player_1.id)
         game.switch_starting_player()
 
-        best_moves_player_2_round_2, _ = get_best_moves(game.player_2, game.player_1, is_first_move=True, depth=2)
+        best_moves_player_2_round_2, _, _ = get_best_moves(game.player_2, game.player_1, is_first_move=True, depth=2)
 
         # Play the second round
         best_move_player_2_round_2 = get_best_move(game.player_2, game.player_1, is_first_move=True, depth=2)

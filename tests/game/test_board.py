@@ -31,7 +31,7 @@ class TestBoard(object):
         board.get_tile(3, 1).place_piece(Piece(PLAYER_2_ID, PieceType.three))
         board.get_tile(3, 2).place_piece(Piece(PLAYER_2_ID, PieceType.three))
         board.get_tile(3, 3).place_piece(Piece(PLAYER_2_ID, PieceType.three))
-        assert board.get_game_result(PLAYER_2_ID, PLAYER_1_ID) is GameResult.draw
+        assert board.get_game_result(PLAYER_2_ID, PLAYER_1_ID) is None
 
     def test_central_row_win_condition(self):
         board = Board()
@@ -73,7 +73,7 @@ class TestBoard(object):
         board.get_tile(2, 1).place_piece(Piece(PLAYER_2_ID, PieceType.two))
         board.get_tile(3, 1).place_piece(Piece(PLAYER_2_ID, PieceType.three))
 
-        assert board.get_game_result(PLAYER_1_ID, PLAYER_2_ID) is GameResult.draw
+        assert board.get_game_result(PLAYER_1_ID, PLAYER_2_ID) is None
 
     def test_perimeter_exclusion_from_win_conditions(self):
         board = Board()

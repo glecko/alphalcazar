@@ -10,10 +10,6 @@ def analyze_games(games: List[Game]):
     losses = [game for game in games if game.result == GameResult.loss]
     losses_average_turns = sum(game.turns for game in losses) / len(losses) if len(losses) > 0 else 0
 
-    draws = [game for game in games if game.result == GameResult.draw]
-    draws_average_turns = sum(game.turns for game in draws) / len(draws) if len(draws) > 0 else 0
-
     print(f"Total games: {len(games)}.")
     print(f"Starting player wins: {len(wins)}. Average turns: {wins_average_turns}.")
     print(f"Second player wins: {len(losses)}. Average turns: {losses_average_turns}.")
-    print(f"Draws: {len(draws)}. Average turns: {draws_average_turns}.")

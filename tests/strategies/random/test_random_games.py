@@ -12,4 +12,4 @@ class TestRandomGames(object):
             result = game.play_game(random_move_strategy, random_move_strategy)
             assert game.turns >= 3  # Minimum amount of moves by one player to win or draw
             assert game.turns == len(game.player_moves[PLAYER_1_ID]) == len(game.player_moves[PLAYER_2_ID])
-            assert result == GameResult.win or result == GameResult.draw or result == GameResult.loss
+            assert result == GameResult.win or result == GameResult.loss

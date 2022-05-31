@@ -110,5 +110,5 @@ def find_best_next_move(
             alpha,
             beta
         )
-        best_next_score = get_depth_adjusted_score(best_next_score)
+        best_next_score = get_depth_adjusted_score(best_next_score, eval_type)
     return best_next_moves, best_next_score, eval_type

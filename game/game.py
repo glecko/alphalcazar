@@ -34,11 +34,8 @@ class Game(object):
             self.execute_player_moves(player_1_strategy_fn, player_2_strategy_fn)
             if self.on_player_moves_executed is not None:
                 self.on_player_moves_executed()
-            executed_movements = self.board.execute_board_movements(self.starting_player.id)
+            self.board.execute_board_movements(self.starting_player.id)
             self.turns += 1
-            if executed_movements == 0 and self.board.is_full():
-                self.result = GameResult.draw
-                return self.result
             self.switch_starting_player()
             self.result = self.get_current_result()
         logger.info(f"Game finished in {self.turns} turns with result: {self.result}")

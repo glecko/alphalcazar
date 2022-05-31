@@ -1,6 +1,6 @@
 from game.enums import PieceType, Direction
 from game.game import Game
-from strategies.tree_search.strategy import get_best_move
+from strategies.tree_search.strategy import get_best_move, get_best_moves
 from strategies.tree_search.config import EvaluationType, DEPTH_PENALTY, WIN_CONDITION_SCORE
 from strategies.tree_search.abstract_move import get_legal_abstract_moves
 from strategies.tree_search.board_evaluation import BOARD_SCORE_CACHE
@@ -133,9 +133,49 @@ class TestTransposition(object):
         game.board.execute_board_movements(game.player_2.id)
         game.switch_starting_player()
 
-        best_move_p1_r2 = get_best_move(game.player_1, game.player_2, is_first_move=True, depth=2)
+        _, score, eval_type = get_best_moves(game.player_1, game.player_2, is_first_move=True, depth=2)
 
-        assert best_move_p1_r2.score == -WIN_CONDITION_SCORE + DEPTH_PENALTY
+        assert score == -WIN_CONDITION_SCORE + DEPTH_PENALTY
+        assert eval_type == EvaluationType.exact
+
+    def test_using_inverted_alpha_beta_cutoffs(self, clean_tree_search_caches_before_tests):
+        game = Game()
+
+        # Player 1 pieces
+
+        one_p1 = game.player_1.get_piece_by_type(PieceType.one)
+        one_p1.set_movement_direction(Direction.east)
+        game.board.get_tile(1, 3).place_piece(one_p1)
+
+        four_p1 = game.player_1.get_piece_by_type(PieceType.four)
+        four_p1.set_movement_direction(Direction.south)
+        game.board.get_tile(3, 2).place_piece(four_p1)
+
+        five_p1 = game.player_1.get_piece_by_type(PieceType.five)
+        five_p1.set_movement_direction(Direction.south)
+        game.board.get_tile(2, 2).place_piece(five_p1)
+
+        # Player 2 pieces
+
+        two_p2 = game.player_2.get_piece_by_type(PieceType.two)
+        two_p2.set_movement_direction(Direction.west)
+        game.board.get_tile(3, 1).place_piece(two_p2)
+
+        three_p2 = game.player_2.get_piece_by_type(PieceType.three)
+        three_p2.set_movement_direction(Direction.east)
+        game.board.get_tile(2, 3).place_piece(three_p2)
+
+        four_p2 = game.player_2.get_piece_by_type(PieceType.four)
+        four_p2.set_movement_direction(Direction.east)
+        game.board.get_tile(2, 1).place_piece(four_p2)
+
+        five_p2 = game.player_2.get_piece_by_type(PieceType.five)
+        five_p2.set_movement_direction(Direction.east)
+        game.board.get_tile(1, 2).place_piece(five_p2)
+
+        _, score, eval_type = get_best_moves(game.player_1, game.player_2, is_first_move=True, depth=2)
+
+        assert eval_type == EvaluationType.exact
 
     def test_cache_dictionaries_cleared_before_tests(self, clean_tree_search_caches_before_tests):
         assert len(TRANSPOSITION_DICT) == 0

@@ -27,16 +27,15 @@ def build_tree_search_strategy(depth: int) -> Callable[[Player, Player, bool], O
     return tree_search_strategy
 
 
-def get_best_moves(player: Player, opponent: Player, is_first_move: bool, depth: int) -> Tuple[List[AbstractMove], int]:
+def get_best_moves(player: Player, opponent: Player, is_first_move: bool, depth: int) -> Tuple[List[AbstractMove], int, EvaluationType]:
     alpha_starting_value = -WIN_CONDITION_SCORE * 10
     beta_starting_value = WIN_CONDITION_SCORE * 10
     best_moves, score, eval_type = max(player, opponent, depth, is_first_move, alpha_starting_value, beta_starting_value)
-    assert eval_type == EvaluationType.exact
-    return best_moves, score
+    return best_moves, score, eval_type
 
 
 def get_best_move(player: Player, opponent: Player, is_first_move: bool, depth: int) -> ScoredMove:
-    best_moves, score = get_best_moves(player, opponent, is_first_move, depth)
+    best_moves, score, _ = get_best_moves(player, opponent, is_first_move, depth)
     logger.debug(f"Found {len(best_moves)} moves with score {score}.")
     best_move = random.choice(best_moves)
     return ScoredMove(best_move, player, score)
