@@ -12,18 +12,18 @@ namespace Alphalcazar::Game {
 	class Piece;
 	struct PlacementMove;
 
+	/*!
+	 * \brief Contains the state of a given game.
+	 */
 	struct GameState {
-		GameState();
-
-		/// What turn the game is currently on
-		std::uint16_t Turn = 0;
 		/// The player that plays the move first this turn (the one that has the "innitiative" token)
 		PlayerId PlayerWithInitiative = PlayerId::PLAYER_ONE;
 		/// If the first move this turn has already been played
 		bool FirstMoveExecuted = false;
+		/// What turn the game is currently on
+		std::uint16_t Turn = 0;
 
-		/// Exchange the player with initiative
-		void SwapPlayerWithInitiative();
+
 	};
 
 
@@ -78,6 +78,8 @@ namespace Alphalcazar::Game {
 		/// Callback executed after both players have placed their piece on the board, and before board movements are executed
 		Utils::CallbackHandler<PlayerMovesExecutedCallback>& OnPlayerMovesExecuted();
 	private:
+		/// Exchange the player with initiative
+		void SwapPlayerWithInitiative();
 		/// Makes both players play their moves
 		void ExecutePlayerMoves(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy);
 		/// Makes a given player play his move
@@ -97,9 +99,11 @@ namespace Alphalcazar::Game {
 		 */
 		GameResult EvaluateGameResult(BoardMovesCount executedMoves);
 
-		Utils::CallbackHandler<PlayerMovesExecutedCallback> mPlayerMovesExecutedCallbacks;
-
-		GameState mState;
+		/// The board on which the game is being played
 		Board mBoard;
+		/// The state of the game. See \ref GameState for more info
+		GameState mState;
+
+		Utils::CallbackHandler<PlayerMovesExecutedCallback> mPlayerMovesExecutedCallbacks;
 	};
 }

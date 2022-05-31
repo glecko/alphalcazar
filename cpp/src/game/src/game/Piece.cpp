@@ -2,17 +2,17 @@
 #include "game/parameters.hpp"
 
 namespace Alphalcazar::Game {
-	Piece::Piece() {}
+	Piece::Piece() noexcept {}
 
-	Piece::Piece(PlayerId owner, PieceType type)
-		: mOwner { owner }
-		, mType { type }
+	Piece::Piece(PlayerId owner, PieceType type) noexcept
+		: mType{ type }
+		, mOwner { owner }
 	{}
 
-	Piece::Piece(const Piece& other)
-		: mOwner { other.mOwner }
-		, mType {other.mType}
+	Piece::Piece(const Piece& other) noexcept
+		: mType {other.mType}
 		, mDirection { other.mDirection }
+		, mOwner{ other.mOwner }
 	{}
 
 	Piece::~Piece() {}

@@ -4,13 +4,79 @@ on:
   push:
     branches: [ master ]
   pull_request:
-    branches: [ master ]
+    branches:
+      - '**'
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
 
 jobs:
-  build:
+  test-cpp-windows:
+    name: Test (C++17 - Windows)
+    defaults:
+      run:
+        shell: powershell
+    runs-on: windows-2022
+    steps:
+    - uses: actions/checkout@v2
+    - name: Configure command prompt for MSVC++
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install conan
+      run: |
+        pip install --upgrade wheel
+        pip install --upgrade conan
+    - name: Build with CMake
+      uses: lukka/run-cmake@v2
+      env:
+        CC: cl.exe
+        CXX: cl.exe
+      with:
+        buildDirectory: '${{ runner.temp }}/build/${{ runner.os }}'
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        cmakeListsTxtPath: '${{ github.workspace }}/cpp/CMakeLists.txt'
+        cmakeAppendedArgs: "-G Ninja -DCMAKE_BUILD_TYPE=Release"
+    - name: Test
+      run: |
+        cd '${{ runner.temp }}/build/${{ runner.os }}'
+        ctest -C Release --timeout 600 -V
 
+  test-cpp-linux:
+    name: Test (C++17 - Linux)
     runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install conan
+      run: |
+        pip install --upgrade wheel
+        pip install --upgrade conan
+    - name: Build with CMake
+      uses: lukka/run-cmake@v2
+      env:
+        CC: clang
+        CXX: clang++
+      with:
+        buildDirectory: '${{ runner.temp }}/build/${{ runner.os }}'
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        cmakeListsTxtPath: '${{ github.workspace }}/cpp/CMakeLists.txt'
+        cmakeAppendedArgs: "-G Ninja -DCMAKE_BUILD_TYPE=Release"
+    - name: Test
+      run: |
+        cd '${{ runner.temp }}/build/${{ runner.os }}'
+        ctest -C Release --timeout 600 -V
 
+  test-python:
+    name: Test (Python)
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.7
@@ -19,8 +85,10 @@ jobs:
         python-version: 3.7
     - name: Install dependencies
       run: |
+        cd python_deprecated
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Test with pytest
       run: |
+        cd python_deprecated
         pytest

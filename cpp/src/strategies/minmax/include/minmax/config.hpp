@@ -31,13 +31,13 @@ namespace Alphalcazar::Strategy::MinMax {
 	 */
 	static constexpr Score c_DepthScorePenalty = 1;
 
-	static constexpr std::array<Score, Game::c_PieceTypes> c_PieceOnBoardScores {
+	static constexpr std::array<Score, Game::c_PieceTypes> c_PieceOnBoardScores{{
 		80, // Piece 1
 		120, // Piece 2
 		140, // Piece 3
 		-80, // Piece 4
 		100 // Piece 5
-	};
+	}};
 
 	static constexpr float c_CenterPieceMultiplier = 2.f;
 	static constexpr float c_FreshCornerPieceMultiplier = 1.55f;

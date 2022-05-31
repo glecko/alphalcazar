@@ -16,13 +16,13 @@ namespace Alphalcazar::Game {
 		PLAYER_TWO_WINS,
 	};
 
-	enum class PlayerId {
+	enum class PlayerId : std::uint8_t {
 		NONE = 0,
 		PLAYER_ONE,
 		PLAYER_TWO
 	};
 
-	enum class Direction {
+	enum class Direction : std::uint8_t {
 		NONE = 0,
 		NORTH,
 		SOUTH,

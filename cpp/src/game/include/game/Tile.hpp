@@ -37,7 +37,7 @@ namespace Alphalcazar::Game {
 
 		bool HasPiece() const;
 	private:
-		Piece mPiece;
 		Coordinates mCoordinates;
+		Piece mPiece;
 	};
 }

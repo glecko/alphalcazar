@@ -13,9 +13,9 @@ namespace Alphalcazar::Game {
 	class Piece {
 	public:
 		/// Default constructor for \ref Piece, constructs an invalid piece
-		Piece();
-		Piece(PlayerId owner, PieceType type);
-		Piece(const Piece& other);
+		Piece() noexcept;
+		Piece(PlayerId owner, PieceType type) noexcept;
+		Piece(const Piece& other) noexcept;
 		~Piece();
 
 		bool operator==(const Piece& other) const;
@@ -31,9 +31,9 @@ namespace Alphalcazar::Game {
 
 		void SetMovementDirection(Direction direction);
 	private:
+		PieceType mType = c_InvalidPieceType;
 		/// The movement direction of the piece while it is in play on the board
 		Direction mDirection = Direction::NONE;
-		PieceType mType = c_InvalidPieceType;
 		PlayerId mOwner = PlayerId::NONE;
 	};
 }

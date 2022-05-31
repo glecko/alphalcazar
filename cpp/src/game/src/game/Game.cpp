@@ -7,12 +7,6 @@
 #include "game/Piece.hpp"
 
 namespace Alphalcazar::Game {
-	GameState::GameState() {}
-
-	void GameState::SwapPlayerWithInitiative() {
-		PlayerWithInitiative = PlayerWithInitiative == PlayerId::PLAYER_ONE ? PlayerId::PLAYER_TWO : PlayerId::PLAYER_ONE;
-	}
-
 	Game::Game() {}
 
 	Game::~Game() {};
@@ -44,7 +38,7 @@ namespace Alphalcazar::Game {
 	GameResult Game::EvaluateTurnEndPhase() {
 		auto executedMoves = mBoard.ExecuteMoves(mState.PlayerWithInitiative);
 		mState.Turn += 1;
-		mState.SwapPlayerWithInitiative();
+		SwapPlayerWithInitiative();
 		return EvaluateGameResult(executedMoves);
 	}
 
@@ -140,6 +134,10 @@ namespace Alphalcazar::Game {
 				return PlayerId::PLAYER_ONE;
 			}
 		}
+	}
+
+	void Game::SwapPlayerWithInitiative() {
+		mState.PlayerWithInitiative = mState.PlayerWithInitiative == PlayerId::PLAYER_ONE ? PlayerId::PLAYER_TWO : PlayerId::PLAYER_ONE;
 	}
 
 	GameState& Game::GetState() {
