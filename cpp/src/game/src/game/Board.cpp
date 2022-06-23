@@ -245,6 +245,9 @@ namespace Alphalcazar::Game {
 		case PlayerId::PLAYER_TWO:
 			min = c_PieceTypes;
 			break;
+		default:
+			// Keep the default min/max to iterate over the complete array
+			break;
 		}
 
 		for (std::size_t i = min; i <= max; i++) {
