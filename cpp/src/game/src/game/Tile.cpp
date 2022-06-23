@@ -1,5 +1,6 @@
 #include "game/Piece.hpp"
 #include "game/Tile.hpp"
+#include <util/Log.hpp>
 
 namespace Alphalcazar::Game {
 	Tile::Tile() {}
@@ -17,7 +18,7 @@ namespace Alphalcazar::Game {
 
 	void Tile::PlacePiece(const Piece& piece) {
 		if (mPiece.IsValid()) {
-			throw "Tried placing a piece on a tile that already had a piece on it.";
+			Utils::LogError("Tried placing a piece on a tile that already had a piece on it.");
 		}
 		mPiece = piece;
 	}
