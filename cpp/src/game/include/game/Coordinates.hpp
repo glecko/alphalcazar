@@ -75,7 +75,7 @@ namespace std {
 	};
 }
 
-// We define the specializations of parse & format to make \ref PlacementMove formattable. Based on: https://fmt.dev/latest/api.html#format-api
+// We define the specializations of parse & format to make \ref Coordinates formattable. Based on: https://fmt.dev/latest/api.html#format-api
 template <> struct fmt::formatter<Alphalcazar::Game::Coordinates> {
 	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
 		return ctx.begin();
