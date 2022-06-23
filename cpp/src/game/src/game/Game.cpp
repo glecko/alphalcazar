@@ -6,6 +6,8 @@
 #include "game/Strategy.hpp"
 #include "game/Piece.hpp"
 
+#include <util/Log.hpp>
+
 namespace Alphalcazar::Game {
 	Game::Game() {}
 
@@ -70,11 +72,13 @@ namespace Alphalcazar::Game {
 		// If a player has no available legal moves, their turn is skipped
 		if (legalMoves.size() > 0) {
 			PlacementMoveIndex placementMoveIndex = strategy.Execute(playerId, legalMoves, *this);
-			if (placementMoveIndex < 0 || placementMoveIndex >= legalMoves.size()) {
-				throw "Invalid legal move index returned by player strategy";
+			if (placementMoveIndex >= 0 && placementMoveIndex < legalMoves.size()) {
+				auto& placementMove = legalMoves[placementMoveIndex];
+				ExecutePlacementMove(playerId, placementMove);
+			} else {
+				Utils::LogError("Invalid legal move index ({}) returned by player strategy", placementMoveIndex);
 			}
-			auto& placementMove = legalMoves[placementMoveIndex];
-			ExecutePlacementMove(playerId, placementMove);
+
 		}
 	}
 

@@ -32,7 +32,7 @@ namespace Alphalcazar::Game {
 				SetPlacedPieceCoordinates(piece, coordinates);
 			}
 		} else {
-			throw "Attempted to place a piece on a non-existing perimeter tile";
+			Utils::LogError("Attempted to place a piece on a non-existing perimeter tile (at {})", coordinates);
 		}
 	}
 
@@ -43,7 +43,7 @@ namespace Alphalcazar::Game {
 
 			SetPlacedPieceCoordinates(piece, coordinates);
 		} else {
-			throw "Attempted to place a piece on a non-existing tile";
+			Utils::LogError("Attempted to place a piece on a non-existing tile (at {})", coordinates);
 		}
 	}
 

@@ -28,7 +28,11 @@ namespace Alphalcazar::Game {
 		/// Indicates if the coordinates represent a valid play area tile.
 		bool IsPlayArea() const;
 
-		/// Returns a new Coordinates object representing a movement at a fixed distance in the specified direction
+		/*!
+		 * \brief Returns a new Coordinates object representing a movement at a fixed distance in the specified direction
+		 *
+		 * Returns invalid coordinates if the parameters are invalid (ex. invalid direction).
+		 */
 		Coordinates GetCoordinateInDirection(Direction direction, Coordinate distance) const;
 
 		/*!

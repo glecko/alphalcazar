@@ -1,6 +1,8 @@
 #include "game/Coordinates.hpp"
 #include "game/parameters.hpp"
 
+#include <util/Log.hpp>
+
 namespace Alphalcazar::Game {
 	constexpr Coordinate c_InvalidCoordinate = std::numeric_limits<Coordinate>::max();
 
@@ -62,10 +64,12 @@ namespace Alphalcazar::Game {
 
 	Coordinates Coordinates::GetCoordinateInDirection(Direction direction, Coordinate distance) const {
 		if (!Valid()) {
-			throw "Tried to get coordinate offset from an invalid coordinate";
+			Utils::LogError("Tried to get coordinate offset from an invalid coordinate");
+			return Invalid();
 		}
 		if (direction == Direction::NONE) {
-			throw "Tried getting a coordinate offset into an invalid direction";
+			Utils::LogError("Tried getting a coordinate offset into an invalid direction");
+			return Invalid();
 		}
 
 		Coordinates& offset = c_DirectionOffsets.at(direction);
