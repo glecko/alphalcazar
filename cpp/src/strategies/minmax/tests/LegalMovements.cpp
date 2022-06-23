@@ -10,6 +10,8 @@
 #include <game/parameters.hpp>
 #include <game/PlacementMove.hpp>
 
+#include "setuphelpers.hpp"
+
 #include <vector>
 
 namespace Alphalcazar::Strategy::MinMax {
@@ -39,11 +41,10 @@ namespace Alphalcazar::Strategy::MinMax {
 	}
 
 	TEST(LegalMovements, CornerSymmetries) {
-		Game::Game game {};
-
-		Game::Piece pieceOne { Game::PlayerId::PLAYER_ONE, 1 };
-		game.GetBoard().GetTile(1, 1)->PlacePiece(pieceOne);
-		game.GetBoard().GetTile(1, 1)->GetPiece()->SetMovementDirection(Game::Direction::NORTH);
+		std::vector<PieceSetup> pieceSetups{
+			{ Game::PlayerId::PLAYER_ONE, 1, Game::Direction::NORTH, { 1, 1 } },
+		};
+		Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, pieceSetups);
 
 		// A single piece on a corner breaks X and Y symmetries
 		auto [xSymmetry, ySymmetry] = GetBoardSymmetries(game);
@@ -52,10 +53,10 @@ namespace Alphalcazar::Strategy::MinMax {
 	}
 
 	TEST(LegalMovements, PerimeterSymmetries) {
-		Game::Game game {};
-
-		Game::Piece pieceOne { Game::PlayerId::PLAYER_ONE, 1 };
-		game.GetBoard().PlacePiece({ 4, 2 }, pieceOne, Game::Direction::WEST);
+		std::vector<PieceSetup> pieceSetups{
+			{ Game::PlayerId::PLAYER_ONE, 1, Game::Direction::WEST, { 4, 2 } },
+		};
+		Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, pieceSetups);
 
 		// The perimeter piece is on the x-axis and faces west, meaning we should still have
 		// x-axis symmetry
@@ -86,10 +87,10 @@ namespace Alphalcazar::Strategy::MinMax {
 	}
 
 	TEST(LegalMovements, FilterXAxisSymmetryMovements) {
-		Game::Game game {};
-
-		Game::Piece pieceFour { Game::PlayerId::PLAYER_ONE, 4 };
-		game.GetBoard().PlacePiece({ 2, 1 }, pieceFour, Game::Direction::SOUTH);
+		std::vector<PieceSetup> pieceSetups{
+			{ Game::PlayerId::PLAYER_ONE, 4, Game::Direction::SOUTH, { 2, 1 } },
+		};
+		Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, pieceSetups);
 
 		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
 		FilterSymmetricMovements(legalMoves, game);
@@ -106,13 +107,11 @@ namespace Alphalcazar::Strategy::MinMax {
 	}
 
 	TEST(LegalMovements, FilterNoSymmetryMovements) {
-		Game::Game game {};
-
-		Game::Piece pieceTwo { Game::PlayerId::PLAYER_ONE, 2 };
-		game.GetBoard().PlacePiece({ 2, 3 }, pieceTwo, Game::Direction::SOUTH);
-
-		Game::Piece pieceFour { Game::PlayerId::PLAYER_ONE, 4 };
-		game.GetBoard().PlacePiece({ 2, 1 }, pieceFour, Game::Direction::EAST);
+		std::vector<PieceSetup> pieceSetups{
+			{ Game::PlayerId::PLAYER_ONE, 2, Game::Direction::SOUTH, { 2, 3 } },
+			{ Game::PlayerId::PLAYER_ONE, 4, Game::Direction::EAST, { 2, 1 } },
+		};
+		Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, pieceSetups);
 
 		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_ONE);
 		auto legalMovesSize = legalMoves.size();

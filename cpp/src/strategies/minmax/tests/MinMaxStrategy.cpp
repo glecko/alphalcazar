@@ -4,34 +4,14 @@
 #include "minmax/config.hpp"
 
 #include <game/Game.hpp>
-#include <game/Board.hpp>
 #include <game/Tile.hpp>
 #include <game/Piece.hpp>
 #include <game/parameters.hpp>
 #include <game/PlacementMove.hpp>
 
+#include "setuphelpers.hpp"
+
 namespace Alphalcazar::Strategy::MinMax {
-	/// Data structure helper for describing a piece placement on the board
-	struct PieceSetup {
-		Game::PlayerId PlayerId;
-		Game::PieceType PieceType;
-		Game::Direction Direction;
-		Game::Coordinates Coordinates;
-	};
-
-	/// Helper function for quickly configuring a game setup for a MinMax strategy test
-	Game::Game SetupGameForMinMaxTesting(Game::PlayerId playerWithInitiative, bool firstMoveExecuted, const std::vector<PieceSetup>& pieceSetups) {
-		Game::Game game {};
-		game.GetState().FirstMoveExecuted = firstMoveExecuted;
-		game.GetState().PlayerWithInitiative = playerWithInitiative;
-
-		for (auto& pieceSetup : pieceSetups) {
-			Game::Piece piece { pieceSetup.PlayerId, pieceSetup.PieceType };
-			game.GetBoard().PlacePiece(pieceSetup.Coordinates, piece, pieceSetup.Direction);
-		}
-		return game;
-	}
-
 	TEST(MinMaxStrategy, TestWinningSecondMoveDepthOne) {
 		/*
 		 * Player 2 goes second and has the opportunity to immediatelly win the game

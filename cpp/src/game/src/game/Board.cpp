@@ -2,6 +2,7 @@
 
 #include "game/Piece.hpp"
 #include "game/board_utils.hpp"
+#include <util/Log.hpp>
 
 #include <algorithm>
 
@@ -164,6 +165,18 @@ namespace Alphalcazar::Game {
 		return GetTile(coord);
 	}
 
+	const Tile* Board::GetTile(const Coordinates& coord) const {
+		if (coord.IsPlayArea()) {
+			return &mTiles[coord.x][coord.y];
+		}
+		return nullptr;
+	}
+
+	const Tile* Board::GetTile(Coordinate x, Coordinate y) const {
+		Coordinates coord{ x, y };
+		return GetTile(coord);
+	}
+
 	Tile* Board::GetPieceTile(const Piece& piece) {
 		Coordinates& coordinates = GetPlacedPieceCoordinates(piece);
 		if (coordinates.Valid()) {
@@ -218,25 +231,36 @@ namespace Alphalcazar::Game {
 		return result;
 	}
 
-	std::vector<std::pair<Coordinates, Piece>> Board::GetPieces() const {
-		std::vector<std::pair<Coordinates, Piece>> result;
-		LoopOverTiles([&result](const Coordinates& coordinates, const Tile& tile) {
-			if (auto* piece = tile.GetPiece()) {
-				result.emplace_back(coordinates, *piece);
-			}
-		});
-		return result;
-	}
-
 	std::vector<std::pair<Coordinates, Piece>> Board::GetPieces(PlayerId player) const {
 		std::vector<std::pair<Coordinates, Piece>> result;
-		LoopOverTiles([&result, player](const Coordinates& coordinates, const Tile& tile) {
-			if (auto* piece = tile.GetPiece()) {
-				if (piece->GetOwner() == player) {
-					result.emplace_back(coordinates, *piece);
+		// See the docstring of \ref mPlacedPieceCoordinates for more information.
+		// We iterate only over the positions that contain the coordinates of the pieces
+		// of the specified player.
+		std::size_t min = 0;
+		std::size_t max = c_PieceTypes * 2 - 1;
+		switch (player) {
+		case PlayerId::PLAYER_ONE:
+			max = c_PieceTypes - 1;
+			break;
+		case PlayerId::PLAYER_TWO:
+			min = c_PieceTypes;
+			break;
+		}
+
+		for (std::size_t i = min; i <= max; i++) {
+			auto coordinates = mPlacedPieceCoordinates[i];
+			if (coordinates.Valid()) {
+				if (auto* tile = GetTile(coordinates)) {
+					if (auto* piece = tile->GetPiece()) {
+						result.emplace_back(coordinates, *piece);
+					} else {
+						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no piece exists at the tile at those coordinates.", coordinates, i);
+					}
+				} else {
+					Utils::LogError("Placed pieces cache pointed at {} for index {}, but no tile exists at those coordinates.", coordinates, i);
 				}
 			}
-		});
+		}
 		return result;
 	}
 

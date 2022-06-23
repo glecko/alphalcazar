@@ -193,6 +193,7 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(board.GetTile(0, 2)->GetPiece(), nullptr);
 		EXPECT_EQ(board.GetTile(2, 2)->GetPiece(), nullptr);
 		EXPECT_EQ(board.GetTile(3, 1)->GetPiece(), nullptr);
+		EXPECT_EQ(board.GetPieces().size(), 1);
 	}
 
 	TEST(Board, PushablePiecesDontPushEachOther) {
@@ -209,6 +210,7 @@ namespace Alphalcazar::Game {
 
 		EXPECT_EQ(*board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PushablePieceType));
 		EXPECT_EQ(*board.GetTile(2, 3)->GetPiece(), Piece(PlayerId::PLAYER_TWO, c_PushablePieceType));
+		EXPECT_EQ(board.GetPieces().size(), 2);
 	}
 
 	TEST(Board, PushablePieceMovements) {
@@ -245,6 +247,7 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(*board.GetTile(3, 3)->GetPiece(), Piece(PlayerId::PLAYER_TWO, c_PushablePieceType));
 		EXPECT_EQ(*board.GetTile(1, 3)->GetPiece(), Piece(PlayerId::PLAYER_TWO, 5));
 		EXPECT_EQ(*board.GetTile(2, 1)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PushablePieceType));
+		EXPECT_EQ(board.GetPieces().size(), 5);
 	}
 
 	TEST(Board, PushingPieceMovements) {
@@ -265,6 +268,7 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(*board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PusherPieceType));
 		EXPECT_EQ(*board.GetTile(3, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, 3));
 		EXPECT_EQ(board.GetTile(4, 2)->GetPiece(), nullptr);
+		EXPECT_EQ(board.GetPieces().size(), 2);
 	}
 
 	TEST(Board, PushingPiecesPushingEachOther) {
@@ -283,6 +287,8 @@ namespace Alphalcazar::Game {
 
 			EXPECT_EQ(*board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PusherPieceType));
 			EXPECT_EQ(*board.GetTile(2, 1)->GetPiece(), Piece(PlayerId::PLAYER_TWO, c_PusherPieceType));
+
+			EXPECT_EQ(board.GetPieces().size(), 2);
 		}
 
 		{
@@ -294,6 +300,8 @@ namespace Alphalcazar::Game {
 
 			EXPECT_EQ(board.GetTile(2, 2)->GetPiece(), nullptr);
 			EXPECT_EQ(*board.GetTile(2, 1)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PusherPieceType));
+
+			EXPECT_EQ(board.GetPieces().size(), 1);
 		}
 	}
 
@@ -332,6 +340,8 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(*board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_TWO, c_PusherPieceType));
 		EXPECT_EQ(board.GetTile(2, 4)->GetPiece(), nullptr);
 		EXPECT_EQ(board.GetTile(4, 1)->GetPiece(), nullptr);
+
+		EXPECT_EQ(board.GetPieces().size(), 4);
 	}
 
 	TEST(Board, LegalPlacementTiles) {
@@ -374,5 +384,46 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(*boardCopy.GetTile(1, 0)->GetPiece(), pieceTwo);
 		EXPECT_EQ(*boardCopy.GetTile(2, 0)->GetPiece(), pieceThree);
 		EXPECT_EQ(*boardCopy.GetTile(2, 2)->GetPiece(), pieceFour);
+	}
+
+	TEST(Board, GetBoardPieces) {
+		Board board{};
+		Piece pieceOnePlayerOne{ PlayerId::PLAYER_ONE, 1 };
+		Piece pieceOnePlayerTwo{ PlayerId::PLAYER_TWO, 1 };
+		Piece pieceFourPlayerOne{ PlayerId::PLAYER_ONE, 4 };
+		Piece pieceFourPlayerTwo{ PlayerId::PLAYER_TWO, 4 };
+
+		board.PlacePiece({ 0, 1 }, pieceOnePlayerOne);
+		board.PlacePiece({ 1, 0 }, pieceOnePlayerTwo);
+		board.PlacePiece({ 2, 2 }, pieceFourPlayerOne, Direction::EAST);
+		board.PlacePiece({ 3, 3 }, pieceFourPlayerTwo, Direction::WEST);
+
+		{
+			auto pieces = board.GetPieces();
+			auto playerOnePieces = board.GetPieces(PlayerId::PLAYER_ONE);
+			auto playerTwoPieces = board.GetPieces(PlayerId::PLAYER_TWO);
+			EXPECT_EQ(pieces.size(), 4);
+			EXPECT_EQ(playerOnePieces.size(), 2);
+			EXPECT_EQ(playerTwoPieces.size(), 2);
+			for (auto& [coordinates, piece] : pieces) {
+				// All pieces should be either type 1 or 4
+				EXPECT_TRUE(piece.GetType() == 4 || piece.GetType() == 1);
+			}
+		}
+
+
+		Piece pieceTwoPlayerTwo{ PlayerId::PLAYER_TWO, 2 };
+		Piece pieceThreePlayerTwo{ PlayerId::PLAYER_TWO, 3 };
+		board.PlacePiece({ 1, 1 }, pieceTwoPlayerTwo, Direction::EAST);
+		board.PlacePiece({ 2, 1 }, pieceThreePlayerTwo, Direction::WEST);
+
+		{
+			auto pieces = board.GetPieces();
+			auto playerOnePieces = board.GetPieces(PlayerId::PLAYER_ONE);
+			auto playerTwoPieces = board.GetPieces(PlayerId::PLAYER_TWO);
+			EXPECT_EQ(pieces.size(), 6);
+			EXPECT_EQ(playerOnePieces.size(), 2);
+			EXPECT_EQ(playerTwoPieces.size(), 4);
+		}
 	}
 }
