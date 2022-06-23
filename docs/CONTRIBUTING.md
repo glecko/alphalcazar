@@ -14,23 +14,23 @@ Example:
  */
 class BreadTeleporter {
 public:
-	BreadTeleporter();
+     BreadTeleporter();
 
-	/// Returns the amount of times the teleporter has been used
-	std::uint32_t GetUseCount() const;
+     /// Returns the amount of times the teleporter has been used
+     std::uint32_t GetUseCount() const;
 
-	/*!
-	 * \brief Teleports the bread of a given ID
-	 * \param breadId The ID of the bread to teleport
+     /*!
+     * \brief Teleports the bread of a given ID
+     * \param breadId The ID of the bread to teleport
      * \param distance The distance we want to teleport the bread away.
      * \returns True if the bread was teleported successfully.
      *
-	 * \note While negative distances are allowed for \param distance, teleporting a bread a negative distance
+     * \note While negative distances are allowed for \param distance, teleporting a bread a negative distance
      *       may have unforseen consequences.
-	 */
-	bool TeleportBread(std::uint64_t breadId, std::int64_t distance);
+     */
+     bool TeleportBread(std::uint64_t breadId, std::int64_t distance);
 private:
-	/// The expiration date of the last teleported bread
-	std::chrono::system_clock::time_point mExpirationDate;
+     /// The expiration date of the last teleported bread
+     std::chrono::system_clock::time_point mExpirationDate;
 };
 ```
