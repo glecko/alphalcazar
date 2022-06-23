@@ -14,6 +14,11 @@ namespace Alphalcazar::Game {
 	 * inwards.
 	 */
 	struct PlacementMove {
+		PlacementMove(const Coordinates& coordinates, PieceType pieceType)
+			: Coordinates{ coordinates }
+			, PieceType{ pieceType }
+		{}
+
 		Coordinates Coordinates;
 		PieceType PieceType;
 

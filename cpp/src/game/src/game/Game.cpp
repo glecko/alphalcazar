@@ -110,7 +110,7 @@ namespace Alphalcazar::Game {
 		result.reserve(pieces.size() * legalTiles.size());
 		for (auto* tile : legalTiles) {
 			for (auto& piece : pieces) {
-				result.push_back({ tile->GetCoordinates(), piece.GetType() });
+				result.emplace_back(tile->GetCoordinates(), piece.GetType());
 			}
 		}
 		return result;
