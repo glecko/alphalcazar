@@ -3,6 +3,8 @@
 #include "aliases.hpp"
 #include <unordered_map>
 
+#include <fmt/format.h>
+
 namespace Alphalcazar::Game {
 	/*!
 	 * \brief Helper class to work with the 2D coordinate system of the tiles of the board.
@@ -72,3 +74,15 @@ namespace std {
 		}
 	};
 }
+
+// We define the specializations of parse & format to make \ref Coordinates formattable. Based on: https://fmt.dev/latest/api.html#format-api
+template <> struct fmt::formatter<Alphalcazar::Game::Coordinates> {
+	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+		return ctx.begin();
+	}
+
+	template <typename FormatContext>
+	auto format(const Alphalcazar::Game::Coordinates& coordinates, FormatContext& ctx) -> decltype(ctx.out()) {
+		return format_to(ctx.out(), "({},{})", coordinates.x, coordinates.y);
+	}
+};

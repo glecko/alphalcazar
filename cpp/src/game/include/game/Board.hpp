@@ -52,6 +52,8 @@ namespace Alphalcazar::Game {
 		/// Returns the tile at the given coordinates
 		Tile* GetTile(const Coordinates& coord);
 		Tile* GetTile(Coordinate x, Coordinate y);
+		const Tile* GetTile(const Coordinates& coord) const;
+		const Tile* GetTile(Coordinate x, Coordinate y) const;
 		/// Returns all tiles of the board
 		std::vector<const Tile*> GetTiles() const;
 		/// Returns all perimeter tiles of the board
@@ -61,10 +63,12 @@ namespace Alphalcazar::Game {
 
 		/// Returns the tile a given piece is placed on, or nullptr if the specified piece is not on the board
 		Tile* GetPieceTile(const Piece& piece);
-		/// Returns a list of all pieces in play on the board (including perimiter)
-		std::vector<std::pair<Coordinates, Piece>> GetPieces() const;
-		/// Returns a list of all pieces of the specified player in play on the board (including perimiter)
-		std::vector<std::pair<Coordinates, Piece>> GetPieces(PlayerId player) const;
+		/*!
+		 * \brief Returns a list of all pieces in play on the board (including perimeter)
+		 *
+		 * \param player If a valid player ID is specified, the function will only return pieces of this player
+		 */
+		std::vector<std::pair<Coordinates, Piece>> GetPieces(PlayerId player = PlayerId::NONE) const;
 	private:
 		/*!
 		 * \brief Executes one piece movement, if the specified piece is on the board

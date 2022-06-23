@@ -4,22 +4,18 @@
 #include "minmax/config.hpp"
 
 #include <game/Game.hpp>
-#include <game/Board.hpp>
-#include <game/PlacementMove.hpp>
 #include <game/Tile.hpp>
 #include <game/Piece.hpp>
 
+#include "setuphelpers.hpp"
+
 namespace Alphalcazar::Strategy::MinMax {
 	TEST(BoardEvaluation, EvaluateBoard) {
-		Game::Game game {};
-
-		Game::Piece pieceOnePlayerOne { Game::PlayerId::PLAYER_ONE, 1 };
-		Game::Piece pieceFivePlayerOne { Game::PlayerId::PLAYER_ONE, 5 };
-
-		game.GetBoard().GetTile(2, 2)->PlacePiece(pieceOnePlayerOne);
-		game.GetBoard().GetTile(2, 2)->GetPiece()->SetMovementDirection(Game::Direction::NORTH);
-		game.GetBoard().GetTile(1, 1)->PlacePiece(pieceFivePlayerOne);
-		game.GetBoard().GetTile(1, 1)->GetPiece()->SetMovementDirection(Game::Direction::WEST);
+		std::vector<PieceSetup> pieceSetups {
+			{ Game::PlayerId::PLAYER_ONE, 1, Game::Direction::NORTH, { 2, 2 } },
+			{ Game::PlayerId::PLAYER_ONE, 5, Game::Direction::WEST, { 1, 1 } },
+		};
+		Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, pieceSetups);
 
 		Score score = EvaluateBoard(Game::PlayerId::PLAYER_ONE, game);
 		Score opponentScore = EvaluateBoard(Game::PlayerId::PLAYER_TWO, game);
@@ -29,28 +25,28 @@ namespace Alphalcazar::Strategy::MinMax {
 	}
 
 	TEST(BoardEvaluation, EvaluatePieceLifeTime) {
-		Game::Game perimeterGame {};
-		Game::Piece pieceTwoPerimeter { Game::PlayerId::PLAYER_ONE, 2 };
-		perimeterGame.GetBoard().GetTile(1, 0)->PlacePiece(pieceTwoPerimeter);
-		perimeterGame.GetBoard().GetTile(1, 0)->GetPiece()->SetMovementDirection(Game::Direction::NORTH);
+		std::vector<PieceSetup> perimeterPieceSetups {
+			{ Game::PlayerId::PLAYER_ONE, 2, Game::Direction::NORTH, { 1, 0 } },
+		};
+		Game::Game perimeterGame = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, perimeterPieceSetups);
 		Score perimeterScore = EvaluateBoard(Game::PlayerId::PLAYER_ONE, perimeterGame);
 
-		Game::Game justEnteredGame {};
-		Game::Piece pieceTwoJustEntered { Game::PlayerId::PLAYER_ONE, 2 };
-		justEnteredGame.GetBoard().GetTile(1, 1)->PlacePiece(pieceTwoJustEntered);
-		justEnteredGame.GetBoard().GetTile(1, 1)->GetPiece()->SetMovementDirection(Game::Direction::NORTH);
+		std::vector<PieceSetup> justEnteredPieceSetups{
+			{ Game::PlayerId::PLAYER_ONE, 2, Game::Direction::NORTH, { 1, 1 } },
+		};
+		Game::Game justEnteredGame = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, justEnteredPieceSetups);
 		Score justEnteredScore = EvaluateBoard(Game::PlayerId::PLAYER_ONE, justEnteredGame);
 
-		Game::Game centerTileGame {};
-		Game::Piece pieceTwoCenterTile { Game::PlayerId::PLAYER_ONE, 2 };
-		centerTileGame.GetBoard().GetTile(1, 2)->PlacePiece(pieceTwoCenterTile);
-		centerTileGame.GetBoard().GetTile(1, 2)->GetPiece()->SetMovementDirection(Game::Direction::NORTH);
+		std::vector<PieceSetup> centerTilePieceSetups{
+			{ Game::PlayerId::PLAYER_ONE, 2, Game::Direction::NORTH, { 1, 2 } },
+		};
+		Game::Game centerTileGame = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, centerTilePieceSetups);
 		Score centerTileScore = EvaluateBoard(Game::PlayerId::PLAYER_ONE, centerTileGame);
 
-		Game::Game aboutToExitGame {};
-		Game::Piece pieceTwoAboutToExit { Game::PlayerId::PLAYER_ONE, 2 };
-		aboutToExitGame.GetBoard().GetTile(1, 3)->PlacePiece(pieceTwoAboutToExit);
-		aboutToExitGame.GetBoard().GetTile(1, 3)->GetPiece()->SetMovementDirection(Game::Direction::NORTH);
+		std::vector<PieceSetup> aboutToExitPieceSetups{
+			{ Game::PlayerId::PLAYER_ONE, 2, Game::Direction::NORTH, { 1, 3 } },
+		};
+		Game::Game aboutToExitGame = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, aboutToExitPieceSetups);
 		Score aboutToExitScore = EvaluateBoard(Game::PlayerId::PLAYER_ONE, aboutToExitGame);
 
 		// Pieces on the perimeter don't contribute to score
