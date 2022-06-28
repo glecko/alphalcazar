@@ -23,10 +23,14 @@ namespace Alphalcazar::Game {
 
 		/// Indicates if the coordinates represent a position in the perimeter of the board
 		bool IsPerimeter() const;
-		/// Indicates if the coordinates represent a corner of the board. No tile will exist at these coordinates.
+		/// Indicates if the coordinates represent a corner of the play area. No tile will exist at these coordinates.
 		bool IsCorner() const;
 		/// Indicates if the coordinates represent a valid play area tile.
 		bool IsPlayArea() const;
+		/// Indicates if the coordinates represent the center of the boared
+		bool IsCenter() const;
+		/// Indicates if the coordinates represent a corner of the board
+		bool IsBoardCorner() const;
 
 		/*!
 		 * \brief Returns a new Coordinates object representing a movement at a fixed distance in the specified direction
@@ -61,20 +65,6 @@ namespace std {
 			auto xHash = hash<Alphalcazar::Game::Coordinate>()(coordinates.x);
 			auto yHash = hash<Alphalcazar::Game::Coordinate>()(coordinates.y);
 			return ((xHash ^ (yHash << 1)) >> 1);
-		}
-	};
-
-	/*
-	* We also implement a hashing function for pairs of Coordinates with any other hashable type.
-	* This will be useful for using pairs of Coordinates with other types (like \ref Direction) as keys
-	* for unordered maps.
-	*/
-	template <class T> 
-	struct hash<std::pair<Alphalcazar::Game::Coordinates, T>> {
-		std::size_t operator()(const std::pair<Alphalcazar::Game::Coordinates, Alphalcazar::Game::Direction>& pair) const noexcept {
-			auto coordinatesHash = hash<Alphalcazar::Game::Coordinates>()(pair.first);
-			auto pairedValueHash = hash<T>()(pair.second);
-			return ((coordinatesHash ^ (pairedValueHash << 1)) >> 1);
 		}
 	};
 }

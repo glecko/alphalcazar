@@ -42,8 +42,16 @@ namespace Alphalcazar::Game {
 		return x == 0 || x == c_PlayAreaSize - 1 || y == 0 || y == c_PlayAreaSize - 1;
 	}
 
+	bool Coordinates::IsCenter() const {
+		return x == c_CenterCoordinate && y == c_CenterCoordinate;
+	}
+
 	bool Coordinates::IsCorner() const {
 		return (x == 0 || x == c_PlayAreaSize - 1) && (y == 0 || y == c_PlayAreaSize - 1);
+	}
+
+	bool Coordinates::IsBoardCorner() const {
+		return (x == 1 || x == c_BoardSize) && (y == 1 || y == c_BoardSize);
 	}
 
 	Direction Coordinates::GetLegalPlacementDirection() const {
