@@ -9,6 +9,11 @@
 #include <util/Log.hpp>
 
 namespace Alphalcazar::Strategy::MinMax {
+	/// The initial value of the "alpha" parameter of the minmax algorithm
+	constexpr Score c_AlphaStartingValue = -c_WinConditionScore * 10;
+	/// The initial value of the "beta" parameter of the minmax algorithm
+	constexpr Score c_BetaStartingValue = c_WinConditionScore * 10;
+
 	MinMaxStrategy::MinMaxStrategy(const Depth depth)
 		: mDepth { depth }
 	{}
@@ -91,9 +96,10 @@ namespace Alphalcazar::Strategy::MinMax {
 				nextBestScore = Min(playerId, nextDepth, gameCopy, alpha, beta);
 			}
 			// If we decreased the depth when calculating the next move score
-			// we add a depth penalty
+			// we add a depth penalty. Since this function is called recursively, we only
+			// adjust for 1 depth level at a time.
 			if (nextDepth < depth) {
-				nextBestScore = GetDepthAdjustedScore(nextBestScore);
+				nextBestScore = GetDepthAdjustedScore(nextBestScore, 1);
 			}
 		}
 		return nextBestScore;
