@@ -14,7 +14,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 		Alphalcazar::Strategy::MinMax::MinMaxStrategy strategy { depth };
 		Alphalcazar::Game::Game game {};
 		auto gameStart = std::chrono::high_resolution_clock::now();
-		game.Play(strategy, strategy);
+		// auto result = game.Play(strategy, strategy);
 		strategy.Execute(Alphalcazar::Game::PlayerId::PLAYER_ONE, game.GetLegalMoves(Alphalcazar::Game::PlayerId::PLAYER_ONE), game);
 		auto score = strategy.GetLastExecutedMoveScore();
 		auto gameEnd = std::chrono::high_resolution_clock::now();
