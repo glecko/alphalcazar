@@ -7,7 +7,6 @@ namespace Alphalcazar::Game {
 	using PieceType = std::uint8_t;
 	constexpr PieceType c_InvalidPieceType = 0;
 	using Coordinate = std::int8_t; // (+-128 should be more than enough for a 3x3 board)
-	using PlacementMoveIndex = std::uint8_t;
 
 	enum class GameResult {
 		NONE = 0,
