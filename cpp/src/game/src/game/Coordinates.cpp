@@ -89,7 +89,7 @@ namespace Alphalcazar::Game {
 		}
 
 		Coordinates& offset = c_DirectionOffsets.at(direction);
-		return Coordinates{ x + offset.x * distance, y + offset.y * distance };
+		return Coordinates(x + offset.x * distance, y + offset.y * distance);
 	}
 
 	bool Coordinates::Valid() const {
@@ -97,6 +97,6 @@ namespace Alphalcazar::Game {
 	}
 
 	Coordinates Coordinates::Invalid() {
-		return Coordinates{ c_InvalidCoordinate, c_InvalidCoordinate };
+		return Coordinates { c_InvalidCoordinate, c_InvalidCoordinate };
 	}
 }
