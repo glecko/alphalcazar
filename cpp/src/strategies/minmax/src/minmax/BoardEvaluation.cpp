@@ -73,7 +73,6 @@ namespace Alphalcazar::Strategy::MinMax {
 					totalScore -= pieceScore;
 				}
 			}
-
 		}
 		return totalScore;
 	}

@@ -39,4 +39,7 @@ namespace Alphalcazar::Strategy::MinMax {
 	constexpr float c_FreshCenterLanePieceMultiplier = 1.7f;
 	constexpr float c_PieceAboutToExitMultiplier = 0.7f;
 	constexpr float c_LateralCenterLanePieceMultiplier = 1.f;
+
+	constexpr Score c_CenterLanePieceMultiplier = 2;
+	constexpr Score c_LateralLanePieceMultiplier = 1;
 }

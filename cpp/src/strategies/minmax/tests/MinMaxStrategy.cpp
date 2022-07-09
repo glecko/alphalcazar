@@ -37,8 +37,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		Game::Coordinates winningCoordinates { 4, 2 };
 		for (Depth depth = 1; depth <= 2; depth++) {
 			MinMaxStrategy strategy { depth };
-			auto moveIndex = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
-			auto move = legalMoves[moveIndex];
+			auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
 
 			EXPECT_EQ(move.Coordinates, winningCoordinates);
 			EXPECT_EQ(move.PieceType, 2);
@@ -73,8 +72,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		// Player 2 should decide to play a piece on the (2,4) square regardless of the search depth
 		for (Depth depth = 1; depth <= 2; depth++) {
 			MinMaxStrategy strategy { depth };
-			auto moveIndex = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
-			auto move = legalMoves[moveIndex];
+			auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
 
 			EXPECT_EQ(move.Coordinates.x, 2);
 			EXPECT_EQ(move.Coordinates.y, 4);
@@ -108,8 +106,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_ONE);
 
 		MinMaxStrategy strategy { 1 };
-		auto moveIndex = strategy.Execute(Game::PlayerId::PLAYER_ONE, legalMoves, game);
-		auto move = legalMoves[moveIndex];
+		auto move = strategy.Execute(Game::PlayerId::PLAYER_ONE, legalMoves, game);
 
 		// Positions at which the pushing piece can be played to avoid an immediate loss
 		std::vector<Game::Coordinates> expectedCoordinates {
@@ -141,8 +138,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
 
 		MinMaxStrategy strategy { 2 };
-		auto moveIndex = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
-		auto move = legalMoves[moveIndex];
+		auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
 
 		// Player 2 should postpone defeat this turn by playing the pusher piece at (2,0)
 		EXPECT_EQ(move.PieceType, Game::c_PusherPieceType);
@@ -174,8 +170,7 @@ namespace Alphalcazar::Strategy::MinMax {
 
 		MinMaxStrategy strategy { 2 };
 		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
-		auto moveIndex = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
-		auto move = legalMoves[moveIndex];
+		auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
 
 		// These are the perimeter tiles at which placing the 5 piece would cause it to enter the board
 		// Player 2 must place the piece on any tile except these ones to be able to win next round.

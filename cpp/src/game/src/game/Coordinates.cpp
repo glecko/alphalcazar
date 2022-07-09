@@ -34,6 +34,10 @@ namespace Alphalcazar::Game {
 		return x == coord.x && y == coord.y;
 	}
 
+	bool Coordinates::operator!=(const Coordinates& coord) const {
+		return x != coord.x || y != coord.y;
+	}
+
 	bool Coordinates::IsPlayArea() const {
 		return x >= 0 && x < c_PlayAreaSize&& y >= 0 && y < c_PlayAreaSize && !IsCorner();
 	}
@@ -44,6 +48,10 @@ namespace Alphalcazar::Game {
 
 	bool Coordinates::IsCenter() const {
 		return x == c_CenterCoordinate && y == c_CenterCoordinate;
+	}
+
+	bool Coordinates::IsOnCenterLane() const {
+		return x == c_CenterCoordinate || y == c_CenterCoordinate;
 	}
 
 	bool Coordinates::IsCorner() const {

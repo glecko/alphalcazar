@@ -20,7 +20,7 @@ namespace Alphalcazar::Strategy::MinMax {
 	class MinMaxStrategy final : public Game::Strategy {
 	public:
 		MinMaxStrategy(const Depth depth);
-		virtual Game::PlacementMoveIndex Execute(Game::PlayerId playerId, const std::vector<Game::PlacementMove>& legalMoves, const Game::Game& game) override;
+		virtual Game::PlacementMove Execute(Game::PlayerId playerId, const std::vector<Game::PlacementMove>& legalMoves, const Game::Game& game) override;
 		Score GetLastExecutedMoveScore() const;
 	private:
 		Score Max(Game::PlayerId playerId, Depth depth, const Game::Game& game, Score alpha, Score beta);

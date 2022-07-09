@@ -20,6 +20,7 @@ namespace Alphalcazar::Game {
 		~Coordinates();
 
 		bool operator==(const Coordinates& coord) const;
+		bool operator!=(const Coordinates& coord) const;
 
 		/// Indicates if the coordinates represent a position in the perimeter of the board
 		bool IsPerimeter() const;
@@ -27,8 +28,10 @@ namespace Alphalcazar::Game {
 		bool IsCorner() const;
 		/// Indicates if the coordinates represent a valid play area tile.
 		bool IsPlayArea() const;
-		/// Indicates if the coordinates represent the center of the boared
+		/// Indicates if the coordinates represent the center of the board
 		bool IsCenter() const;
+		/// Indicates if the coordinates represent a tile that is on either the row or column that contains the center tile of the board
+		bool IsOnCenterLane() const;
 		/// Indicates if the coordinates represent a corner of the board
 		bool IsBoardCorner() const;
 

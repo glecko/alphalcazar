@@ -18,25 +18,26 @@ namespace Alphalcazar::Strategy::MinMax {
 		: mDepth { depth }
 	{}
 
-	Game::PlacementMoveIndex MinMaxStrategy::Execute(Game::PlayerId playerId, const std::vector<Game::PlacementMove>& legalMoves, const Game::Game& game) {
+	Game::PlacementMove MinMaxStrategy::Execute(Game::PlayerId playerId, const std::vector<Game::PlacementMove>& legalMoves, const Game::Game& game) {
 		Score bestScore = c_AlphaStartingValue;
-		Game::PlacementMoveIndex bestMoveIndex = 0;
 		Score alpha = c_AlphaStartingValue;
 		auto filteredMoves = legalMoves;
-		FilterSymmetricMovements(filteredMoves, game);
-		for (Game::PlacementMoveIndex i = 0; i < filteredMoves.size(); i++) {
-			auto move = filteredMoves[i];
-			auto moveScore = GetNextBestScore(playerId, move, mDepth, game, alpha, c_BetaStartingValue);
+		FilterSymmetricMovements(filteredMoves, game.GetBoard());
+		SortLegalMovements(filteredMoves, game.GetBoard());
 
+		assert(!legalMoves.empty());
+		Game::PlacementMove& bestMove = filteredMoves[0];
+		for (const auto& move : filteredMoves) {
+			auto moveScore = GetNextBestScore(playerId, move, mDepth, game, alpha, c_BetaStartingValue);
 			if (moveScore > bestScore) {
-				bestMoveIndex = i;
 				bestScore = moveScore;
+				bestMove = move;
 			}
 		}
 
 		mLastExecutedMoveScore = bestScore;
-		Utils::LogDebug("Played {} with score {}.", legalMoves[bestMoveIndex], bestScore);
-		return bestMoveIndex;
+		Utils::LogDebug("Played {} with score {}.", bestMove, bestScore);
+		return bestMove;
 	}
 
 	Score MinMaxStrategy::Max(Game::PlayerId playerId, Depth depth, const Game::Game& game, Score alpha, Score beta) {
@@ -46,7 +47,8 @@ namespace Alphalcazar::Strategy::MinMax {
 		Score bestScore = c_AlphaStartingValue;
 		// We are in "Max" so we are evaluating the player who is executing the strategy
 		auto legalMoves = game.GetLegalMoves(playerId);
-		FilterSymmetricMovements(legalMoves, game);
+		FilterSymmetricMovements(legalMoves, game.GetBoard());
+		SortLegalMovements(legalMoves, game.GetBoard());
 		for (const auto& move : legalMoves) {
 			auto nextBestScore = GetNextBestScore(playerId, move, depth, game, alpha, beta);
 
@@ -67,7 +69,8 @@ namespace Alphalcazar::Strategy::MinMax {
 		// We are in "Min" so we are evaluating the opponent
 		auto opponentId = playerId == Game::PlayerId::PLAYER_ONE ? Game::PlayerId::PLAYER_TWO : Game::PlayerId::PLAYER_ONE;
 		auto legalMoves = game.GetLegalMoves(opponentId);
-		FilterSymmetricMovements(legalMoves, game);
+		FilterSymmetricMovements(legalMoves, game.GetBoard());
+		SortLegalMovements(legalMoves, game.GetBoard());
 		for (const auto& move : legalMoves) {
 			auto nextBestScore = GetNextBestScore(playerId, move, depth, game, alpha, beta);
 			bestScore = std::min(nextBestScore, bestScore);
