@@ -31,6 +31,7 @@ namespace Alphalcazar::Strategy::MinMax {
 			auto moveScore = GetNextBestScore(playerId, move, mDepth, game, alpha, c_BetaStartingValue);
 			if (moveScore > bestScore) {
 				bestScore = moveScore;
+				alpha = moveScore;
 				bestMove = move;
 			}
 		}
