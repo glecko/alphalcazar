@@ -11,7 +11,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 
 	constexpr Alphalcazar::Strategy::MinMax::Depth c_MaxDepth = 5;
 	for (Alphalcazar::Strategy::MinMax::Depth depth = 1; depth <= c_MaxDepth; depth++) {
-		Alphalcazar::Strategy::MinMax::MinMaxStrategy strategy { depth };
+		Alphalcazar::Strategy::MinMax::MinMaxStrategy strategy { depth, true };
 		Alphalcazar::Game::Game game {};
 		auto gameStart = std::chrono::high_resolution_clock::now();
 		// auto result = game.Play(strategy, strategy);
