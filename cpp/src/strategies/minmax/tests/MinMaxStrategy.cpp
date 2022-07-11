@@ -180,20 +180,6 @@ namespace Alphalcazar::Strategy::MinMax {
 		}
 	}
 
-	TEST(MinMaxStrategy, TestGameWonOnDepthThree) {
-		/*
-		 * At this position, player 1 has a mate-in-three available when playing first.
-		 */
-		std::vector<PieceSetup> pieceSetups{
-
-		};
-		Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, pieceSetups);
-
-		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_ONE);
-		MinMaxStrategy strategy{ 3 };
-		auto move = strategy.Execute(Game::PlayerId::PLAYER_ONE, legalMoves, game);
-	}
-
 	TEST(MinMaxStrategy, BlackWidowTest) {
 		/*
 		 * The following situation is hard to see for a human, but completely winning for player 2 at depth 2.
