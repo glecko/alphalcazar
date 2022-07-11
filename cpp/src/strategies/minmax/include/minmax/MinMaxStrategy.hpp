@@ -51,10 +51,10 @@ namespace Alphalcazar::Strategy::MinMax {
 
 		Score GetNextBestScore(Game::PlayerId playerId, const Game::PlacementMove& move, Depth depth, const Game::Game& game, Score alpha, Score beta);
 
-		/// Whether the min-max search will be run on multiple threads
-		bool mMultithreaded;
 		/// The max depth to explore on max-max searches
 		Depth mDepth;
+		/// Whether the min-max search will be run on multiple threads
+		bool mMultithreaded;
 		/// The score calculated for the move returned by the last \ref Execute function call
 		Score mLastExecutedMoveScore = 0;
 
