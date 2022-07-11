@@ -36,5 +36,5 @@ namespace Alphalcazar::Game {
 	 * 
 	 * \note The game can still result in a draw if this is false if a stalemate is reached on the board.
 	 */
-	constexpr bool c_AcceptDraws = true;
+	constexpr bool c_AcceptDraws = false;
 }
