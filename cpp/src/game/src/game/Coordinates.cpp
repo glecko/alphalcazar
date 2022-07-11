@@ -2,21 +2,25 @@
 #include "game/parameters.hpp"
 
 #include <util/Log.hpp>
+#include <array>
 
 namespace Alphalcazar::Game {
 	constexpr Coordinate c_InvalidCoordinate = std::numeric_limits<Coordinate>::max();
 
-	/// The coordinate offset each direction represents
-	static std::unordered_map<Direction, Coordinates> c_DirectionOffsets = {
-		{ Direction::NORTH,  { 0, 1 } },
-		{ Direction::SOUTH, { 0, -1 } },
-		{ Direction::EAST, { 1, 0 } },
-		{ Direction::WEST, { -1, 0 } },
-		{ Direction::SOUTH_EAST, { 1, -1 } },
-		{ Direction::SOUTH_WEST, { -1, -1 } },
-		{ Direction::NORTH_EAST, { 1, 1 } },
-		{ Direction::NORTH_WEST, { -1, 1 } },
-	};
+#define OFFSETS(x, y) { static_cast<Coordinate>(x), static_cast<Coordinate>(y) }
+
+	/// The x/y offsets each direction represents
+	constexpr std::array<std::pair<Coordinate, Coordinate>, static_cast<std::size_t>(Direction::SIZE)> c_DirectionOffsets = {{
+		OFFSETS(0, 0), // NONE
+		OFFSETS(0, 1), // NORTH
+		OFFSETS(0, -1), // SOUTH
+		OFFSETS(1, 0), // EAST
+		OFFSETS(-1, 0), // WEST
+		OFFSETS(1, -1), // SOUTH_EAST
+		OFFSETS(-1, -1), // SOUTH_WEST
+		OFFSETS(1, 1), // NORTH_EAST
+		OFFSETS(-1, 1), // NORTH_WEST
+	}};
 
 	Coordinates::Coordinates()
 		: x { c_InvalidCoordinate }
@@ -24,8 +28,8 @@ namespace Alphalcazar::Game {
 	{}
 
 	Coordinates::Coordinates(Coordinate x, Coordinate y)
-		: x(x)
-		, y(y)
+		: x{ x }
+		, y{ y }
 	{}
 
 	Coordinates::~Coordinates() {}
@@ -88,8 +92,8 @@ namespace Alphalcazar::Game {
 			return Invalid();
 		}
 
-		Coordinates& offset = c_DirectionOffsets.at(direction);
-		return Coordinates(x + offset.x * distance, y + offset.y * distance);
+		auto& offset = c_DirectionOffsets[static_cast<std::size_t>(direction)];
+		return Coordinates(x + offset.first * distance, y + offset.second * distance);
 	}
 
 	bool Coordinates::Valid() const {

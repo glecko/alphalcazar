@@ -1,7 +1,6 @@
 #pragma once
 
 #include "aliases.hpp"
-#include <unordered_map>
 
 #include <fmt/format.h>
 
