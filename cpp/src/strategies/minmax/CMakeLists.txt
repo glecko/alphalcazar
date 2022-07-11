@@ -1,12 +1,9 @@
 file(GLOB_RECURSE _sources
     CONFIGURE_DEPENDS
     "src/*.cpp"
-    "src/*.c"
     "src/*.inl"
-    "src/*.h"
     "src/*.hpp"
     "include/*.inl"
-    "include/*.h"
     "include/*.hpp"
 )
 

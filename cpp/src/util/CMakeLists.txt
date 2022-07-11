@@ -4,7 +4,6 @@ file(GLOB_RECURSE _sources
     "src/*.inl"
     "src/*.hpp"
     "include/*.inl"
-    "include/*.h"
     "include/*.hpp"
 )
 
