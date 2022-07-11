@@ -70,12 +70,23 @@ namespace Alphalcazar::Strategy::MinMax {
 		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
 
 		// Player 2 should decide to play a piece on the (2,4) square regardless of the search depth
+		// and regardless of if the strategy is executed on multiple or a single thread
 		for (Depth depth = 1; depth <= 2; depth++) {
-			MinMaxStrategy strategy { depth };
-			auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
+			{
+				MinMaxStrategy strategy{ depth, true };
+				auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
 
-			EXPECT_EQ(move.Coordinates.x, 2);
-			EXPECT_EQ(move.Coordinates.y, 4);
+				EXPECT_EQ(move.Coordinates.x, 2);
+				EXPECT_EQ(move.Coordinates.y, 4);
+			}
+
+			{
+				MinMaxStrategy strategy{ depth, false };
+				auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
+
+				EXPECT_EQ(move.Coordinates.x, 2);
+				EXPECT_EQ(move.Coordinates.y, 4);
+			}
 		}
 	}
 
@@ -137,14 +148,36 @@ namespace Alphalcazar::Strategy::MinMax {
 
 		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
 
-		MinMaxStrategy strategy { 2 };
-		auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
+		Game::Coordinates expectedCoordinates = { 2, 0 };
+		Game::PieceType expectedPieceType = Game::c_PusherPieceType;
+		Score expectedScore = -c_WinConditionScore + c_DepthScorePenalty;
+		{
+			MinMaxStrategy strategy{ 2 };
+			auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
 
-		// Player 2 should postpone defeat this turn by playing the pusher piece at (2,0)
-		EXPECT_EQ(move.PieceType, Game::c_PusherPieceType);
-		EXPECT_TRUE(move.Coordinates.x == 2 && move.Coordinates.y == 0);
-		// But should be aware that the move implies a loss in 2 turns
-		EXPECT_EQ(strategy.GetLastExecutedMoveScore(), -c_WinConditionScore + c_DepthScorePenalty);
+			// Player 2 should postpone defeat this turn by playing the pusher piece at (2,0)
+			EXPECT_EQ(move.PieceType, expectedPieceType);
+			EXPECT_TRUE(move.Coordinates.x == expectedCoordinates.x && move.Coordinates.y == expectedCoordinates.y);
+			// But should be aware that the move implies a loss in 2 turns
+			EXPECT_EQ(strategy.GetLastExecutedMoveScore(), expectedScore);
+		}
+
+		// At depth 3, the strategy should return exactly the same result
+		{
+			MinMaxStrategy strategy{ 3 };
+			auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
+
+			EXPECT_EQ(move.PieceType, expectedPieceType);
+			EXPECT_TRUE(move.Coordinates.x == expectedCoordinates.x && move.Coordinates.y == expectedCoordinates.y);
+			EXPECT_EQ(strategy.GetLastExecutedMoveScore(), expectedScore);
+		}
+
+		// At depth 1, the strategy should not detect the loss
+		{
+			MinMaxStrategy strategy{ 1 };
+			strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
+			EXPECT_TRUE(strategy.GetLastExecutedMoveScore() > -c_WinConditionScore + c_DepthScorePenalty * 10);
+		}
 	}
 
 	TEST(MinMaxStrategy, BlackWidowTest) {
