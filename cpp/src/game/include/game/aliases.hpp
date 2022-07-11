@@ -30,6 +30,7 @@ namespace Alphalcazar::Game {
 		SOUTH_EAST,
 		SOUTH_WEST,
 		NORTH_EAST,
-		NORTH_WEST
+		NORTH_WEST,
+		SIZE
 	};
 }

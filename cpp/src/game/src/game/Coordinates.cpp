@@ -2,21 +2,33 @@
 #include "game/parameters.hpp"
 
 #include <util/Log.hpp>
+#include <array>
 
 namespace Alphalcazar::Game {
 	constexpr Coordinate c_InvalidCoordinate = std::numeric_limits<Coordinate>::max();
 
-	/// The coordinate offset each direction represents
-	static std::unordered_map<Direction, Coordinates> c_DirectionOffsets = {
-		{ Direction::NORTH,  { 0, 1 } },
-		{ Direction::SOUTH, { 0, -1 } },
-		{ Direction::EAST, { 1, 0 } },
-		{ Direction::WEST, { -1, 0 } },
-		{ Direction::SOUTH_EAST, { 1, -1 } },
-		{ Direction::SOUTH_WEST, { -1, -1 } },
-		{ Direction::NORTH_EAST, { 1, 1 } },
-		{ Direction::NORTH_WEST, { -1, 1 } },
-	};
+	// Small macro to define the offsets of \ref c_DirectionOffsets. The reason for this is that in order for the
+	// array to be a valid constexpr, we must cast the int literals to Coordinate (std::int8_t), as implicit type
+	// conversions are not valid for constexprs, and C++17 does not have std::int8_t literals.
+	#define DIR_OFFSETS(x, y) { static_cast<Coordinate>(x), static_cast<Coordinate>(y) }
+
+	/*!
+	 * \brief The x/y offsets each direction represents.
+	 *
+	 * \note Each direction offset should be located at the index of its corresponding \ref Direction value. If
+	 *       the Direction enum is re-ordered, so should this array.
+	 */
+	constexpr std::array<std::pair<Coordinate, Coordinate>, static_cast<std::size_t>(Direction::SIZE)> c_DirectionOffsets = {{
+		DIR_OFFSETS(0, 0), // NONE
+		DIR_OFFSETS(0, 1), // NORTH
+		DIR_OFFSETS(0, -1), // SOUTH
+		DIR_OFFSETS(1, 0), // EAST
+		DIR_OFFSETS(-1, 0), // WEST
+		DIR_OFFSETS(1, -1), // SOUTH_EAST
+		DIR_OFFSETS(-1, -1), // SOUTH_WEST
+		DIR_OFFSETS(1, 1), // NORTH_EAST
+		DIR_OFFSETS(-1, 1), // NORTH_WEST
+	}};
 
 	Coordinates::Coordinates()
 		: x { c_InvalidCoordinate }
@@ -24,8 +36,8 @@ namespace Alphalcazar::Game {
 	{}
 
 	Coordinates::Coordinates(Coordinate x, Coordinate y)
-		: x(x)
-		, y(y)
+		: x{ x }
+		, y{ y }
 	{}
 
 	Coordinates::~Coordinates() {}
@@ -88,8 +100,8 @@ namespace Alphalcazar::Game {
 			return Invalid();
 		}
 
-		Coordinates& offset = c_DirectionOffsets.at(direction);
-		return Coordinates(x + offset.x * distance, y + offset.y * distance);
+		auto& offset = c_DirectionOffsets[static_cast<std::size_t>(direction)];
+		return Coordinates(x + offset.first * distance, y + offset.second * distance);
 	}
 
 	bool Coordinates::Valid() const {
