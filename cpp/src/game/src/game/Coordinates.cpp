@@ -7,19 +7,27 @@
 namespace Alphalcazar::Game {
 	constexpr Coordinate c_InvalidCoordinate = std::numeric_limits<Coordinate>::max();
 
-#define OFFSETS(x, y) { static_cast<Coordinate>(x), static_cast<Coordinate>(y) }
+	// Small macro to define the offsets of \ref c_DirectionOffsets. The reason for this is that in order for the
+	// array to be a valid constexpr, we must cast the int literals to Coordinate (std::int8_t), as implicit type
+	// conversions are not valid for constexprs, and C++17 does not have std::int8_t literals.
+	#define DIR_OFFSETS(x, y) { static_cast<Coordinate>(x), static_cast<Coordinate>(y) }
 
-	/// The x/y offsets each direction represents
+	/*!
+	 * \brief The x/y offsets each direction represents.
+	 *
+	 * \note Each direction offset should be located at the index of its corresponding \ref Direction value. If
+	 *       the Direction enum is re-ordered, so should this array.
+	 */
 	constexpr std::array<std::pair<Coordinate, Coordinate>, static_cast<std::size_t>(Direction::SIZE)> c_DirectionOffsets = {{
-		OFFSETS(0, 0), // NONE
-		OFFSETS(0, 1), // NORTH
-		OFFSETS(0, -1), // SOUTH
-		OFFSETS(1, 0), // EAST
-		OFFSETS(-1, 0), // WEST
-		OFFSETS(1, -1), // SOUTH_EAST
-		OFFSETS(-1, -1), // SOUTH_WEST
-		OFFSETS(1, 1), // NORTH_EAST
-		OFFSETS(-1, 1), // NORTH_WEST
+		DIR_OFFSETS(0, 0), // NONE
+		DIR_OFFSETS(0, 1), // NORTH
+		DIR_OFFSETS(0, -1), // SOUTH
+		DIR_OFFSETS(1, 0), // EAST
+		DIR_OFFSETS(-1, 0), // WEST
+		DIR_OFFSETS(1, -1), // SOUTH_EAST
+		DIR_OFFSETS(-1, -1), // SOUTH_WEST
+		DIR_OFFSETS(1, 1), // NORTH_EAST
+		DIR_OFFSETS(-1, 1), // NORTH_WEST
 	}};
 
 	Coordinates::Coordinates()
