@@ -1,5 +1,3 @@
-#pragma once
-
 #include "util/ThreadPool.hpp"
 
 namespace Alphalcazar::Utils {
