@@ -25,7 +25,7 @@ namespace Alphalcazar::Strategy::MinMax {
 			 * we want to make use of all cores of the machine we are running on. To maximise alpha-beta-cutoffs while
 			 * making sure we make the most use of the cores of our current hardware, we create a thread pool with as
 			 * many threads as the maximum supported hardware concurrency (minus 1, for the main thread).
-			 * 
+			 *
 			 * We always want to have at least 1 worker thread to ensure that single-core machines still execute this strategy.
 			 */
 			std::size_t threadCount = std::max(std::thread::hardware_concurrency() - 1, 1U);
@@ -102,9 +102,9 @@ namespace Alphalcazar::Strategy::MinMax {
 			bestScore = std::max(nextBestScore, bestScore);
 			alpha = std::max(bestScore, alpha);
 			if (mMultithreaded) {
-				alpha = std::max(alpha, mFirstLevelAlpha.load());				
+				alpha = std::max(alpha, mFirstLevelAlpha.load());
 			}
-			
+
 			if (alpha > beta) {
 				break;
 			}
