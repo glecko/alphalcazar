@@ -10,7 +10,7 @@
 
 #include <array>
 
-namespace Alphalcazar::Game {	
+namespace Alphalcazar::Game {
 	TEST(Board, SetupTiles) {
 		Board board {};
 		EXPECT_EQ(board.IsFull(), false);
@@ -365,6 +365,9 @@ namespace Alphalcazar::Game {
 		Piece pieceFourPlayerOne{ PlayerId::PLAYER_ONE, 4 };
 		Piece pieceFourPlayerTwo{ PlayerId::PLAYER_TWO, 4 };
 
+		EXPECT_EQ(board.GetPieces().size(), 0);
+		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_ONE).size(), 0);
+		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_TWO).size(), 0);
 		board.PlacePiece({ 0, 1 }, pieceOnePlayerOne);
 		board.PlacePiece({ 1, 0 }, pieceOnePlayerTwo);
 		board.PlacePiece({ 2, 2 }, pieceFourPlayerOne, Direction::EAST);
@@ -397,5 +400,38 @@ namespace Alphalcazar::Game {
 			EXPECT_EQ(playerOnePieces.size(), 2);
 			EXPECT_EQ(playerTwoPieces.size(), 4);
 		}
+	}
+
+	TEST(Board, GetBoardPiecesWithoutPerimeter) {
+		Board board{};
+		Piece pieceOnePlayerOne{ PlayerId::PLAYER_ONE, 1 };
+		Piece pieceOnePlayerTwo{ PlayerId::PLAYER_TWO, 1 };
+		Piece pieceTwoPlayerOne{ PlayerId::PLAYER_ONE, 2 };
+		Piece pieceTwoPlayerTwo{ PlayerId::PLAYER_TWO, 2 };
+
+		// Place a player 1 piece on the perimeter
+		board.PlacePiece({ 0, 1 }, pieceOnePlayerOne);
+		EXPECT_EQ(board.GetPieces(PlayerId::NONE, true).size(), 0);
+		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_ONE, false).size(), 1);
+		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_ONE, true).size(), 0);
+
+		// Place a player 2 piece on the perimeter
+		board.PlacePiece({ 2, 0 }, pieceOnePlayerTwo);
+		EXPECT_EQ(board.GetPieces(PlayerId::NONE, true).size(), 0);
+		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_TWO, false).size(), 1);
+		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_TWO, true).size(), 0);
+
+		// Place a player 1 piece on the center
+		board.PlacePiece({ 2, 2 }, pieceTwoPlayerOne, Direction::NORTH);
+		EXPECT_EQ(board.GetPieces(PlayerId::NONE, true).size(), 1);
+		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_ONE, false).size(), 2);
+		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_ONE, true).size(), 1);
+
+		// Place a player 2 piece on a corner
+		board.PlacePiece({ 3, 3 }, pieceTwoPlayerTwo, Direction::NORTH);
+		EXPECT_EQ(board.GetPieces(PlayerId::NONE, true).size(), 2);
+		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_TWO, false).size(), 2);
+		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_TWO, true).size(), 1);
+		EXPECT_EQ(board.GetPieces(PlayerId::NONE, false).size(), 4);
 	}
 }

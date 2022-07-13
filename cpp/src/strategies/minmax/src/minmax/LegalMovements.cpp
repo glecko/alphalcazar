@@ -64,8 +64,14 @@ namespace Alphalcazar::Strategy::MinMax {
 		);
 	}
 
-	/// Returns an heuristic approximation of the score we expect to gain from a given placement move, for sorting purposes
-	Score GetHeuristicPlacementMoveScore(const Game::PlacementMove& move, const Game::Board& board) {
+	/*!
+	 * \brief Returns an heuristic approximation of the score we expect to gain from a given placement move, for sorting purposes
+	 *
+	 * \param move The move for which to calculate the heuristic approximation.
+	 * \param board The board of the game for which the legal movement is valid.
+	 * \param opponentBoardPieces A list of the pieces the opponent has on the board (excluding perimeter)
+	 */
+	Score GetHeuristicPlacementMoveScore(const Game::PlacementMove& move, const Game::Board& board, const std::vector<std::pair<Game::Coordinates, Game::Piece>>& opponentBoardPieces) {
 		// First, we check if we have good reason to believe that the movement would result in the placed
 		// piece not even entering the board. While this can be beneficial in some very specific situations,
 		// most times it would just be a blunder, so it makes sense to assign these movements the lowest score
@@ -91,19 +97,41 @@ namespace Alphalcazar::Strategy::MinMax {
 			}
 		}
 
-		// Once we assume that the piece will be able to enter the board, we assign a score based on the piece type and target row
-		Score expectedPieceScore = c_PieceOnBoardScores[move.PieceType - 1];
-		if (move.Coordinates.IsOnCenterLane()) {
-			return expectedPieceScore * c_CenterLanePieceMultiplier;
-		} else {
-			return expectedPieceScore * c_LateralLanePieceMultiplier;
+		// Once we assume that the piece will be able to enter the board, we use the heuristic score of the piece
+		// as a base value for the final heuristic score
+		Score resultScore = c_PieceOnBoardScores[move.PieceType - 1];
+
+		// Check the docstring for \ref c_PusherBonusPerOpponentPiece for more information
+		if (move.PieceType == Game::c_PusherPieceType && opponentBoardPieces.size() >= 2) {
+			resultScore += static_cast<Score>(c_PusherBonusPerOpponentPiece * opponentBoardPieces.size());
 		}
+
+		// We adjust the score based on if the piece is on the center lane (more valuable) or a lateral lane.
+		// We multiply the positive scores and divide the negative scores by the multiplier, as a higher lane multiplier
+		// is meant to always increase the absolute value of the move score
+		if (move.Coordinates.IsOnCenterLane()) {
+			if (resultScore >= 0) {
+				resultScore = static_cast<Score>(resultScore * c_FreshCenterLanePieceMultiplier);
+			} else {
+				resultScore = static_cast<Score>(resultScore / c_FreshCenterLanePieceMultiplier);
+			}
+		} else {
+			if (resultScore >= 0) {
+				resultScore = static_cast<Score>(resultScore * c_FreshCornerPieceMultiplier);
+			} else {
+				resultScore = static_cast<Score>(resultScore / c_FreshCornerPieceMultiplier);
+			}
+		}
+
+		return resultScore;
 	}
 
-	void SortLegalMovements(std::vector<Game::PlacementMove>& legalMoves, const Game::Board& board) {
-		std::sort(legalMoves.begin(), legalMoves.end(), [board](const Game::PlacementMove& moveA, const Game::PlacementMove& moveB) {
+	void SortLegalMovements(Game::PlayerId playerId, std::vector<Game::PlacementMove>& legalMoves, const Game::Board& board) {
+		auto opponentId = playerId == Game::PlayerId::PLAYER_ONE ? Game::PlayerId::PLAYER_TWO : Game::PlayerId::PLAYER_ONE;
+		auto opponentBoardPieces = board.GetPieces(opponentId, true);
+		std::sort(legalMoves.begin(), legalMoves.end(), [board, opponentBoardPieces](const Game::PlacementMove& moveA, const Game::PlacementMove& moveB) {
 			// Sort the vector by the heuristic score of the placement moves
-			return GetHeuristicPlacementMoveScore(moveA, board) > GetHeuristicPlacementMoveScore(moveB, board);
+			return GetHeuristicPlacementMoveScore(moveA, board, opponentBoardPieces) > GetHeuristicPlacementMoveScore(moveB, board, opponentBoardPieces);
 		});
 	}
 }

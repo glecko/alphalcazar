@@ -25,10 +25,10 @@ namespace Alphalcazar::Strategy::MinMax {
 	/*!
 	 * \brief Filters a list of legal movements, erasing those that are duplicated once board
 	 *        symmetries are taken into account.
-	 * 
+	 *
 	 * This means that if several moves would cause the resulting board states to be identical with some symmetry
 	 * (ex. x-axis symmetry), only one of those moves (the first one) is kept in the list.
-	 * 
+	 *
 	 * \param legalMoves The list of legal moves to filter. Will potentially be modified.
 	 * \param board The board of the game for which the legal movements are valid.
 	 */
@@ -37,12 +37,13 @@ namespace Alphalcazar::Strategy::MinMax {
 	/*!
 	 * \brief Sorts a list of legal movements by the heuristic score we expect to obtain from playing
 	 *        each of those movements.
-	 * 
+	 *
 	 * Alpha-beta-pruning algorithms are most efficient when the best moves are explored first. Since this is
 	 * not possible until the branch is actually explore, we use this heuristic to try to approximate it.
-	 * 
+	 *
+	 * \param playerId The ID of the player who's turn it is to play.
 	 * \param legalMoves The list of legal moves to sort. Will potentially be modified.
 	 * \param board The board of the game for which the legal movements are valid.
 	 */
-	void SortLegalMovements(std::vector<Game::PlacementMove>& legalMoves, const Game::Board& board);
+	void SortLegalMovements(Game::PlayerId playerId, std::vector<Game::PlacementMove>& legalMoves, const Game::Board& board);
 }
