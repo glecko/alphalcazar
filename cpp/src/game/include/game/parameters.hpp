@@ -25,6 +25,9 @@ namespace Alphalcazar::Game {
 	/// The coordinate at the center of the board. This value will only have significance for odd board sizes.
 	constexpr Coordinate c_CenterCoordinate = c_BoardSize / 2 + 1;
 
+	/// The amount of tiles that make up the perimeter of the board
+	constexpr Coordinate c_PerimeterTileCount = c_BoardSize * 4;
+
 	/*!
 	 * \brief Whether the game ends in a draw condition when both players complete a row.
 	 * 

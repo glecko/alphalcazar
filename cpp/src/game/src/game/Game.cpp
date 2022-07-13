@@ -31,23 +31,23 @@ namespace Alphalcazar::Game {
 		auto result = GameResult::NONE;
 		ExecutePlacementMove(activePlayer, move);
 		if (mState.FirstMoveExecuted) {
+			mPlayerMovesExecutedCallbacks.Invoke();
 			result = EvaluateTurnEndPhase();
+		} else {
+			mState.FirstMoveExecuted = true;
 		}
-		mState.FirstMoveExecuted = !mState.FirstMoveExecuted;
 		return result;
 	}
 
 	GameResult Game::EvaluateTurnEndPhase() {
 		auto executedMoves = mBoard.ExecuteMoves(mState.PlayerWithInitiative);
 		mState.Turn += 1;
+		mState.FirstMoveExecuted = false;
 		SwapPlayerWithInitiative();
 		return EvaluateGameResult(executedMoves);
 	}
 
 	void Game::ExecutePlayerMoves(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy) {
-		// At the beginning of the turn, we reset the "first move executed" state
-		mState.FirstMoveExecuted = false;
-
 		// Play the first move for the player with initiative
 		if (mState.PlayerWithInitiative == PlayerId::PLAYER_ONE) {
 			ExecutePlayerMove(PlayerId::PLAYER_ONE, firstPlayerStrategy);

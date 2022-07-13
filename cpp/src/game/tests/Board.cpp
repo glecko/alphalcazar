@@ -6,40 +6,11 @@
 #include "game/Piece.hpp"
 #include "game/parameters.hpp"
 
+#include "testhelpers.hpp"
+
 #include <array>
 
-namespace Alphalcazar::Game {
-	struct PieceSetup {
-		PlayerId PlayerId;
-		PieceType PieceType;
-		Direction Direction;
-		Coordinates Coordinates;
-	};
-
-	/// Helper function for quickly configuring a board's initial position
-	Board SetupBoardForTesting(const std::vector<PieceSetup>& pieceSetups) {
-		Board board {};
-
-		for (auto& pieceSetup : pieceSetups) {
-			Piece piece { pieceSetup.PlayerId, pieceSetup.PieceType };
-			board.PlacePiece(pieceSetup.Coordinates, piece, pieceSetup.Direction);
-		}
-		return board;
-	}
-
-	static Piece c_AllPieces[] = {
-		{ PlayerId::PLAYER_ONE, 1 },
-		{ PlayerId::PLAYER_ONE, 2 },
-		{ PlayerId::PLAYER_ONE, 3 },
-		{ PlayerId::PLAYER_ONE, 4 },
-		{ PlayerId::PLAYER_ONE, 5 },
-		{ PlayerId::PLAYER_TWO, 1 },
-		{ PlayerId::PLAYER_TWO, 2 },
-		{ PlayerId::PLAYER_TWO, 3 },
-		{ PlayerId::PLAYER_TWO, 4 },
-		{ PlayerId::PLAYER_TWO, 5 },
-	};
-
+namespace Alphalcazar::Game {	
 	TEST(Board, SetupTiles) {
 		Board board {};
 		EXPECT_EQ(board.IsFull(), false);
@@ -47,6 +18,7 @@ namespace Alphalcazar::Game {
 		// We expect a square of c_PlayAreaSize size without the 4 corners
 		auto tiles = board.GetTiles();
 		EXPECT_EQ(tiles.size(), c_PlayAreaSize * c_PlayAreaSize - 4);
+		EXPECT_EQ(board.GetPerimeterTiles().size(), c_PerimeterTileCount);
 	}
 
 	TEST(Board, PlacePiece) {

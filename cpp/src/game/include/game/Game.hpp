@@ -22,8 +22,6 @@ namespace Alphalcazar::Game {
 		bool FirstMoveExecuted = false;
 		/// What turn the game is currently on
 		std::uint16_t Turn = 0;
-
-
 	};
 
 
