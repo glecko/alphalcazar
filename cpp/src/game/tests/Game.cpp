@@ -65,7 +65,7 @@ namespace Alphalcazar::Game {
 
 		CheckHandPiecesLegalMovesConsistency(game, PlayerId::PLAYER_ONE);
 		CheckHandPiecesLegalMovesConsistency(game, PlayerId::PLAYER_TWO);
-		
+
 		game.PlayNextPlacementMove({ { 0, 2 }, 5 });
 		game.PlayNextPlacementMove({ { 0, 3 }, 5 });
 
@@ -87,7 +87,7 @@ namespace Alphalcazar::Game {
 		game.PlayNextPlacementMove({ { 0, 3 }, 3 });
 		EXPECT_EQ(game.GetState().Turn, 0);
 		EXPECT_EQ(game.GetState().FirstMoveExecuted, true);
-		EXPECT_EQ(game.GetActivePlayer(), PlayerId::PLAYER_ONE);
+		EXPECT_EQ(game.GetActivePlayer(), PlayerId::PLAYER_TWO);
 		EXPECT_EQ(game.GetBoard().GetTile(0, 3)->GetPiece()->GetOwner(), PlayerId::PLAYER_ONE);
 		EXPECT_EQ(game.GetBoard().GetTile(0, 3)->GetPiece()->GetType(), 3);
 
@@ -96,6 +96,7 @@ namespace Alphalcazar::Game {
 		game.PlayNextPlacementMove({ { 2, 0 }, 5 });
 		EXPECT_EQ(game.GetState().Turn, 1);
 		EXPECT_EQ(game.GetState().FirstMoveExecuted, false);
+		EXPECT_EQ(game.GetActivePlayer(), PlayerId::PLAYER_TWO);
 		EXPECT_FALSE(game.GetBoard().GetTile(0, 3)->HasPiece());
 		EXPECT_FALSE(game.GetBoard().GetTile(2, 0)->HasPiece());
 		EXPECT_EQ(game.GetBoard().GetTile(1, 3)->GetPiece()->GetType(), 3);
@@ -107,6 +108,9 @@ namespace Alphalcazar::Game {
 		// On the next turn, we expect the first placement move to be played by player 2,
 		// as the player with initiative should have switched
 		game.PlayNextPlacementMove({ { 0, 1 }, 2 });
+		EXPECT_EQ(game.GetState().Turn, 1);
+		EXPECT_EQ(game.GetActivePlayer(), PlayerId::PLAYER_ONE);
+		EXPECT_EQ(game.GetState().FirstMoveExecuted, true);
 		EXPECT_EQ(game.GetBoard().GetTile(0, 1)->GetPiece()->GetOwner(), PlayerId::PLAYER_TWO);
 		EXPECT_EQ(game.GetState().Turn, 1);
 		EXPECT_EQ(game.GetState().FirstMoveExecuted, true);
@@ -127,7 +131,7 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(game.GetPlayerByInitiative(true), PlayerId::PLAYER_TWO);
 		EXPECT_EQ(game.GetState().Turn, 1);
 		EXPECT_EQ(game.GetState().FirstMoveExecuted, false);
-		
+
 		// We expect player 1 to be missing piece 3 in their hand
 		auto playerOnePieces = game.GetPiecesInHand(PlayerId::PLAYER_ONE);
 		EXPECT_EQ(playerOnePieces.size(), c_PieceTypes - 1);
@@ -149,7 +153,7 @@ namespace Alphalcazar::Game {
 		});
 		EXPECT_NE(pieceThreeBoardIter, boardPieces.end());
 		EXPECT_TRUE(pieceThreeBoardIter->first.x == 1 && pieceThreeBoardIter->first.y == 2);
-		
+
 		// We expect piece 2 of player 2 to be on (1,3)
 		auto pieceTwoBoardIter = std::find_if(boardPieces.begin(), boardPieces.end(), [](const std::pair<Coordinates, Piece>& pieceInfo) {
 			return pieceInfo.second.GetType() == 2 && pieceInfo.second.GetOwner() == PlayerId::PLAYER_TWO;
