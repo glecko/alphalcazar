@@ -41,9 +41,8 @@ namespace Alphalcazar::Strategy::MinMax {
 		SortLegalMovements(filteredMoves, game.GetBoard());
 
 		assert(!filteredMoves.empty());
-		Game::PlacementMove& bestMove = filteredMoves[0];
 		Score bestScore = c_AlphaStartingValue;
-
+		std::size_t bestMoveIndex = 0;
 		if (mMultithreaded) {
 			mFirstLevelAlpha = c_AlphaStartingValue;
 
@@ -63,27 +62,29 @@ namespace Alphalcazar::Strategy::MinMax {
 				moveFuture.wait();
 			}
 
-			for (auto& moveFuture : moveFutures) {
+			for (std::size_t i = 0; i < moveFutures.size(); i++) {
+				auto& moveFuture = moveFutures[i];
 				MoveFutureResult moveFutureResult = moveFuture.get();
 				if (moveFutureResult.first > bestScore) {
 					bestScore = moveFutureResult.first;
-					bestMove = moveFutureResult.second;
+					bestMoveIndex = i;
 				}
 			}
 		} else {
 			Score alpha = c_AlphaStartingValue;
-			for (const auto& move : filteredMoves) {
+			for (std::size_t i = 0; i < filteredMoves.size(); i++) {
+				auto& move = filteredMoves[i];
 				auto moveScore = GetNextBestScore(playerId, move, mDepth, game, alpha, c_BetaStartingValue);
 				if (moveScore > bestScore) {
 					bestScore = moveScore;
 					alpha = moveScore;
-					bestMove = move;
+					bestMoveIndex = i;
 				}
 			}
 		}
-
 		mLastExecutedMoveScore = bestScore;
-		Utils::LogDebug("Played {} with score {}.", bestMove, bestScore);
+		Game::PlacementMove& bestMove = filteredMoves[bestMoveIndex];
+		Utils::LogDebug("Player {} played {} (idx {}/{}) with score {}.", static_cast<std::size_t>(playerId), bestMove, bestMoveIndex, filteredMoves.size(), bestScore);
 		return bestMove;
 	}
 
