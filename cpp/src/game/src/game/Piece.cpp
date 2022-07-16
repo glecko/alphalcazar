@@ -2,7 +2,11 @@
 #include "game/parameters.hpp"
 
 namespace Alphalcazar::Game {
-	Piece::Piece() noexcept {}
+	Piece::Piece() noexcept
+		: mType{ c_InvalidPieceType }
+		, mDirection{ Direction::NONE }
+		, mOwner{ PlayerId::NONE }
+	{}
 
 	Piece::Piece(PlayerId owner, PieceType type) noexcept
 		: mType{ type }
@@ -36,7 +40,7 @@ namespace Alphalcazar::Game {
 	bool Piece::IsPusher() const {
 		return mType == c_PusherPieceType;
 	}
-	
+
 	bool Piece::IsValid() const {
 		return mType != c_InvalidPieceType && mOwner != PlayerId::NONE;
 	}

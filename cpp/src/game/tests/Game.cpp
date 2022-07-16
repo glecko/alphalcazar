@@ -34,23 +34,6 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(game.GetPiecesInHand(PlayerId::PLAYER_TWO).size(), c_PieceTypes);
 	}
 
-	TEST(Game, TestMovesExecutedCallback) {
-		Game game{};
-		std::size_t counter = 0;
-		std::ignore = game.OnPlayerMovesExecuted().Register([&counter]() {
-			counter++;
-		});
-		game.PlayNextPlacementMove({ { 0, 2 }, 5 });
-		EXPECT_EQ(counter, 0);
-		game.PlayNextPlacementMove({ { 0, 3 }, 5 });
-		// After 2 moves have been played, we expect the counter to increase as a complete turn has been played
-		EXPECT_EQ(counter, 1);
-
-		MockStrategy strategy;
-		game.PlayTurn(strategy, strategy);
-		EXPECT_EQ(counter, 2);
-	}
-
 	/*!
 	 * \brief Checks if the amount of legal moves is consistent with the pieces in hand of a player
 	 *

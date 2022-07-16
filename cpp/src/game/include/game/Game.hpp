@@ -71,10 +71,6 @@ namespace Alphalcazar::Game {
 
 		/// Returns a list of all pieces that the specified player has in hand (are not placed on the board)
 		std::vector<Piece> GetPiecesInHand(PlayerId player) const;
-
-		using PlayerMovesExecutedCallback = void();
-		/// Callback executed after both players have placed their piece on the board, and before board movements are executed
-		Utils::CallbackHandler<PlayerMovesExecutedCallback>& OnPlayerMovesExecuted();
 	private:
 		/// Exchange the player with initiative
 		void SwapPlayerWithInitiative();
@@ -101,7 +97,5 @@ namespace Alphalcazar::Game {
 		Board mBoard;
 		/// The state of the game. See \ref GameState for more info
 		GameState mState;
-
-		Utils::CallbackHandler<PlayerMovesExecutedCallback> mPlayerMovesExecutedCallbacks;
 	};
 }
