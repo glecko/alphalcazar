@@ -224,6 +224,11 @@ namespace Alphalcazar::Game {
 
 	std::vector<std::pair<Coordinates, Piece>> Board::GetPieces(PlayerId player, bool excludePerimeter) const {
 		std::vector<std::pair<Coordinates, Piece>> result;
+		// We preallocate space in the vector according to the max amount of pieces that could
+		// fit in the vector if all relevant pieces were on the board. Will waste memory sometimes
+		// but memory usage is not as much of an issue as CPU usage here.
+		result.reserve(player == PlayerId::NONE ? c_PieceTypes * 2 : c_PieceTypes);
+
 		// See the docstring of \ref mPlacedPieceCoordinates for more information.
 		// We iterate only over the positions that contain the coordinates of the pieces
 		// of the specified player.
