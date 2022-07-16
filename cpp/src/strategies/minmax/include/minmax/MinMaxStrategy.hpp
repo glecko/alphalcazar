@@ -22,8 +22,8 @@ namespace Alphalcazar::Strategy::MinMax {
 	/*!
 	 * \brief A strategy that determines the move to play by using a min-max algorithm
 	 *        on the available legal moves.
-	 * 
-	 * Like a min-max chess engine, it is limited to a certain depth (due to the computational complexity 
+	 *
+	 * Like a min-max chess engine, it is limited to a certain depth (due to the computational complexity
 	 * of running this algorithm on this kind of game) and uses heuristics to evaluate the board score
 	 * when the max depth is reached.
 	 */
@@ -51,15 +51,15 @@ namespace Alphalcazar::Strategy::MinMax {
 
 		Score GetNextBestScore(Game::PlayerId playerId, const Game::PlacementMove& move, Depth depth, const Game::Game& game, Score alpha, Score beta);
 
-		/// The max depth to explore on max-max searches
+		/// The thread pool that will run the min-max algorithm tasks if mMultithreaded is true
+		std::unique_ptr<Utils::ThreadPool> mThreadPool;
+		std::atomic<Score> mFirstLevelAlpha = 0;
+
+		/// The score calculated for the move returned by the last \ref Execute function call
+		Score mLastExecutedMoveScore = 0;
+		/// The max depth to explore on min-max searches
 		Depth mDepth;
 		/// Whether the min-max search will be run on multiple threads
 		bool mMultithreaded;
-		/// The score calculated for the move returned by the last \ref Execute function call
-		Score mLastExecutedMoveScore = 0;
-
-		std::atomic<Score> mFirstLevelAlpha = 0;
-		/// The thread pool that will run the min-max algorithm tasks if mMultithreaded is true
-		std::unique_ptr<Utils::ThreadPool> mThreadPool;
 	};
 }

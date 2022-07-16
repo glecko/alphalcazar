@@ -31,7 +31,6 @@ namespace Alphalcazar::Game {
 		auto result = GameResult::NONE;
 		ExecutePlacementMove(activePlayer, move);
 		if (mState.FirstMoveExecuted) {
-			mPlayerMovesExecutedCallbacks.Invoke();
 			result = EvaluateTurnEndPhase();
 		} else {
 			mState.FirstMoveExecuted = true;
@@ -63,8 +62,6 @@ namespace Alphalcazar::Game {
 		} else {
 			ExecutePlayerMove(PlayerId::PLAYER_ONE, secondPlayerStrategy);
 		}
-
-		mPlayerMovesExecutedCallbacks.Invoke();
 	}
 
 	void Game::ExecutePlayerMove(PlayerId playerId, Strategy& strategy) {
@@ -152,9 +149,5 @@ namespace Alphalcazar::Game {
 
 	const Board& Game::GetBoard() const {
 		return mBoard;
-	}
-
-	Utils::CallbackHandler<Game::PlayerMovesExecutedCallback>& Game::OnPlayerMovesExecuted() {
-		return mPlayerMovesExecutedCallbacks;
 	}
 }

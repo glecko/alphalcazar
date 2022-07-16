@@ -11,7 +11,7 @@ namespace Alphalcazar::Utils {
 
 	/*!
 	 * \brief Generic callback handler utility class.
-	 * 
+	 *
 	 * Use the \ref Register method to register new callbacks to it, and the \ref Invoke method to execute them.
 	 */
 	template <typename T, typename...Args>
@@ -24,23 +24,39 @@ namespace Alphalcazar::Utils {
 		/// Registers a new callback and returns its handle.
 		[[nodiscard]] CallbackHandle Register(CallbackType callback) {
 			auto handle = ++mHandle;
-			mCallbacks[handle] = callback;
+			mCallbacks.emplace_back(handle, callback);
 			return handle;
 		}
 
 		/// Removes a previously registered callback given its handle returned from \ref Register
 		void Remove(CallbackHandle handle) {
-			mCallbacks.erase(handle);
+			mCallbacks.erase(
+				std::remove_if(
+					mCallbacks.begin(),
+					mCallbacks.end(),
+					[handle](const auto& callbackInfo) {
+						return callbackInfo.Handle == handle;
+					}
+				),
+				mCallbacks.end()
+			);
 		}
 
 		/// Invokes all callbacks registered to this callback handler.
 		void Invoke(Args... args) const {
-			for (const auto& it : mCallbacks) {
-				it.second(args...);
+			for (const auto& callbackInfo : mCallbacks) {
+				callbackInfo.Callback(args...);
 			}
 		}
 	private:
-		std::unordered_map<CallbackHandle, CallbackType> mCallbacks;
+		struct CallbackInfo {
+			CallbackInfo(CallbackHandle handle, CallbackType callback) : Handle{ handle }, Callback{ callback } {}
+
+			CallbackHandle Handle;
+			CallbackType Callback;
+		};
+
+		std::vector<CallbackInfo> mCallbacks;
 		CallbackHandle mHandle = 1;
 	};
 
