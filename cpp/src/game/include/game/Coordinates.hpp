@@ -1,22 +1,23 @@
 #pragma once
 
 #include "aliases.hpp"
-
+#include "game/parameters.hpp"
 #include <fmt/format.h>
+#include <array>
 
 namespace Alphalcazar::Game {
+	constexpr Coordinate c_InvalidCoordinate = std::numeric_limits<Coordinate>::max();
+
 	/*!
 	 * \brief Helper class to work with the 2D coordinate system of the tiles of the board.
-	 * 
+	 *
 	 * Represents the coordinates of a (potential) tile position on the board. The coordinate system of the board
 	 * has its origin (0, 0) at the south-west (bottom-left) most corner of the board. X coordinates increase to the east
 	 * and Y coordinates increase to the north.
 	 */
 	struct Coordinates {
-		Coordinate x, y;
-		Coordinates();
-		Coordinates(Coordinate x, Coordinate y);
-		~Coordinates();
+		Coordinate x = c_InvalidCoordinate;
+		Coordinate y = c_InvalidCoordinate;
 
 		bool operator==(const Coordinates& coord) const;
 		bool operator!=(const Coordinates& coord) const;
@@ -53,6 +54,29 @@ namespace Alphalcazar::Game {
 
 		/// Builds and returns an instance of invalid coordinates
 		static Coordinates Invalid();
+
+		/// Returns a list of all coordinates that correspond to valid perimeter tiles
+		static constexpr std::array<Coordinates, c_PerimeterTileCount> GetPerimeterCoordinates() {
+			std::array<Coordinates, c_PerimeterTileCount> result{};
+			std::size_t i = 0;
+			for (Coordinate x = 1; x <= c_BoardSize; x++) {
+				result[i] = { x, 0 };
+				i++;
+			}
+			for (Coordinate x = 1; x <= c_BoardSize; x++) {
+				result[i] = { x, c_PlayAreaSize - 1 };
+				i++;
+			}
+			for (Coordinate y = 1; y <= c_BoardSize; y++) {
+				result[i] = { 0, y };
+				i++;
+			}
+			for (Coordinate y = 1; y <= c_BoardSize; y++) {
+				result[i] = { c_PlayAreaSize - 1, y };
+				i++;
+			}
+			return result;
+		}
 	};
 }
 
@@ -61,7 +85,7 @@ namespace std {
 	* The \ref Coordinates class implements a hashing function to be able to be used as a key
 	* for unordered maps.
 	*/
-	template <> 
+	template <>
 	struct hash<Alphalcazar::Game::Coordinates> {
 		std::size_t operator()(const Alphalcazar::Game::Coordinates& coordinates) const noexcept {
 			auto xHash = hash<Alphalcazar::Game::Coordinate>()(coordinates.x);

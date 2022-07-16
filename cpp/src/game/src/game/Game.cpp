@@ -103,12 +103,12 @@ namespace Alphalcazar::Game {
 
 	std::vector<PlacementMove> Game::GetLegalMoves(PlayerId player) const {
 		std::vector<PlacementMove> result;
-		auto legalTiles = mBoard.GetLegalPlacementTiles();
+		auto legalCoordinates = mBoard.GetLegalPlacementCoordinates();
 		std::vector<Piece> pieces = GetPiecesInHand(player);
-		result.reserve(pieces.size() * legalTiles.size());
-		for (auto* tile : legalTiles) {
+		result.reserve(pieces.size() * legalCoordinates.size());
+		for (auto& coordinates : legalCoordinates) {
 			for (auto& piece : pieces) {
-				result.emplace_back(tile->GetCoordinates(), piece.GetType());
+				result.emplace_back(coordinates, piece.GetType());
 			}
 		}
 		return result;

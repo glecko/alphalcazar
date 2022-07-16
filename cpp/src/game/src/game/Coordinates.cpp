@@ -1,11 +1,8 @@
 #include "game/Coordinates.hpp"
-#include "game/parameters.hpp"
 
 #include <util/Log.hpp>
-#include <array>
 
 namespace Alphalcazar::Game {
-	constexpr Coordinate c_InvalidCoordinate = std::numeric_limits<Coordinate>::max();
 
 	// Small macro to define the offsets of \ref c_DirectionOffsets. The reason for this is that in order for the
 	// array to be a valid constexpr, we must cast the int literals to Coordinate (std::int8_t), as implicit type
@@ -29,18 +26,6 @@ namespace Alphalcazar::Game {
 		DIR_OFFSETS(1, 1), // NORTH_EAST
 		DIR_OFFSETS(-1, 1), // NORTH_WEST
 	}};
-
-	Coordinates::Coordinates()
-		: x { c_InvalidCoordinate }
-		, y { c_InvalidCoordinate }
-	{}
-
-	Coordinates::Coordinates(Coordinate x, Coordinate y)
-		: x{ x }
-		, y{ y }
-	{}
-
-	Coordinates::~Coordinates() {}
 
 	bool Coordinates::operator==(const Coordinates& coord) const {
 		return x == coord.x && y == coord.y;
@@ -101,7 +86,7 @@ namespace Alphalcazar::Game {
 		}
 
 		auto& offset = c_DirectionOffsets[static_cast<std::size_t>(direction)];
-		return Coordinates(x + offset.first * distance, y + offset.second * distance);
+		return Coordinates{ static_cast<Coordinate>(x + offset.first * distance), static_cast<Coordinate>(y + offset.second * distance) };
 	}
 
 	bool Coordinates::Valid() const {
