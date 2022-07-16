@@ -23,10 +23,8 @@ namespace Alphalcazar::Game {
 
 	TEST(Board, PlacePiece) {
 		Board board {};
-
 		std::size_t pieceIndex = 0;
-		for (auto* tile : board.GetPerimeterTiles()) {
-			auto& coordinates = tile->GetCoordinates();
+		for (auto& coordinates : Coordinates::GetPerimeterCoordinates()) {
 			Piece piece = c_AllPieces[pieceIndex];
 			pieceIndex++;
 			if (pieceIndex >= (c_PieceTypes * 2) - 1) {
@@ -43,12 +41,11 @@ namespace Alphalcazar::Game {
 		Board board {};
 
 		std::size_t pieceIndex = 0;
-		for (auto* tile : board.GetTiles()) {
-			auto& coordinates = tile->GetCoordinates();
-			if (!coordinates.IsPerimeter()) {
+		for (Coordinate x = 1; x <= c_BoardSize; x++) {
+			for (Coordinate y = 1; y <= c_BoardSize; y++) {
 				Piece piece = c_AllPieces[pieceIndex];
 				pieceIndex++;
-				board.GetTile(coordinates)->PlacePiece(piece);
+				board.GetTile(x, y)->PlacePiece(piece);
 			}
 		}
 		EXPECT_EQ(board.IsFull(), true);
@@ -321,16 +318,16 @@ namespace Alphalcazar::Game {
 		Piece pieceOne { PlayerId::PLAYER_ONE, 1 };
 		Piece pieceTwo { PlayerId::PLAYER_ONE, 2 };
 
-		auto legalPlacementTiles = board.GetLegalPlacementTiles();
+		auto legalPlacementTiles = board.GetLegalPlacementCoordinates();
 		// On an empty board we should have as many options as the size of the perimeter
 		// which is the play area size square minus the board size square minus the 4 corners
 		constexpr Coordinate perimeterSize = c_PlayAreaSize * c_PlayAreaSize - c_BoardSize * c_BoardSize - 4;
 		EXPECT_EQ(legalPlacementTiles.size(), perimeterSize);
 
-		board.PlacePiece(legalPlacementTiles[0]->GetCoordinates(), pieceOne);
-		board.PlacePiece(legalPlacementTiles[1]->GetCoordinates(), pieceTwo);
+		board.PlacePiece(legalPlacementTiles[0], pieceOne);
+		board.PlacePiece(legalPlacementTiles[1], pieceTwo);
 
-		auto legalTilesAfterPlacement = board.GetLegalPlacementTiles();
+		auto legalTilesAfterPlacement = board.GetLegalPlacementCoordinates();
 		EXPECT_EQ(legalTilesAfterPlacement.size(), perimeterSize - 2);
 	}
 

@@ -76,24 +76,20 @@ namespace Alphalcazar::Strategy::MinMax {
 		// piece not even entering the board. While this can be beneficial in some very specific situations,
 		// most times it would just be a blunder, so it makes sense to assign these movements the lowest score
 		if (move.PieceType != Game::c_PusherPieceType) {
-			if (auto* moveTile = board.GetTile(move.Coordinates)) {
-				auto placementDirection = moveTile->GetLegalPlacementDirection();
-				auto pieceTargetCoordinate = move.Coordinates.GetCoordinateInDirection(placementDirection, 1);
-				if (auto* pieceTargetTilePiece = board.GetTile(pieceTargetCoordinate)->GetPiece()) {
-					// There's a piece on the tile that our piece is looking at
-					// We check if we can expect the piece to be gone before our piece moves
-					// or if the piece can be pushed by us
-					if (!pieceTargetTilePiece->IsPushable()) {
-						auto blockingPieceTargetCoordinate = pieceTargetCoordinate.GetCoordinateInDirection(pieceTargetTilePiece->GetMovementDirection(), 1);
-						// We check if the target piece moves after us, or if it will attempt to move to the position where we have placed
-						// the piece, causing its movement to be blocked
-						if (pieceTargetTilePiece->GetType() > move.PieceType || blockingPieceTargetCoordinate == move.Coordinates) {
-							return 0;
-						}
+			auto placementDirection = move.Coordinates.GetLegalPlacementDirection();
+			auto pieceTargetCoordinate = move.Coordinates.GetCoordinateInDirection(placementDirection, 1);
+			if (auto* pieceTargetTilePiece = board.GetTile(pieceTargetCoordinate)->GetPiece()) {
+				// There's a piece on the tile that our piece is looking at
+				// We check if we can expect the piece to be gone before our piece moves
+				// or if the piece can be pushed by us
+				if (!pieceTargetTilePiece->IsPushable()) {
+					auto blockingPieceTargetCoordinate = pieceTargetCoordinate.GetCoordinateInDirection(pieceTargetTilePiece->GetMovementDirection(), 1);
+					// We check if the target piece moves after us, or if it will attempt to move to the position where we have placed
+					// the piece, causing its movement to be blocked
+					if (pieceTargetTilePiece->GetType() > move.PieceType || blockingPieceTargetCoordinate == move.Coordinates) {
+						return 0;
 					}
 				}
-			} else {
-				Utils::LogError("Legal move pointed at {}, but no board tile was found at those coordinates.", move.Coordinates);
 			}
 		}
 

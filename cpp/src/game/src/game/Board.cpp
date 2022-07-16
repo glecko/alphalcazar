@@ -7,27 +7,16 @@
 #include <algorithm>
 
 namespace Alphalcazar::Game {
-	Board::Board() {
-		for (Coordinate x = 0; x <= c_PlayAreaSize - 1; x++) {
-			for (Coordinate y = 0; y <= c_PlayAreaSize - 1; y++) {
-				Coordinates coordinates { x, y };
-				if (coordinates.IsCorner()) {
-					// Avoid creating tiles for corners of the play area
-					continue;
-				}
-				mTiles[x][y] = { coordinates };
-			}
-		}
-	}
+	Board::Board() {}
 
 	Board::~Board() {}
 
 	void Board::PlacePiece(const Coordinates& coordinates, Piece& piece) {
 		if (auto* tile = GetTile(coordinates)) {
-			auto direction = tile->GetLegalPlacementDirection();
+			auto direction = coordinates.GetLegalPlacementDirection();
 			if (direction != Direction::NONE) {
 				tile->PlacePiece(piece);
-				tile->GetPiece()->SetMovementDirection(tile->GetLegalPlacementDirection());
+				tile->GetPiece()->SetMovementDirection(coordinates.GetLegalPlacementDirection());
 
 				SetPlacedPieceCoordinates(piece, coordinates);
 			}
@@ -49,9 +38,10 @@ namespace Alphalcazar::Game {
 
 	BoardMovesCount Board::ExecutePieceMove(const Piece& piece) {
 		BoardMovesCount movedPieces = 0;
-		// Check if a tile exists with the specified piece to move
-		if (auto* originTile = GetPieceTile(piece)) {
-			const Coordinates& originCoordinates = originTile->GetCoordinates();
+		// Check if the piece to move exists at some coordinate on the board
+		const Coordinates& originCoordinates = GetPlacedPieceCoordinates(piece);
+		if (originCoordinates.Valid()) {
+			Tile* originTile = GetTile(originCoordinates);
 			Piece* originPiece = originTile->GetPiece();
 
 			auto direction = originPiece->GetMovementDirection();
@@ -59,14 +49,14 @@ namespace Alphalcazar::Game {
 			if (Tile* targetTile = GetTile(targetCoordinates)) {
 				Piece* targetTilePiece = targetTile->GetPiece();
 				if (targetTilePiece == nullptr) {
-					MovePiece(*originTile, *targetTile);
+					MovePiece(*originTile, *targetTile, targetCoordinates);
 					movedPieces++;
 				} else if (originPiece->IsPusher()) {
 					auto chainedMovements = GetChainedPushMovements(originCoordinates, direction);
 					// We execute the chained push movements in order
-					for (auto& [sourcePushTile, targetPushTile] : chainedMovements) {
+					for (auto& [sourcePushTile, targetPushTile, targetPushCoordinate] : chainedMovements) {
 						if (targetPushTile != nullptr) {
-							MovePiece(*sourcePushTile, *targetPushTile);
+							MovePiece(*sourcePushTile, *targetPushTile, targetPushCoordinate);
 						} else {
 							// If a piece is pushed to a non-existing tile (happens when a piece that is on the perimeter is pushed
 							// further outwards of the board) we simply remove the piece from play
@@ -81,8 +71,8 @@ namespace Alphalcazar::Game {
 					// it would be pushed to. It doesn't matter if the piece behind it is also pushable
 					if (!pushTargetTile->HasPiece()) {
 						// We first move the pushed piece, then the pushing piece
-						MovePiece(*targetTile, *pushTargetTile);
-						MovePiece(*originTile, *targetTile);
+						MovePiece(*targetTile, *pushTargetTile, pushTargetCoordinates);
+						MovePiece(*originTile, *targetTile, targetCoordinates);
 						movedPieces += 2;
 					} else if (originCoordinates.IsPerimeter()) {
 						// if a piece was unable to perform any movement on its turn while sitting on
@@ -122,7 +112,7 @@ namespace Alphalcazar::Game {
 			// Insert this movement (from the current tile to the tile we will push to) at the beginning
 			// of the vector, as the pushing movements will need to happen in order
 			// from the last piece on the chain to the first (pushing) piece
-			MovementDescription movement = std::make_pair(nextTile, pushToTile);
+			MovementDescription movement = std::make_tuple(nextTile, pushToTile, pushToCoordinate);
 			result.insert(result.begin(), movement);
 
 			// The tile and coordinates we are pushing to become the next tile/coordinates we evaluate
@@ -132,10 +122,9 @@ namespace Alphalcazar::Game {
 		return result;
 	}
 
-	void Board::MovePiece(Tile& source, Tile& target) {
+	void Board::MovePiece(Tile& source, Tile& target, const Coordinates& targetCoordinates) {
 		if (auto* piece = source.GetPiece()) {
 			// A piece that moves or is moved to a perimeter tile gets removed from play immediatelly
-			auto& targetCoordinates = target.GetCoordinates();
 			if (!targetCoordinates.IsPerimeter()) {
 				SetPlacedPieceCoordinates(*piece, targetCoordinates);
 				target.PlacePiece(*piece);
@@ -205,17 +194,19 @@ namespace Alphalcazar::Game {
 		return result;
 	}
 
-	std::vector<const Tile*> Board::GetLegalPlacementTiles() const {
-		std::vector<const Tile*> result;
+	std::vector<Coordinates> Board::GetLegalPlacementCoordinates() const {
+		std::vector<Coordinates> result;
+		constexpr auto perimeterCoordinates = Coordinates::GetPerimeterCoordinates();
 		// Allocating the maximum amount of memory the vector could potentially
 		// take up. Will waste memory sometimes but we'll use all of it most of the times,
 		// and memory usage is not as much of an issue as CPU usage here
-		result.reserve(mTiles.size());
-		LoopOverTiles([&result](const Coordinates& coordinates, const Tile& tile) {
-			if (!tile.HasPiece() && coordinates.IsPerimeter()) {
-				result.push_back(&tile);
+		result.reserve(perimeterCoordinates.size());
+		for (auto& coordinates : perimeterCoordinates) {
+			auto* tile = GetTile(coordinates);
+			if (!tile->HasPiece()) {
+				result.push_back(coordinates);
 			}
-		});
+		}
 		return result;
 	}
 

@@ -5,13 +5,8 @@
 namespace Alphalcazar::Game {
 	Tile::Tile() {}
 
-	Tile::Tile(const Coordinates& coordinates)
-		: mCoordinates{ coordinates }
-	{}
-
 	Tile::Tile(const Tile& other)
-		: mCoordinates { other.mCoordinates }
-		, mPiece { other.mPiece }
+		: mPiece { other.mPiece }
 	{}
 
 	Tile::~Tile() {}
@@ -26,14 +21,6 @@ namespace Alphalcazar::Game {
 	void Tile::RemovePiece() {
 		// Replace the existing piece with an invalid piece
 		mPiece = {};
-	}
-
-	const Coordinates& Tile::GetCoordinates() const {
-		return mCoordinates;
-	}
-
-	Direction Tile::GetLegalPlacementDirection() const {
-		return mCoordinates.GetLegalPlacementDirection();
 	}
 
 	bool Tile::HasPiece() const {

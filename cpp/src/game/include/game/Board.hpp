@@ -58,8 +58,8 @@ namespace Alphalcazar::Game {
 		std::vector<const Tile*> GetTiles() const;
 		/// Returns all perimeter tiles of the board
 		std::vector<const Tile*> GetPerimeterTiles() const;
-		/// Returns a list of all tiles where a player may legally place a piece on their turn
-		std::vector<const Tile*> GetLegalPlacementTiles() const;
+		/// Returns a list of all coordinates where a player may legally place a piece on their turn
+		std::vector<Coordinates> GetLegalPlacementCoordinates() const;
 
 		/// Returns the tile a given piece is placed on, or nullptr if the specified piece is not on the board
 		Tile* GetPieceTile(const Piece& piece);
@@ -79,7 +79,7 @@ namespace Alphalcazar::Game {
 		 */
 		BoardMovesCount ExecutePieceMove(const Piece& piece);
 		/// Moves the piece from the source tile to the target tile
-		void MovePiece(Tile& source, Tile& target);
+		void MovePiece(Tile& source, Tile& target, const Coordinates& targetCoordinates);
 		/// Removes the piece (if any) on the specified tile
 		void RemovePiece(Tile& tile);
 		/*!
@@ -92,7 +92,7 @@ namespace Alphalcazar::Game {
 		 */
 		std::optional<PlayerId> CheckRowCompleteness(const Coordinates& startCoordinate, Direction direction, Coordinate length) const;
 
-		using MovementDescription = std::pair<Tile*, Tile*>;
+		using MovementDescription = std::tuple<Tile*, Tile*, Coordinates>;
 		/*!
 		 * \brief Returns a list of chained push movements that occur when a piece wants to move from the specified
 		 *        source coordinates in the specified direction.
