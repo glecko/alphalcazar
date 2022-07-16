@@ -98,7 +98,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		/*
 		 * On a board with either x-axis or y-axis symmetry (but not both), the amount of available
 		 * perimeter tiles we expect to be available for each piece goes as follows:
-		 * 
+		 *
 		 * 1) One full side (of size BoardSize)
 		 * 2) Two sides cut in half (rounding up to include the center row in boards with odd sizes)
 		 */
@@ -139,7 +139,7 @@ namespace Alphalcazar::Strategy::MinMax {
 			{ { 3, 0 }, 3 }
 		};
 		std::size_t sizeBeforeSorting = legalMoves.size();
-		SortLegalMovements(legalMoves, game.GetBoard());
+		SortLegalMovements(Game::PlayerId::PLAYER_ONE, legalMoves, game.GetBoard());
 		std::size_t sizeAfterSorting = legalMoves.size();
 
 		EXPECT_EQ(sizeBeforeSorting, sizeAfterSorting);

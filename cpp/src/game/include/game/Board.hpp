@@ -24,7 +24,7 @@ namespace Alphalcazar::Game {
 
 		/*!
 		 * \brief Places a given piece at the tile at the specified coordinates.
-		 * 
+		 *
 		 * May only be used to place pieces on the perimeter of the board, and automatically sets
 		 * the direction of the piece according to the placement direction of the perimeter tile.
 		 */
@@ -67,8 +67,9 @@ namespace Alphalcazar::Game {
 		 * \brief Returns a list of all pieces in play on the board (including perimeter)
 		 *
 		 * \param player If a valid player ID is specified, the function will only return pieces of this player
+		 * \param excludePerimeter If true, pieces on the perimeter of the board will not be included on the list
 		 */
-		std::vector<std::pair<Coordinates, Piece>> GetPieces(PlayerId player = PlayerId::NONE) const;
+		std::vector<std::pair<Coordinates, Piece>> GetPieces(PlayerId player = PlayerId::NONE, bool excludePerimeter = false) const;
 	private:
 		/*!
 		 * \brief Executes one piece movement, if the specified piece is on the board
@@ -83,9 +84,9 @@ namespace Alphalcazar::Game {
 		void RemovePiece(Tile& tile);
 		/*!
 		 * \brief Returns the ID of the player that has completed the specified row, or nullopt if no player has done so.
-		 * 
+		 *
 		 * \note A row is considered "complete" when all of the tiles along it are occupied by a piece of the same player.
-		 * 
+		 *
 		 * \param startCoordinate The coordinate where the row starts.
 		 * \param direction The direction we follow to check for row completness, until a perimeter tile is found.
 		 */
@@ -98,7 +99,7 @@ namespace Alphalcazar::Game {
 		 *
 		 * Each chained movement will be described as a pair of the source tile from which a piece needs to be moved from and
 		 * the target tile it needs to be moved to.
-		 * 
+		 *
 		 * \note The list will be returned in the order the movements are supposed to be executed (with the last piece of the chain
 		 * first and the movement of the pushing piece last)
 		 */
@@ -120,10 +121,10 @@ namespace Alphalcazar::Game {
 		std::array<std::array<Tile, c_PlayAreaSize>, c_PlayAreaSize> mTiles;
 		/*!
 		 * \brief An array containing the coordinates of each piece type, or invalid if the piece is not located on the board.
-		 * 
+		 *
 		 * The first \ref c_PieceTypes positions of the array are used by the pieces of player 1, and the next
 		 * \ref c_PieceTypes positions by the pieces of player 2.
-		 * 
+		 *
 		 * This information stored (even though it is also available on the tiles) to quickly find the coordinates/tile at which
 		 * a piece is located without having to loop over all the tiles.
 		 */

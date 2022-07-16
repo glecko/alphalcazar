@@ -231,7 +231,7 @@ namespace Alphalcazar::Game {
 		return result;
 	}
 
-	std::vector<std::pair<Coordinates, Piece>> Board::GetPieces(PlayerId player) const {
+	std::vector<std::pair<Coordinates, Piece>> Board::GetPieces(PlayerId player, bool excludePerimeter) const {
 		std::vector<std::pair<Coordinates, Piece>> result;
 		// See the docstring of \ref mPlacedPieceCoordinates for more information.
 		// We iterate only over the positions that contain the coordinates of the pieces
@@ -253,6 +253,9 @@ namespace Alphalcazar::Game {
 		for (std::size_t i = min; i <= max; i++) {
 			auto coordinates = mPlacedPieceCoordinates[i];
 			if (coordinates.Valid()) {
+				if (excludePerimeter && coordinates.IsPerimeter()) {
+					continue;
+				}
 				if (auto* tile = GetTile(coordinates)) {
 					if (auto* piece = tile->GetPiece()) {
 						result.emplace_back(coordinates, *piece);
