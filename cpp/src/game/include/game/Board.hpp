@@ -66,10 +66,30 @@ namespace Alphalcazar::Game {
 		/*!
 		 * \brief Returns a list of all pieces in play on the board (including perimeter)
 		 *
-		 * \param player If a valid player ID is specified, the function will only return pieces of this player
-		 * \param excludePerimeter If true, pieces on the perimeter of the board will not be included on the list
+		 * \param player If a valid player ID is specified, the function will only return pieces of this player.
+		 * \param excludePerimeter If true, pieces on the perimeter of the board will not be included on the list.
 		 */
 		std::vector<std::pair<Coordinates, Piece>> GetPieces(PlayerId player = PlayerId::NONE, bool excludePerimeter = false) const;
+		/*!
+		 * \brief Returns the amount of pieces a player has on the board.
+		 *
+		 * Much faster than calling \ref GetPieces if you're only interested in the amount of pieces on the board.
+		 *
+		 * \param player The player for which to return the piece count.
+		 * \param excludePerimeter If true, pieces on the perimeter of the board will not be counted.
+		 */
+		std::size_t GetPieceCount(PlayerId player, bool excludePerimeter = false) const;
+		/*!
+		 * \brief Returns an array indicating if a player's piece of a certain type is present on the board or not.
+		 *
+		 * The result array will contain booleans for each piece (in order 1-N) indicating if the piece is present on the board (true)
+		 * or not (false). Keep in mind that there will be an offset of 1 between the piece type and the index (PieceType 1 will be located at index 0).
+		 *
+		 * Much faster than running \ref GetPieces if you are only interested in whether a piece exists on the board or not.
+		 *
+		 * \param player The player for which the piece placements will be returned
+		 */
+		std::array<bool, c_PieceTypes> GetPiecePlacements(PlayerId player) const;
 	private:
 		/*!
 		 * \brief Executes one piece movement, if the specified piece is on the board
@@ -116,6 +136,9 @@ namespace Alphalcazar::Game {
 		 *        If we wish to remove the piece from the array, set it to have invalid coordinates.
 		 */
 		void SetPlacedPieceCoordinates(const Piece& piece, const Coordinates& coordinates);
+
+		/// Returns the [min, max] index range at which the coordinates of the pieces of a given player are located on the \ref mPlacedPieceCoordinates array
+		std::pair<std::size_t, std::size_t> GetPlacePieceIndexRange(PlayerId playerId) const;
 
 		/// 2D array containing all tiles of the board (both perimeter and board tiles) indexed by their coordinates
 		std::array<std::array<Tile, c_PlayAreaSize>, c_PlayAreaSize> mTiles;

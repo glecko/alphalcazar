@@ -79,18 +79,19 @@ namespace Alphalcazar::Game {
 	}
 
 	std::vector<Piece> Game::GetPiecesInHand(PlayerId player) const {
-		auto boardPieces = mBoard.GetPieces(player);
 		std::vector<Piece> result;
-		result.reserve(c_PieceTypes - boardPieces.size());
-		// If all pieces are on the board, immediatelly return an empty vector
-		if (boardPieces.size() != c_PieceTypes) {
-			for (PieceType type = 1; type <= c_PieceTypes; type++) {
-				// Check if the player already has a piece of this type on the board
-				auto boardPieceIter = std::find_if(boardPieces.begin(), boardPieces.end(), [type](const std::pair<Coordinates, const Piece>& pair) {
-					return pair.second.GetType() == type;
-					});
+		if (player == PlayerId::NONE) {
+			return result;
+		}
 
-				if (boardPieceIter == boardPieces.end()) {
+		auto piecePlacements = mBoard.GetPiecePlacements(player);
+		auto placedPiecesCount = std::count(piecePlacements.begin(), piecePlacements.end(), true);
+		// If all pieces are on the board, immediatelly return an empty vector
+		if (placedPiecesCount != c_PieceTypes) {
+			result.reserve(c_PieceTypes - placedPiecesCount);
+			for (PieceType type = 1; type <= c_PieceTypes; type++) {
+				// Check if the piece type is not placed by the player on the board
+				if (!piecePlacements[type - 1]) {
 					result.emplace_back(player, type);
 				}
 			}

@@ -364,7 +364,9 @@ namespace Alphalcazar::Game {
 
 		EXPECT_EQ(board.GetPieces().size(), 0);
 		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_ONE).size(), 0);
+		EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_ONE), 0);
 		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_TWO).size(), 0);
+		EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_TWO), 0);
 		board.PlacePiece({ 0, 1 }, pieceOnePlayerOne);
 		board.PlacePiece({ 1, 0 }, pieceOnePlayerTwo);
 		board.PlacePiece({ 2, 2 }, pieceFourPlayerOne, Direction::EAST);
@@ -376,7 +378,9 @@ namespace Alphalcazar::Game {
 			auto playerTwoPieces = board.GetPieces(PlayerId::PLAYER_TWO);
 			EXPECT_EQ(pieces.size(), 4);
 			EXPECT_EQ(playerOnePieces.size(), 2);
+			EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_ONE), 2);
 			EXPECT_EQ(playerTwoPieces.size(), 2);
+			EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_TWO), 2);
 			for (auto& [coordinates, piece] : pieces) {
 				// All pieces should be either type 1 or 4
 				EXPECT_TRUE(piece.GetType() == 4 || piece.GetType() == 1);
@@ -395,7 +399,9 @@ namespace Alphalcazar::Game {
 			auto playerTwoPieces = board.GetPieces(PlayerId::PLAYER_TWO);
 			EXPECT_EQ(pieces.size(), 6);
 			EXPECT_EQ(playerOnePieces.size(), 2);
+			EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_ONE), 2);
 			EXPECT_EQ(playerTwoPieces.size(), 4);
+			EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_TWO), 4);
 		}
 	}
 
@@ -410,25 +416,55 @@ namespace Alphalcazar::Game {
 		board.PlacePiece({ 0, 1 }, pieceOnePlayerOne);
 		EXPECT_EQ(board.GetPieces(PlayerId::NONE, true).size(), 0);
 		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_ONE, false).size(), 1);
+		EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_ONE, false), 1);
 		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_ONE, true).size(), 0);
+		EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_ONE, true), 0);
 
 		// Place a player 2 piece on the perimeter
 		board.PlacePiece({ 2, 0 }, pieceOnePlayerTwo);
 		EXPECT_EQ(board.GetPieces(PlayerId::NONE, true).size(), 0);
 		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_TWO, false).size(), 1);
+		EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_TWO, false), 1);
 		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_TWO, true).size(), 0);
+		EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_TWO, true), 0);
 
 		// Place a player 1 piece on the center
 		board.PlacePiece({ 2, 2 }, pieceTwoPlayerOne, Direction::NORTH);
 		EXPECT_EQ(board.GetPieces(PlayerId::NONE, true).size(), 1);
 		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_ONE, false).size(), 2);
+		EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_ONE, false), 2);
 		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_ONE, true).size(), 1);
+		EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_ONE, true), 1);
 
 		// Place a player 2 piece on a corner
 		board.PlacePiece({ 3, 3 }, pieceTwoPlayerTwo, Direction::NORTH);
 		EXPECT_EQ(board.GetPieces(PlayerId::NONE, true).size(), 2);
 		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_TWO, false).size(), 2);
+		EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_TWO, false), 2);
 		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_TWO, true).size(), 1);
+		EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_TWO, true), 1);
 		EXPECT_EQ(board.GetPieces(PlayerId::NONE, false).size(), 4);
+	}
+
+	TEST(Board, GetPiecePlacements) {
+		Board board{};
+		Piece pieceOnePlayerOne{ PlayerId::PLAYER_ONE, 1 };
+		Piece pieceOnePlayerTwo{ PlayerId::PLAYER_TWO, 1 };
+
+		// Place a player 1 piece on the board
+		board.PlacePiece({ 2, 2 }, pieceOnePlayerOne, Direction::NORTH);
+		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_ONE).size(), 1);
+		auto playerOnePlacements = board.GetPiecePlacements(PlayerId::PLAYER_ONE);
+		for (std::size_t i = 0; i < playerOnePlacements.size(); i++) {
+			EXPECT_TRUE(i == 0 ? playerOnePlacements[i] : !playerOnePlacements[i]);
+		}
+
+		// Place a player 2 piece on the board
+		board.PlacePiece({ 2, 3 }, pieceOnePlayerTwo, Direction::NORTH);
+		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_TWO).size(), 1);
+		auto playerTwoPlacements = board.GetPiecePlacements(PlayerId::PLAYER_TWO);
+		for (std::size_t i = 0; i < playerTwoPlacements.size(); i++) {
+			EXPECT_TRUE(i == 0 ? playerTwoPlacements[i] : !playerTwoPlacements[i]);
+		}
 	}
 }

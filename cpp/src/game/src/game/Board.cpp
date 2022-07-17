@@ -222,50 +222,6 @@ namespace Alphalcazar::Game {
 		return result;
 	}
 
-	std::vector<std::pair<Coordinates, Piece>> Board::GetPieces(PlayerId player, bool excludePerimeter) const {
-		std::vector<std::pair<Coordinates, Piece>> result;
-		// We preallocate space in the vector according to the max amount of pieces that could
-		// fit in the vector if all relevant pieces were on the board. Will waste memory sometimes
-		// but memory usage is not as much of an issue as CPU usage here.
-		result.reserve(player == PlayerId::NONE ? c_PieceTypes * 2 : c_PieceTypes);
-
-		// See the docstring of \ref mPlacedPieceCoordinates for more information.
-		// We iterate only over the positions that contain the coordinates of the pieces
-		// of the specified player.
-		std::size_t min = 0;
-		std::size_t max = c_PieceTypes * 2 - 1;
-		switch (player) {
-		case PlayerId::PLAYER_ONE:
-			max = c_PieceTypes - 1;
-			break;
-		case PlayerId::PLAYER_TWO:
-			min = c_PieceTypes;
-			break;
-		default:
-			// Keep the default min/max to iterate over the complete array
-			break;
-		}
-
-		for (std::size_t i = min; i <= max; i++) {
-			auto coordinates = mPlacedPieceCoordinates[i];
-			if (coordinates.Valid()) {
-				if (excludePerimeter && coordinates.IsPerimeter()) {
-					continue;
-				}
-				if (auto* tile = GetTile(coordinates)) {
-					if (auto* piece = tile->GetPiece()) {
-						result.emplace_back(coordinates, *piece);
-					} else {
-						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no piece exists at the tile at those coordinates.", coordinates, i);
-					}
-				} else {
-					Utils::LogError("Placed pieces cache pointed at {} for index {}, but no tile exists at those coordinates.", coordinates, i);
-				}
-			}
-		}
-		return result;
-	}
-
 	GameResult Board::GetResult() const {
 		std::optional<PlayerId> candidateWinner = std::nullopt;
 
@@ -315,7 +271,7 @@ namespace Alphalcazar::Game {
 	}
 
 	/// Returns the index of the \ref mPlacedPieceCoordinates array of a given piece
-	std::size_t GetPlacePieceTypeIndex(const Piece& piece) {
+	std::size_t GetPlacedPieceTypeIndex(const Piece& piece) {
 		std::size_t pieceTypeIndex = static_cast<std::size_t>(piece.GetType());
 		// The first 5 positions of the array are held by the (1-5) pieces of player one,
 		// the next 5 position by the (1-5) pieces of player 2. To get the index, we get the piece index
@@ -325,13 +281,89 @@ namespace Alphalcazar::Game {
 	}
 
 	Coordinates& Board::GetPlacedPieceCoordinates(const Piece& piece) {
-		std::size_t index = GetPlacePieceTypeIndex(piece);
+		std::size_t index = GetPlacedPieceTypeIndex(piece);
 		return mPlacedPieceCoordinates[index];
 	}
 
 	void Board::SetPlacedPieceCoordinates(const Piece& piece, const Coordinates& coordinates) {
-		std::size_t index = GetPlacePieceTypeIndex(piece);
+		std::size_t index = GetPlacedPieceTypeIndex(piece);
 		mPlacedPieceCoordinates[index] = coordinates;
+	}
+
+	std::pair<std::size_t, std::size_t> Board::GetPlacePieceIndexRange(PlayerId playerId) const {
+		// See the docstring of \ref mPlacedPieceCoordinates for more information.
+		std::size_t min = 0;
+		std::size_t max = c_PieceTypes * 2 - 1;
+		switch (playerId) {
+		case PlayerId::PLAYER_ONE:
+			max = c_PieceTypes - 1;
+			break;
+		case PlayerId::PLAYER_TWO:
+			min = c_PieceTypes;
+			break;
+		default:
+			// Keep the default min/max
+			break;
+		}
+		return std::make_pair(min, max);
+	}
+
+	std::vector<std::pair<Coordinates, Piece>> Board::GetPieces(PlayerId player, bool excludePerimeter) const {
+		std::vector<std::pair<Coordinates, Piece>> result;
+		// We preallocate space in the vector according to the max amount of pieces that could
+		// fit in the vector if all relevant pieces were on the board. Will waste memory sometimes
+		// but memory usage is not as much of an issue as CPU usage here.
+		result.reserve(player == PlayerId::NONE ? c_PieceTypes * 2 : c_PieceTypes);
+
+		auto [min, max] = GetPlacePieceIndexRange(player);
+		for (std::size_t i = min; i <= max; i++) {
+			auto coordinates = mPlacedPieceCoordinates[i];
+			if (coordinates.Valid()) {
+				if (excludePerimeter && coordinates.IsPerimeter()) {
+					continue;
+				}
+				if (auto* tile = GetTile(coordinates)) {
+					if (auto* piece = tile->GetPiece()) {
+						result.emplace_back(coordinates, *piece);
+					} else {
+						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no piece exists at the tile at those coordinates.", coordinates, i);
+					}
+				} else {
+					Utils::LogError("Placed pieces cache pointed at {} for index {}, but no tile exists at those coordinates.", coordinates, i);
+				}
+			}
+		}
+		return result;
+	}
+
+	std::size_t Board::GetPieceCount(PlayerId player, bool excludePerimeter) const {
+		if (player == PlayerId::NONE) {
+			return 0;
+		}
+		std::size_t pieceCount = 0;
+		auto [min, max] = GetPlacePieceIndexRange(player);
+		for (std::size_t i = min; i <= max; i++) {
+			auto coordinates = mPlacedPieceCoordinates[i];
+			if (coordinates.Valid()) {
+				if (!excludePerimeter || !coordinates.IsPerimeter()) {
+					pieceCount++;
+				}
+			}
+		}
+		return pieceCount;
+	}
+
+	std::array<bool, c_PieceTypes> Board::GetPiecePlacements(PlayerId player) const {
+		std::array<bool, c_PieceTypes> result{};
+		if (player == PlayerId::NONE) {
+			return result;
+		}
+		auto [min, max] = GetPlacePieceIndexRange(player);
+		for (std::size_t i = min; i <= max; i++) {
+			auto coordinates = mPlacedPieceCoordinates[i];
+			result[i - min] = coordinates.Valid();
+		}
+		return result;
 	}
 
 	void Board::LoopOverTiles(std::function<void(const Coordinates& coordinates, const Tile& tile)> action) const {
