@@ -85,7 +85,7 @@ namespace Alphalcazar::Game {
 		}
 
 		auto piecePlacements = mBoard.GetPiecePlacements(player);
-		auto placedPiecesCount = std::count(piecePlacements.begin(), piecePlacements.end(), true);
+		std::size_t placedPiecesCount = piecePlacements.count();
 		// If all pieces are on the board, immediatelly return an empty vector
 		if (placedPiecesCount != c_PieceTypes) {
 			result.reserve(c_PieceTypes - placedPiecesCount);

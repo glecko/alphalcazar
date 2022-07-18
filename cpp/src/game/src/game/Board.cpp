@@ -353,8 +353,8 @@ namespace Alphalcazar::Game {
 		return pieceCount;
 	}
 
-	std::array<bool, c_PieceTypes> Board::GetPiecePlacements(PlayerId player) const {
-		std::array<bool, c_PieceTypes> result{};
+	std::bitset<c_PieceTypes> Board::GetPiecePlacements(PlayerId player) const {
+		std::bitset<c_PieceTypes> result;
 		if (player == PlayerId::NONE) {
 			return result;
 		}

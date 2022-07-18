@@ -1,14 +1,16 @@
 #pragma once
 
 #include "aliases.hpp"
+#include "Coordinates.hpp"
+#include "parameters.hpp"
+#include "Tile.hpp"
+
 #include <array>
 #include <vector>
 #include <memory>
 #include <optional>
 #include <functional>
-#include "Coordinates.hpp"
-#include "parameters.hpp"
-#include "Tile.hpp"
+#include <bitset>
 
 namespace Alphalcazar::Game {
 	class Piece;
@@ -80,16 +82,17 @@ namespace Alphalcazar::Game {
 		 */
 		std::size_t GetPieceCount(PlayerId player, bool excludePerimeter = false) const;
 		/*!
-		 * \brief Returns an array indicating if a player's piece of a certain type is present on the board or not.
+		 * \brief Returns a bitset indicating if a player's piece of a certain type is present on the board or not.
 		 *
-		 * The result array will contain booleans for each piece (in order 1-N) indicating if the piece is present on the board (true)
-		 * or not (false). Keep in mind that there will be an offset of 1 between the piece type and the index (PieceType 1 will be located at index 0).
+		 * Will return a set of \ref c_PieceTypes bits each indicating if a given piece is present on the board (bit will be set)
+		 * or not (bit will be unset). Keep in mind that there will be an offset of 1 between the piece type and the index
+		 * (The existance of PieceType 1 will be indicated by the bit at index 0).
 		 *
 		 * Much faster than running \ref GetPieces if you are only interested in whether a piece exists on the board or not.
 		 *
 		 * \param player The player for which the piece placements will be returned
 		 */
-		std::array<bool, c_PieceTypes> GetPiecePlacements(PlayerId player) const;
+		std::bitset<c_PieceTypes> GetPiecePlacements(PlayerId player) const;
 	private:
 		/*!
 		 * \brief Executes one piece movement, if the specified piece is on the board
