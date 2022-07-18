@@ -71,7 +71,7 @@ namespace Alphalcazar::Strategy::MinMax {
 	 * \param board The board of the game for which the legal movement is valid.
 	 * \param opponentBoardPieces A list of the pieces the opponent has on the board (excluding perimeter)
 	 */
-	Score GetHeuristicPlacementMoveScore(const Game::PlacementMove& move, const Game::Board& board, const std::vector<std::pair<Game::Coordinates, Game::Piece>>& opponentBoardPieces) {
+	Score GetHeuristicPlacementMoveScore(const Game::PlacementMove& move, const Game::Board& board, const std::size_t opponentBoardPieceCount) {
 		// First, we check if we have good reason to believe that the movement would result in the placed
 		// piece not even entering the board. While this can be beneficial in some very specific situations,
 		// most times it would just be a blunder, so it makes sense to assign these movements the lowest score
@@ -98,8 +98,8 @@ namespace Alphalcazar::Strategy::MinMax {
 		Score resultScore = c_PieceOnBoardScores[move.PieceType - 1];
 
 		// Check the docstring for \ref c_PusherBonusPerOpponentPiece for more information
-		if (move.PieceType == Game::c_PusherPieceType && opponentBoardPieces.size() >= 2) {
-			resultScore += static_cast<Score>(c_PusherBonusPerOpponentPiece * opponentBoardPieces.size());
+		if (move.PieceType == Game::c_PusherPieceType && opponentBoardPieceCount >= 2) {
+			resultScore += static_cast<Score>(c_PusherBonusPerOpponentPiece * opponentBoardPieceCount);
 		}
 
 		// We adjust the score based on if the piece is on the center lane (more valuable) or a lateral lane.
@@ -124,10 +124,10 @@ namespace Alphalcazar::Strategy::MinMax {
 
 	void SortLegalMovements(Game::PlayerId playerId, std::vector<Game::PlacementMove>& legalMoves, const Game::Board& board) {
 		auto opponentId = playerId == Game::PlayerId::PLAYER_ONE ? Game::PlayerId::PLAYER_TWO : Game::PlayerId::PLAYER_ONE;
-		auto opponentBoardPieces = board.GetPieces(opponentId, true);
-		std::sort(legalMoves.begin(), legalMoves.end(), [board, opponentBoardPieces](const Game::PlacementMove& moveA, const Game::PlacementMove& moveB) {
+		std::size_t opponentBoardPieceCount = board.GetPieceCount(opponentId, true);
+		std::sort(legalMoves.begin(), legalMoves.end(), [board, opponentBoardPieceCount](const Game::PlacementMove& moveA, const Game::PlacementMove& moveB) {
 			// Sort the vector by the heuristic score of the placement moves
-			return GetHeuristicPlacementMoveScore(moveA, board, opponentBoardPieces) > GetHeuristicPlacementMoveScore(moveB, board, opponentBoardPieces);
+			return GetHeuristicPlacementMoveScore(moveA, board, opponentBoardPieceCount) > GetHeuristicPlacementMoveScore(moveB, board, opponentBoardPieceCount);
 		});
 	}
 }

@@ -1,14 +1,16 @@
 #pragma once
 
 #include "aliases.hpp"
+#include "Coordinates.hpp"
+#include "parameters.hpp"
+#include "Tile.hpp"
+
 #include <array>
 #include <vector>
 #include <memory>
 #include <optional>
 #include <functional>
-#include "Coordinates.hpp"
-#include "parameters.hpp"
-#include "Tile.hpp"
+#include <bitset>
 
 namespace Alphalcazar::Game {
 	class Piece;
@@ -66,10 +68,31 @@ namespace Alphalcazar::Game {
 		/*!
 		 * \brief Returns a list of all pieces in play on the board (including perimeter)
 		 *
-		 * \param player If a valid player ID is specified, the function will only return pieces of this player
-		 * \param excludePerimeter If true, pieces on the perimeter of the board will not be included on the list
+		 * \param player If a valid player ID is specified, the function will only return pieces of this player.
+		 * \param excludePerimeter If true, pieces on the perimeter of the board will not be included on the list.
 		 */
 		std::vector<std::pair<Coordinates, Piece>> GetPieces(PlayerId player = PlayerId::NONE, bool excludePerimeter = false) const;
+		/*!
+		 * \brief Returns the amount of pieces a player has on the board.
+		 *
+		 * Much faster than calling \ref GetPieces if you're only interested in the amount of pieces on the board.
+		 *
+		 * \param player The player for which to return the piece count.
+		 * \param excludePerimeter If true, pieces on the perimeter of the board will not be counted.
+		 */
+		std::size_t GetPieceCount(PlayerId player, bool excludePerimeter = false) const;
+		/*!
+		 * \brief Returns a bitset indicating if a player's piece of a certain type is present on the board or not.
+		 *
+		 * Will return a set of \ref c_PieceTypes bits each indicating if a given piece is present on the board (bit will be set)
+		 * or not (bit will be unset). Keep in mind that there will be an offset of 1 between the piece type and the index
+		 * (The existance of PieceType 1 will be indicated by the bit at index 0).
+		 *
+		 * Much faster than running \ref GetPieces if you are only interested in whether a piece exists on the board or not.
+		 *
+		 * \param player The player for which the piece placements will be returned
+		 */
+		std::bitset<c_PieceTypes> GetPiecePlacements(PlayerId player) const;
 	private:
 		/*!
 		 * \brief Executes one piece movement, if the specified piece is on the board

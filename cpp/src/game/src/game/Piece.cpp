@@ -10,6 +10,7 @@ namespace Alphalcazar::Game {
 
 	Piece::Piece(PlayerId owner, PieceType type) noexcept
 		: mType{ type }
+		, mDirection{ Direction::NONE }
 		, mOwner { owner }
 	{}
 
