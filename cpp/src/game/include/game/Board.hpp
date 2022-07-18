@@ -140,9 +140,6 @@ namespace Alphalcazar::Game {
 		 */
 		void SetPlacedPieceCoordinates(const Piece& piece, const Coordinates& coordinates);
 
-		/// Returns the [min, max] index range at which the coordinates of the pieces of a given player are located on the \ref mPlacedPieceCoordinates array
-		std::pair<std::size_t, std::size_t> GetPlacePieceIndexRange(PlayerId playerId) const;
-
 		/// 2D array containing all tiles of the board (both perimeter and board tiles) indexed by their coordinates
 		std::array<std::array<Tile, c_PlayAreaSize>, c_PlayAreaSize> mTiles;
 		/*!

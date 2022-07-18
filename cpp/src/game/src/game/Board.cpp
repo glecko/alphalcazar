@@ -6,6 +6,37 @@
 
 #include <algorithm>
 
+namespace {
+	/// Returns the index of the \ref mPlacedPieceCoordinates array of a given piece
+	std::size_t GetPlacedPieceTypeIndex(const Alphalcazar::Game::Piece& piece) {
+		std::size_t pieceTypeIndex = static_cast<std::size_t>(piece.GetType());
+		// The first 5 positions of the array are held by the (1-5) pieces of player one,
+		// the next 5 position by the (1-5) pieces of player 2. To get the index, we get the piece index
+		// and shift it forward by 5 for player 2 and by 0 for player 1.
+		std::size_t pieceOwnerOffset = static_cast<std::size_t>(piece.GetOwner()) - 1;
+		return pieceTypeIndex + (pieceOwnerOffset * Alphalcazar::Game::c_PieceTypes) - 1;
+	}
+
+	/// Returns the [min, max] index range at which the coordinates of the pieces of a given player are located on the \ref mPlacedPieceCoordinates array
+	std::pair<std::size_t, std::size_t> GetPlacePieceIndexRange(Alphalcazar::Game::PlayerId playerId) {
+		// See the docstring of \ref mPlacedPieceCoordinates for more information.
+		std::size_t min = 0;
+		std::size_t max = Alphalcazar::Game::c_PieceTypes * 2 - 1;
+		switch (playerId) {
+		case Alphalcazar::Game::PlayerId::PLAYER_ONE:
+			max = Alphalcazar::Game::c_PieceTypes - 1;
+			break;
+		case Alphalcazar::Game::PlayerId::PLAYER_TWO:
+			min = Alphalcazar::Game::c_PieceTypes;
+			break;
+		default:
+			// Keep the default min/max
+			break;
+		}
+		return std::make_pair(min, max);
+	}
+}
+
 namespace Alphalcazar::Game {
 	Board::Board() {}
 
@@ -270,16 +301,6 @@ namespace Alphalcazar::Game {
 		return candidateRowCompleter;
 	}
 
-	/// Returns the index of the \ref mPlacedPieceCoordinates array of a given piece
-	std::size_t GetPlacedPieceTypeIndex(const Piece& piece) {
-		std::size_t pieceTypeIndex = static_cast<std::size_t>(piece.GetType());
-		// The first 5 positions of the array are held by the (1-5) pieces of player one,
-		// the next 5 position by the (1-5) pieces of player 2. To get the index, we get the piece index
-		// and shift it forward by 5 for player 2 and by 0 for player 1.
-		std::size_t pieceOwnerOffset = static_cast<std::size_t>(piece.GetOwner()) - 1;
-		return pieceTypeIndex + (pieceOwnerOffset * c_PieceTypes) - 1;
-	}
-
 	Coordinates& Board::GetPlacedPieceCoordinates(const Piece& piece) {
 		std::size_t index = GetPlacedPieceTypeIndex(piece);
 		return mPlacedPieceCoordinates[index];
@@ -288,24 +309,6 @@ namespace Alphalcazar::Game {
 	void Board::SetPlacedPieceCoordinates(const Piece& piece, const Coordinates& coordinates) {
 		std::size_t index = GetPlacedPieceTypeIndex(piece);
 		mPlacedPieceCoordinates[index] = coordinates;
-	}
-
-	std::pair<std::size_t, std::size_t> Board::GetPlacePieceIndexRange(PlayerId playerId) const {
-		// See the docstring of \ref mPlacedPieceCoordinates for more information.
-		std::size_t min = 0;
-		std::size_t max = c_PieceTypes * 2 - 1;
-		switch (playerId) {
-		case PlayerId::PLAYER_ONE:
-			max = c_PieceTypes - 1;
-			break;
-		case PlayerId::PLAYER_TWO:
-			min = c_PieceTypes;
-			break;
-		default:
-			// Keep the default min/max
-			break;
-		}
-		return std::make_pair(min, max);
 	}
 
 	std::vector<std::pair<Coordinates, Piece>> Board::GetPieces(PlayerId player, bool excludePerimeter) const {
