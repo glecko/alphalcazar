@@ -19,6 +19,7 @@ namespace Alphalcazar::Game {
 		~Piece();
 
 		bool operator==(const Piece& other) const;
+		bool operator!=(const Piece& other) const;
 
 		PieceType GetType() const;
 		PlayerId GetOwner() const;

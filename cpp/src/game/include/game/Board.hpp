@@ -24,6 +24,8 @@ namespace Alphalcazar::Game {
 		Board();
 		~Board();
 
+		bool operator==(const Board& other) const;
+
 		/*!
 		 * \brief Places a given piece at the tile at the specified coordinates.
 		 *
@@ -152,5 +154,24 @@ namespace Alphalcazar::Game {
 		 * a piece is located without having to loop over all the tiles.
 		 */
 		std::array<Coordinates, c_PieceTypes * 2> mPlacedPieceCoordinates;
+	};
+}
+
+namespace std {
+	template <>
+	struct hash<Alphalcazar::Game::Board> {
+		std::size_t operator()(const Alphalcazar::Game::Board& board) const noexcept {
+			std::size_t result = 0;
+			for (auto& [coordinate, piece] : board.GetPieces()) {
+				auto coordinatesHash = hash<Alphalcazar::Game::Coordinates>()(coordinate);
+				auto directionHash = hash<Alphalcazar::Game::Direction>()(piece.GetMovementDirection());
+				auto ownerHash = hash<Alphalcazar::Game::PlayerId>()(piece.GetOwner());
+				auto typeHash = hash<Alphalcazar::Game::PieceType>()(piece.GetType());
+				auto pieceHash = ((ownerHash ^ ((directionHash << 1) ^ (typeHash << 1) >> 1)) >> 1);
+				auto pieceInfoHash = ((coordinatesHash ^ (pieceHash << 1)) >> 1);
+				result = ((pieceInfoHash ^ (result << 1)) >> 1);
+			}
+			return result;
+		}
 	};
 }

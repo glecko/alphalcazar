@@ -34,6 +34,8 @@ namespace Alphalcazar::Game {
 		Game();
 		~Game();
 
+		bool operator==(const Game& other) const;
+
 		/// Play the game and return the result
 		GameResult Play(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy);
 		/// Plays out a single round of the game, given the player strategies to execute
@@ -97,5 +99,20 @@ namespace Alphalcazar::Game {
 		Board mBoard;
 		/// The state of the game. See \ref GameState for more info
 		GameState mState;
+	};
+}
+
+namespace std {
+	/*
+	* The \ref Game class implements a hashing function to be able to be used as a key
+	* for unordered maps.
+	*/
+	template <>
+	struct hash<Alphalcazar::Game::Game> {
+		std::size_t operator()(const Alphalcazar::Game::Game& game) const noexcept {
+			auto activePlayerHash = hash<Alphalcazar::Game::PlayerId>()(game.GetActivePlayer());
+			auto boardHash = hash<Alphalcazar::Game::Board>()(game.GetBoard());
+			return ((boardHash ^ (activePlayerHash << 1)) >> 1);
+		}
 	};
 }

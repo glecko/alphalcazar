@@ -42,6 +42,22 @@ namespace Alphalcazar::Game {
 
 	Board::~Board() {}
 
+	bool Board::operator==(const Board& other) const {
+		bool allTilesEqual = true;
+		for (Coordinate x = 0; x <= c_PlayAreaSize - 1; x++) {
+			for (Coordinate y = 0; y <= c_PlayAreaSize - 1; y++) {
+				Coordinates coordinates{ x, y };
+				if (coordinates.IsCorner()) {
+					continue;
+				}
+				if (mTiles[x][y] != other.mTiles[x][y]) {
+					allTilesEqual = false;
+				}
+			}
+		}
+		return allTilesEqual;
+	}
+
 	void Board::PlacePiece(const Coordinates& coordinates, Piece& piece) {
 		if (auto* tile = GetTile(coordinates)) {
 			auto direction = coordinates.GetLegalPlacementDirection();

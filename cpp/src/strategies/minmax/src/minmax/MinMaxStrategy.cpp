@@ -3,6 +3,7 @@
 #include "minmax/BoardEvaluation.hpp"
 #include "minmax/LegalMovements.hpp"
 #include "minmax/config.hpp"
+#include "TranspositionCache.hpp"
 
 #include <game/Game.hpp>
 #include <game/PlacementMove.hpp>
@@ -18,6 +19,7 @@ namespace Alphalcazar::Strategy::MinMax {
 	MinMaxStrategy::MinMaxStrategy(const Depth depth, bool multithreaded)
 		: mDepth { depth }
 		, mMultithreaded { multithreaded }
+		, mTranspositionCache{ std::make_unique<TranspositionCache>() }
 	{
 		if (mMultithreaded) {
 			/*
@@ -92,11 +94,15 @@ namespace Alphalcazar::Strategy::MinMax {
 		if (depth == 0) {
 			return EvaluateBoard(playerId, game);
 		}
+		if (auto cachedScore = mTranspositionCache->GetScore(playerId, game, depth, alpha, beta)) {
+			return cachedScore.value();
+		}
 		Score bestScore = c_AlphaStartingValue;
 		// We are in "Max" so we are evaluating the player who is executing the strategy
 		auto legalMoves = game.GetLegalMoves(playerId);
 		FilterSymmetricMovements(legalMoves, game.GetBoard());
 		SortLegalMovements(playerId, legalMoves, game.GetBoard());
+		EvaluationType evaluationType = EvaluationType::EXACT;
 		for (const auto& move : legalMoves) {
 			auto nextBestScore = GetNextBestScore(playerId, move, depth, game, alpha, beta);
 
@@ -107,9 +113,11 @@ namespace Alphalcazar::Strategy::MinMax {
 			}
 
 			if (alpha > beta) {
+				evaluationType = EvaluationType::ALPHA_CUTOFF;
 				break;
 			}
 		}
+		mTranspositionCache->StoreScore(game, evaluationType, depth, bestScore);
 		return bestScore;
 	}
 
@@ -117,20 +125,26 @@ namespace Alphalcazar::Strategy::MinMax {
 		if (depth == 0) {
 			return EvaluateBoard(playerId, game);
 		}
+		if (auto cachedScore = mTranspositionCache->GetScore(playerId, game, depth, alpha, beta)) {
+			return cachedScore.value();
+		}
 		Score bestScore = c_BetaStartingValue;
 		// We are in "Min" so we are evaluating the opponent
 		auto opponentId = playerId == Game::PlayerId::PLAYER_ONE ? Game::PlayerId::PLAYER_TWO : Game::PlayerId::PLAYER_ONE;
 		auto legalMoves = game.GetLegalMoves(opponentId);
 		FilterSymmetricMovements(legalMoves, game.GetBoard());
 		SortLegalMovements(playerId, legalMoves, game.GetBoard());
+		EvaluationType evaluationType = EvaluationType::EXACT;
 		for (const auto& move : legalMoves) {
 			auto nextBestScore = GetNextBestScore(playerId, move, depth, game, alpha, beta);
 			bestScore = std::min(nextBestScore, bestScore);
 			beta = std::min(bestScore, beta);
 			if (beta < alpha) {
+				evaluationType = EvaluationType::BETA_CUTOFF;
 				break;
 			}
 		}
+		mTranspositionCache->StoreScore(game, evaluationType, depth, bestScore);
 		return bestScore;
 	}
 
@@ -144,8 +158,7 @@ namespace Alphalcazar::Strategy::MinMax {
 			// Only decrease the depth if this placement move completed a turn
 			// as we want to evaluate complete turns only, never half a turn
 			Depth nextDepth = gameCopy.GetState().FirstMoveExecuted ? depth : depth - 1;
-			Game::PlayerId activePlayerId = gameCopy.GetActivePlayer();
-			if (activePlayerId == playerId) {
+			if (gameCopy.GetActivePlayer() == playerId) {
 				nextBestScore = Max(playerId, nextDepth, gameCopy, alpha, beta);
 			} else {
 				nextBestScore = Min(playerId, nextDepth, gameCopy, alpha, beta);

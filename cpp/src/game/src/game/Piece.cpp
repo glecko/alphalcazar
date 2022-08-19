@@ -53,4 +53,7 @@ namespace Alphalcazar::Game {
 	bool Piece::operator==(const Piece& other) const {
 		return other.mOwner == mOwner && other.mType == mType;
 	}
+	bool Piece::operator!=(const Piece& other) const {
+		return other.mOwner != mOwner || other.mType != mType;
+	}
 }

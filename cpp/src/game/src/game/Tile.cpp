@@ -11,6 +11,10 @@ namespace Alphalcazar::Game {
 
 	Tile::~Tile() {}
 
+	bool Tile::operator!=(const Tile& other) const {
+		return mPiece != other.mPiece;
+	}
+
 	void Tile::PlacePiece(const Piece& piece) {
 		if (mPiece.IsValid()) {
 			Utils::LogError("Tried placing a piece on a tile that already had a piece on it.");

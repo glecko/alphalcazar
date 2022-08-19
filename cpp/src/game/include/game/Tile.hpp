@@ -17,6 +17,8 @@ namespace Alphalcazar::Game {
 		Tile(const Tile& other);
 		~Tile();
 
+		bool operator!=(const Tile& other) const;
+
 		/// Places a piece on this tile
 		void PlacePiece(const Piece& piece);
 		/// Removes the piece that was placed on this tile, if any

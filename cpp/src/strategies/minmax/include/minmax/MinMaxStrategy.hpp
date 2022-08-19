@@ -18,6 +18,7 @@ namespace Alphalcazar::Utils {
 }
 
 namespace Alphalcazar::Strategy::MinMax {
+	class TranspositionCache;
 
 	/*!
 	 * \brief A strategy that determines the move to play by using a min-max algorithm
@@ -50,6 +51,8 @@ namespace Alphalcazar::Strategy::MinMax {
 		Score Min(Game::PlayerId playerId, Depth depth, const Game::Game& game, Score alpha, Score beta);
 
 		Score GetNextBestScore(Game::PlayerId playerId, const Game::PlacementMove& move, Depth depth, const Game::Game& game, Score alpha, Score beta);
+
+		std::unique_ptr<TranspositionCache> mTranspositionCache;
 
 		/// The thread pool that will run the min-max algorithm tasks if mMultithreaded is true
 		std::unique_ptr<Utils::ThreadPool> mThreadPool;
