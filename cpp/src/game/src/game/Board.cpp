@@ -43,7 +43,6 @@ namespace Alphalcazar::Game {
 	Board::~Board() {}
 
 	bool Board::operator==(const Board& other) const {
-		bool allTilesEqual = true;
 		for (Coordinate x = 0; x <= c_PlayAreaSize - 1; x++) {
 			for (Coordinate y = 0; y <= c_PlayAreaSize - 1; y++) {
 				Coordinates coordinates{ x, y };
@@ -51,11 +50,11 @@ namespace Alphalcazar::Game {
 					continue;
 				}
 				if (mTiles[x][y] != other.mTiles[x][y]) {
-					allTilesEqual = false;
+					return false;
 				}
 			}
 		}
-		return allTilesEqual;
+		return true;
 	}
 
 	void Board::PlacePiece(const Coordinates& coordinates, Piece& piece) {

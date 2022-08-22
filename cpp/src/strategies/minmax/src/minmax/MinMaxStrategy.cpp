@@ -3,7 +3,7 @@
 #include "minmax/BoardEvaluation.hpp"
 #include "minmax/LegalMovements.hpp"
 #include "minmax/config.hpp"
-#include "TranspositionCache.hpp"
+#include "minmax/TranspositionCache.hpp"
 
 #include <game/Game.hpp>
 #include <game/PlacementMove.hpp>
@@ -15,6 +15,7 @@ namespace Alphalcazar::Strategy::MinMax {
 	constexpr Score c_AlphaStartingValue = -c_WinConditionScore * 10;
 	/// The initial value of the "beta" parameter of the minmax algorithm
 	constexpr Score c_BetaStartingValue = c_WinConditionScore * 10;
+	constexpr Depth c_MinDepthToStoreInTranspositionCache = 3;
 
 	MinMaxStrategy::MinMaxStrategy(const Depth depth, bool multithreaded)
 		: mDepth { depth }
@@ -117,7 +118,9 @@ namespace Alphalcazar::Strategy::MinMax {
 				break;
 			}
 		}
-		mTranspositionCache->StoreScore(game, evaluationType, depth, bestScore);
+		if (depth >= c_MinDepthToStoreInTranspositionCache) {
+			mTranspositionCache->StoreScore(game, evaluationType, depth, bestScore);
+		}
 		return bestScore;
 	}
 
@@ -144,7 +147,9 @@ namespace Alphalcazar::Strategy::MinMax {
 				break;
 			}
 		}
-		mTranspositionCache->StoreScore(game, evaluationType, depth, bestScore);
+		if (depth >= c_MinDepthToStoreInTranspositionCache) {
+			mTranspositionCache->StoreScore(game, evaluationType, depth, bestScore);
+		}
 		return bestScore;
 	}
 

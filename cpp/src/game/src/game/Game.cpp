@@ -14,9 +14,11 @@ namespace Alphalcazar::Game {
 	Game::~Game() {};
 
 	bool Game::operator==(const Game& other) const {
-		bool turnStateEqual = mState.FirstMoveExecuted == other.mState.FirstMoveExecuted && other.mState.PlayerWithInitiative == mState.PlayerWithInitiative;
-		bool boardEqual = mBoard == other.mBoard;
-		return turnStateEqual && boardEqual;
+		// Check turn state equality (and early return), as checking board equality is orders of magnitude more expensive
+		if (mState.FirstMoveExecuted != other.mState.FirstMoveExecuted || other.mState.PlayerWithInitiative != mState.PlayerWithInitiative) {
+			return false;
+		}
+		return mBoard == other.mBoard;
 	}
 
 	GameResult Game::Play(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy) {

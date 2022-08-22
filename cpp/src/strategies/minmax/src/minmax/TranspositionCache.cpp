@@ -1,4 +1,4 @@
-#include "TranspositionCache.hpp"
+#include "minmax/TranspositionCache.hpp"
 
 namespace Alphalcazar::Strategy::MinMax {
 	TranspositionCache::TranspositionCache() {}
@@ -22,9 +22,6 @@ namespace Alphalcazar::Strategy::MinMax {
 	}
 
 	void TranspositionCache::StoreScore(const Game::Game& game, EvaluationType type, Depth depth, Score score) {
-        if (depth <= 2) {
-            return;
-        }
         std::unique_lock lock{ mCacheMutex };
         auto& cacheData = mCache[game];
         // We only overwrite the value in cache if our depth value is higher than the max explored depth
@@ -36,6 +33,13 @@ namespace Alphalcazar::Strategy::MinMax {
             cacheData.ActivePlayerScore = score;
         }
 	}
+
+    void TranspositionCache::DeleteScore(const Game::Game& game) {
+        auto cacheMatch = mCache.find(game);
+        if (cacheMatch != mCache.end()) {
+            mCache.erase(cacheMatch);
+        }
+    }
 
 	bool TranspositionCache::ValidCacheValue(Game::PlayerId evaluatedPlayer, Game::PlayerId activePlayer, const CacheData& cacheData, Score alpha, Score beta) const {
         Score cachedScore = cacheData.ActivePlayerScore;

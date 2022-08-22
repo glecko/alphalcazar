@@ -80,21 +80,6 @@ namespace Alphalcazar::Game {
 	};
 }
 
-namespace std {
-	/*
-	* The \ref Coordinates class implements a hashing function to be able to be used as a key
-	* for unordered maps.
-	*/
-	template <>
-	struct hash<Alphalcazar::Game::Coordinates> {
-		std::size_t operator()(const Alphalcazar::Game::Coordinates& coordinates) const noexcept {
-			auto xHash = hash<Alphalcazar::Game::Coordinate>()(coordinates.x);
-			auto yHash = hash<Alphalcazar::Game::Coordinate>()(coordinates.y);
-			return ((xHash ^ (yHash << 1)) >> 1);
-		}
-	};
-}
-
 // We define the specializations of parse & format to make \ref Coordinates formattable. Based on: https://fmt.dev/latest/api.html#format-api
 template <> struct fmt::formatter<Alphalcazar::Game::Coordinates> {
 	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
