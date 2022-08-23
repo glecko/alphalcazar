@@ -7,7 +7,7 @@
 
 #include <game/Game.hpp>
 #include <game/PlacementMove.hpp>
-#include <util/Log.hpp>
+#include <util/log.hpp>
 #include "util/ThreadPool.hpp"
 
 namespace Alphalcazar::Strategy::MinMax {

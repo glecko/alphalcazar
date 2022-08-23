@@ -4,6 +4,7 @@
 #include "Coordinates.hpp"
 #include "parameters.hpp"
 #include "Tile.hpp"
+#include <util/hash.hpp>
 
 #include <array>
 #include <vector>
@@ -175,7 +176,7 @@ namespace std {
 				// We can then concatenate the first 3 bits of each piece's coordinate (which will never exceed 4, 0b100)
 				// into a 16-bit integer that will have 14 bits of information and 2 spare bits on the left
 				std::uint16_t pieceInfoBitRepresentation = coordinate.x << 8 & coordinate.y << 11 & pieceBitRepresentation;
-				result = ((pieceInfoBitRepresentation ^ (result << 1)) >> 1);
+				result = Alphalcazar::Utils::combineHash(result, pieceInfoBitRepresentation);
 			}
 			return result;
 		}

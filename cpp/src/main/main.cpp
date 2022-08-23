@@ -2,7 +2,7 @@
 #include <game/PlacementMove.hpp>
 #include <minmax/MinMaxStrategy.hpp>
 
-#include <util/Log.hpp>
+#include <util/log.hpp>
 
 #include <chrono>
 #include <functional>
@@ -20,16 +20,18 @@
 */
 
 /* With c_MinDepthToStoreInTranspositionCache = 3
-[2022-08-22 15:47:51.869] [info] First move at depth 1 took 4ms and calculated a score of 0
-[2022-08-22 15:47:51.877] [info] Game at depth 1 took 1ms ended with result 3
-[2022-08-22 15:47:51.940] [info] First move at depth 2 took 56ms and calculated a score of -34
-[2022-08-22 15:47:52.139] [info] Game at depth 2 took 194ms ended with result 3
-[2022-08-22 15:47:53.372] [info] First move at depth 3 took 1224ms and calculated a score of 35
-[2022-08-22 15:48:05.345] [info] Game at depth 3 took 11967ms ended with result 2
-[2022-08-22 15:50:59.554] [info] First move at depth 4 took 174200ms and calculated a score of -64
-[2022-08-22 15:59:35.800] [info] Game at depth 4 took 516240ms ended with result 3
-                                 |--> How can the other player win?? There's some wonky shit here
-								      Unless a depth 4 calculation was used for a depth 3 branch that made the player make a better move.
+[2022-08-23 12:58:19.136] [info] First move at depth 1 took 3ms and calculated a score of 0
+[2022-08-23 12:58:19.143] [info] Game at depth 1 took 1ms ended with result 3
+[2022-08-23 12:58:19.213] [info] First move at depth 2 took 62ms and calculated a score of -34
+[2022-08-23 12:58:19.408] [info] Game at depth 2 took 191ms ended with result 3
+[2022-08-23 12:58:20.635] [info] First move at depth 3 took 1217ms and calculated a score of 35
+[2022-08-23 12:58:33.355] [info] Game at depth 3 took 12714ms ended with result 2
+[2022-08-23 13:00:34.915] [info] First move at depth 4 took 121551ms and calculated a score of -64
+[2022-08-23 13:23:13.233] [info] Game at depth 4 took 1358312ms ended with result 3 --> PC went to sleep, check again?
+*/
+
+/* With c_MinDepthToStoreInTranspositionCache = 4
+
 */
 
 std::uint64_t executionTime(std::function<void()> function) {

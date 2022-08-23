@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 #include "aliases.hpp"
-#include "util/CallbackHandler.hpp"
+#include "util/hash.hpp"
 #include "Board.hpp"
 
 namespace Alphalcazar::Game {
@@ -112,7 +112,7 @@ namespace std {
 		std::size_t operator()(const Alphalcazar::Game::Game& game) const noexcept {
 			auto activePlayerHash = hash<Alphalcazar::Game::PlayerId>()(game.GetActivePlayer());
 			auto boardHash = hash<Alphalcazar::Game::Board>()(game.GetBoard());
-			return ((boardHash ^ (activePlayerHash << 1)) >> 1);
+			return Alphalcazar::Utils::combineHash(activePlayerHash, boardHash);
 		}
 	};
 }
