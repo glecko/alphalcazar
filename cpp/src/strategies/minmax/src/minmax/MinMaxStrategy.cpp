@@ -15,7 +15,7 @@ namespace Alphalcazar::Strategy::MinMax {
 	constexpr Score c_AlphaStartingValue = -c_WinConditionScore * 10;
 	/// The initial value of the "beta" parameter of the minmax algorithm
 	constexpr Score c_BetaStartingValue = c_WinConditionScore * 10;
-	constexpr Depth c_MinDepthToStoreInTranspositionCache = 3;
+	constexpr Depth c_MinDepthToStoreInTranspositionCache = 1;
 
 	MinMaxStrategy::MinMaxStrategy(const Depth depth, bool multithreaded)
 		: mDepth { depth }

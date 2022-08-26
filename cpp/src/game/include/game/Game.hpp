@@ -4,7 +4,6 @@
 #include <vector>
 #include <memory>
 #include "aliases.hpp"
-#include "util/hash.hpp"
 #include "Board.hpp"
 
 namespace Alphalcazar::Game {
@@ -99,20 +98,5 @@ namespace Alphalcazar::Game {
 		Board mBoard;
 		/// The state of the game. See \ref GameState for more info
 		GameState mState;
-	};
-}
-
-namespace std {
-	/*
-	* The \ref Game class implements a hashing function to be able to be used as a key
-	* for unordered maps.
-	*/
-	template <>
-	struct hash<Alphalcazar::Game::Game> {
-		std::size_t operator()(const Alphalcazar::Game::Game& game) const noexcept {
-			auto activePlayerHash = hash<Alphalcazar::Game::PlayerId>()(game.GetActivePlayer());
-			auto boardHash = hash<Alphalcazar::Game::Board>()(game.GetBoard());
-			return Alphalcazar::Utils::combineHash(activePlayerHash, boardHash);
-		}
 	};
 }

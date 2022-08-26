@@ -3,10 +3,52 @@
 #include <game/Game.hpp>
 #include <game/aliases.hpp>
 #include "minmax/minmax_aliases.hpp"
+#include <util/hash.hpp>
 
 #include <optional>
 #include <shared_mutex>
 #include <unordered_map>
+
+namespace std {
+	/*
+	 * A hashing function for the \ref Board class to be able to hash the \ref Game class.
+	 */
+	template <>
+	struct hash<Alphalcazar::Game::Board> {
+		std::size_t operator()(const Alphalcazar::Game::Board& board) const noexcept {
+			// We hash the board by looping through all pieces on the board, creating a hash for each piece/coordinate pair
+			// and combining all pair hashes together
+			std::size_t result = 0;
+			for (auto& [coordinate, piece] : board.GetPieces()) {
+				/*
+				 * We only care about the first 3 bits of the piece type as it currently will never exceed 5 (0b101)
+				 * and the direction, which will never exceed 4 (0b100). For the owner, we only care about the first 2 bits
+				 * as it will not exceed the value 2 (0b10).
+				 *
+				 * Therefore, we can concatenate all the information of a piece in the following 8-bit integer by shifting the bits of their 3 properties.
+				 */
+				std::uint8_t pieceBitRepresentation = static_cast<std::uint8_t>(piece.GetType()) << 5 & static_cast<std::uint8_t>(piece.GetMovementDirection()) << 2 & static_cast<std::uint8_t>(piece.GetOwner());
+
+				// We can then concatenate the first 3 bits of each piece's coordinate (which will never exceed 4, 0b100)
+				// into a 16-bit integer that will have 14 bits of information and 2 spare bits on the left
+				std::uint16_t pieceInfoBitRepresentation = coordinate.x << 8 & coordinate.y << 11 & pieceBitRepresentation;
+				result = Alphalcazar::Utils::combineHash(result, pieceInfoBitRepresentation);
+			}
+			return result;
+		}
+	};
+
+	/*
+	 * A hashing function for the \ref Game class to be able to use it as a key for the cache's unordered map.
+	 */
+	template <>
+	struct hash<Alphalcazar::Game::Game> {
+		std::size_t operator()(const Alphalcazar::Game::Game& game) const noexcept {
+			auto boardHash = hash<Alphalcazar::Game::Board>()(game.GetBoard());
+			return Alphalcazar::Utils::combineHash(boardHash, game.GetActivePlayer());
+		}
+	};
+}
 
 namespace Alphalcazar::Strategy::MinMax {
 	/*!

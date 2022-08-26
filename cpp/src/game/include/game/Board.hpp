@@ -4,7 +4,6 @@
 #include "Coordinates.hpp"
 #include "parameters.hpp"
 #include "Tile.hpp"
-#include <util/hash.hpp>
 
 #include <array>
 #include <vector>
@@ -155,30 +154,5 @@ namespace Alphalcazar::Game {
 		 * a piece is located without having to loop over all the tiles.
 		 */
 		std::array<Coordinates, c_PieceTypes * 2> mPlacedPieceCoordinates;
-	};
-}
-
-namespace std {
-	template <>
-	struct hash<Alphalcazar::Game::Board> {
-		std::size_t operator()(const Alphalcazar::Game::Board& board) const noexcept {
-			std::size_t result = 0;
-			for (auto& [coordinate, piece] : board.GetPieces()) {
-				/*
-				 * We only care about the first 3 bits of the piece type as it currently will never exceed 5 (0b101)
-				 * and the direction, which will never exceed 4 (0b100). For the owner, we only care about the first 2 bits
-				 * as it will not exceed the value 2 (0b10).
-				 *
-				 * Therefore, we can concatenate all the information of a piece in the following 8-bit integer by shifting the bits of their 3 properties.
-				 */
-				std::uint8_t pieceBitRepresentation = static_cast<std::uint8_t>(piece.GetType()) << 5 & static_cast<std::uint8_t>(piece.GetMovementDirection()) << 2 & static_cast<std::uint8_t>(piece.GetOwner());
-
-				// We can then concatenate the first 3 bits of each piece's coordinate (which will never exceed 4, 0b100)
-				// into a 16-bit integer that will have 14 bits of information and 2 spare bits on the left
-				std::uint16_t pieceInfoBitRepresentation = coordinate.x << 8 & coordinate.y << 11 & pieceBitRepresentation;
-				result = Alphalcazar::Utils::combineHash(result, pieceInfoBitRepresentation);
-			}
-			return result;
-		}
 	};
 }

@@ -20,18 +20,25 @@
 */
 
 /* With c_MinDepthToStoreInTranspositionCache = 3
-[2022-08-23 12:58:19.136] [info] First move at depth 1 took 3ms and calculated a score of 0
-[2022-08-23 12:58:19.143] [info] Game at depth 1 took 1ms ended with result 3
-[2022-08-23 12:58:19.213] [info] First move at depth 2 took 62ms and calculated a score of -34
-[2022-08-23 12:58:19.408] [info] Game at depth 2 took 191ms ended with result 3
-[2022-08-23 12:58:20.635] [info] First move at depth 3 took 1217ms and calculated a score of 35
-[2022-08-23 12:58:33.355] [info] Game at depth 3 took 12714ms ended with result 2
-[2022-08-23 13:00:34.915] [info] First move at depth 4 took 121551ms and calculated a score of -64
-[2022-08-23 13:23:13.233] [info] Game at depth 4 took 1358312ms ended with result 3 --> PC went to sleep, check again?
+[2022-08-26 11:22:20.166] [info] First move at depth 1 took 3ms and calculated a score of 0
+[2022-08-26 11:22:20.174] [info] Game at depth 1 took 2ms ended with result 3
+[2022-08-26 11:22:20.238] [info] First move at depth 2 took 56ms and calculated a score of -34
+[2022-08-26 11:22:20.437] [info] Game at depth 2 took 193ms ended with result 3
+[2022-08-26 11:22:21.813] [info] First move at depth 3 took 1367ms and calculated a score of 35
+[2022-08-26 11:22:35.480] [info] Game at depth 3 took 13659ms ended with result 2
+[2022-08-26 11:24:36.753] [info] First move at depth 4 took 121263ms and calculated a score of -64
+[2022-08-26 11:50:35.163] [info] Game at depth 4 took 1558404ms ended with result 3
 */
 
 /* With c_MinDepthToStoreInTranspositionCache = 4
-
+[2022-08-26 14:00:46.837] [info] First move at depth 1 took 5ms and calculated a score of 0
+[2022-08-26 14:00:46.844] [info] Game at depth 1 took 2ms ended with result 3
+[2022-08-26 14:00:46.909] [info] First move at depth 2 took 56ms and calculated a score of -34
+[2022-08-26 14:00:47.112] [info] Game at depth 2 took 198ms ended with result 3
+[2022-08-26 14:00:48.382] [info] First move at depth 3 took 1261ms and calculated a score of 35
+[2022-08-26 14:01:00.694] [info] Game at depth 3 took 12306ms ended with result 2
+[2022-08-26 14:03:47.215] [info] First move at depth 4 took 166511ms and calculated a score of -64
+[2022-08-26 14:19:31.539] [info] Game at depth 4 took 944318ms ended with result 2
 */
 
 std::uint64_t executionTime(std::function<void()> function) {
@@ -42,7 +49,7 @@ std::uint64_t executionTime(std::function<void()> function) {
 }
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
-	constexpr Alphalcazar::Strategy::MinMax::Depth c_MaxDepth = 5;
+	constexpr Alphalcazar::Strategy::MinMax::Depth c_MaxDepth = 2;
 	for (Alphalcazar::Strategy::MinMax::Depth depth = 1; depth <= c_MaxDepth; depth++) {
 		Alphalcazar::Strategy::MinMax::MinMaxStrategy strategy { depth, true };
 		Alphalcazar::Game::Game game {};
