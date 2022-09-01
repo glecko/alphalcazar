@@ -42,7 +42,7 @@ namespace Alphalcazar::Game {
 
 	Board::~Board() {}
 
-	void Board::PlacePiece(const Coordinates& coordinates, Piece& piece) {
+	void Board::PlacePiece(const Coordinates& coordinates, const Piece& piece) {
 		if (auto* tile = GetTile(coordinates)) {
 			auto direction = coordinates.GetLegalPlacementDirection();
 			if (direction != Direction::NONE) {
@@ -56,7 +56,7 @@ namespace Alphalcazar::Game {
 		}
 	}
 
-	void Board::PlacePiece(const Coordinates& coordinates, Piece& piece, Direction direction) {
+	void Board::PlacePiece(const Coordinates& coordinates, const Piece& piece, Direction direction) {
 		if (auto* tile = GetTile(coordinates)) {
 			tile->PlacePiece(piece);
 			tile->GetPiece()->SetMovementDirection(direction);
