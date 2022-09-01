@@ -2,6 +2,7 @@
 
 #include "game/Piece.hpp"
 #include "game/board_utils.hpp"
+#include "safety_checks.hpp"
 #include <util/Log.hpp>
 
 #include <algorithm>
@@ -42,7 +43,7 @@ namespace Alphalcazar::Game {
 
 	Board::~Board() {}
 
-	void Board::PlacePiece(const Coordinates& coordinates, const Piece& piece) {
+	void Board::PlacePiece(const Coordinates& coordinates, Piece& piece) {
 		Tile* tile = GetTile(coordinates);
 		if constexpr (c_BoardPiecePlacementIntegrityChecks) {
 			if (!tile) {
@@ -50,15 +51,18 @@ namespace Alphalcazar::Game {
 			}
 		}
 		auto direction = coordinates.GetLegalPlacementDirection();
-		if (direction != Direction::NONE) {
-			tile->PlacePiece(piece);
-			tile->GetPiece().SetMovementDirection(coordinates.GetLegalPlacementDirection());
-
-			SetPlacedPieceCoordinates(piece, coordinates);
+		if constexpr (c_BoardPiecePlacementIntegrityChecks) {
+			if (direction == Direction::NONE) {
+				Utils::LogError("Legal placement direction of piece placement at {} was invalid.", coordinates);
+			}
 		}
+		tile->PlacePiece(piece);
+		tile->GetPiece()->SetMovementDirection(coordinates.GetLegalPlacementDirection());
+
+		SetPlacedPieceCoordinates(piece, coordinates);
 	}
 
-	void Board::PlacePiece(const Coordinates& coordinates, const Piece& piece, Direction direction) {
+	void Board::PlacePiece(const Coordinates& coordinates, Piece& piece, Direction direction) {
 		Tile* tile = GetTile(coordinates);
 		if constexpr (c_BoardPiecePlacementIntegrityChecks) {
 			if (!tile) {
@@ -66,7 +70,7 @@ namespace Alphalcazar::Game {
 			}
 		}
 		tile->PlacePiece(piece);
-		tile->GetPiece().SetMovementDirection(direction);
+		tile->GetPiece()->SetMovementDirection(direction);
 
 		SetPlacedPieceCoordinates(piece, coordinates);
 	}
@@ -343,7 +347,7 @@ namespace Alphalcazar::Game {
 						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no piece exists at the tile at those coordinates.", coordinates, i);
 					}
 				}
-				result.emplace_back(coordinates, tile->GetPiece());
+				result.emplace_back(coordinates, *tile->GetPiece());
 			}
 		}
 		return result;
