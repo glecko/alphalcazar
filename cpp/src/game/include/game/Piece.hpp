@@ -25,12 +25,6 @@ namespace Alphalcazar::Game {
 			, mOwner{ owner }
 		{}
 
-		Piece(const Piece& other) noexcept
-			: mType{ other.mType }
-			, mDirection{ other.mDirection }
-			, mOwner{ other.mOwner }
-		{}
-
 		/// Returns the type (that determines the movement order) of the piece
 		PieceType GetType() const {
 			return mType;
