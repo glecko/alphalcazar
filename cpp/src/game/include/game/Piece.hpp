@@ -13,23 +13,59 @@ namespace Alphalcazar::Game {
 	class Piece {
 	public:
 		/// Default constructor for \ref Piece, constructs an invalid piece
-		Piece() noexcept;
-		Piece(PlayerId owner, PieceType type) noexcept;
-		Piece(const Piece& other) noexcept;
-		~Piece();
+		Piece() noexcept
+			: mType{ c_InvalidPieceType }
+			, mDirection{ Direction::NONE }
+			, mOwner{ PlayerId::NONE }
+		{}
 
-		bool operator==(const Piece& other) const;
+		Piece(PlayerId owner, PieceType type) noexcept
+			: mType{ type }
+			, mDirection{ Direction::NONE }
+			, mOwner{ owner }
+		{}
 
-		PieceType GetType() const;
-		PlayerId GetOwner() const;
-		Direction GetMovementDirection() const;
+		Piece(const Piece& other) noexcept
+			: mType{ other.mType }
+			, mDirection{ other.mDirection }
+			, mOwner{ other.mOwner }
+		{}
 
-		bool IsPushable() const;
-		bool IsPusher() const;
+		PieceType GetType() const {
+			return mType;
+		}
 
-		bool IsValid() const;
+		PlayerId GetOwner() const {
+			return mOwner;
+		}
 
-		void SetMovementDirection(Direction direction);
+		Direction GetMovementDirection() const {
+			return mDirection;
+		}
+
+		bool IsPushable() const {
+			return mType == c_PushablePieceType;
+		}
+
+		bool IsPusher() const {
+			return mType == c_PusherPieceType;
+		}
+
+		bool IsValid() const {
+			bool typeIsValid = mType != c_InvalidPieceType;
+			bool ownerIsValid = mOwner != PlayerId::NONE;
+			return typeIsValid && ownerIsValid;
+		}
+
+		void SetMovementDirection(Direction direction) {
+			mDirection = direction;
+		}
+
+		bool operator==(const Piece& other) const {
+			bool typeMatches = other.mType == mType;
+			bool ownerMatches = other.mOwner == mOwner;
+			return typeMatches && ownerMatches;
+		}
 	private:
 		/*!
 		 * \brief The type, or movement order, of the piece.
