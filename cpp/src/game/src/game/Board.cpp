@@ -42,29 +42,33 @@ namespace Alphalcazar::Game {
 
 	Board::~Board() {}
 
-	void Board::PlacePiece(const Coordinates& coordinates, Piece& piece) {
-		if (auto* tile = GetTile(coordinates)) {
-			auto direction = coordinates.GetLegalPlacementDirection();
-			if (direction != Direction::NONE) {
-				tile->PlacePiece(piece);
-				tile->GetPiece()->SetMovementDirection(coordinates.GetLegalPlacementDirection());
-
-				SetPlacedPieceCoordinates(piece, coordinates);
+	void Board::PlacePiece(const Coordinates& coordinates, const Piece& piece) {
+		Tile* tile = GetTile(coordinates);
+		if constexpr (c_BoardPiecePlacementIntegrityChecks) {
+			if (!tile) {
+				Utils::LogError("Attempted to place a piece on a non-existing perimeter tile (at {})", coordinates);
 			}
-		} else {
-			Utils::LogError("Attempted to place a piece on a non-existing perimeter tile (at {})", coordinates);
+		}
+		auto direction = coordinates.GetLegalPlacementDirection();
+		if (direction != Direction::NONE) {
+			tile->PlacePiece(piece);
+			tile->GetPiece().SetMovementDirection(coordinates.GetLegalPlacementDirection());
+
+			SetPlacedPieceCoordinates(piece, coordinates);
 		}
 	}
 
-	void Board::PlacePiece(const Coordinates& coordinates, Piece& piece, Direction direction) {
-		if (auto* tile = GetTile(coordinates)) {
-			tile->PlacePiece(piece);
-			tile->GetPiece()->SetMovementDirection(direction);
-
-			SetPlacedPieceCoordinates(piece, coordinates);
-		} else {
-			Utils::LogError("Attempted to place a piece on a non-existing tile (at {})", coordinates);
+	void Board::PlacePiece(const Coordinates& coordinates, const Piece& piece, Direction direction) {
+		Tile* tile = GetTile(coordinates);
+		if constexpr (c_BoardPiecePlacementIntegrityChecks) {
+			if (!tile) {
+				Utils::LogError("Attempted to place a piece on a non-existing tile (at {})", coordinates);
+			}
 		}
+		tile->PlacePiece(piece);
+		tile->GetPiece().SetMovementDirection(direction);
+
+		SetPlacedPieceCoordinates(piece, coordinates);
 	}
 
 	BoardMovesCount Board::ExecutePieceMove(const Piece& piece) {
@@ -264,7 +268,10 @@ namespace Alphalcazar::Game {
 			if (auto playerId = CheckRowCompleteness(startCoordinate, direction, distance); playerId.has_value()) {
 				if (candidateWinner.has_value() && candidateWinner != playerId) {
 					// Both players have completed at least one row/column/diagonal
-					return c_AcceptDraws ? GameResult::DRAW : GameResult::NONE;
+					if constexpr (c_AcceptDraws) {
+						return GameResult::DRAW;
+					}
+					return GameResult::NONE;
 				}
 				candidateWinner = playerId.value();
 			}
@@ -325,15 +332,18 @@ namespace Alphalcazar::Game {
 				if (excludePerimeter && coordinates.IsPerimeter()) {
 					continue;
 				}
-				if (auto* tile = GetTile(coordinates)) {
-					if (auto* piece = tile->GetPiece()) {
-						result.emplace_back(coordinates, *piece);
-					} else {
+				const Tile* tile = GetTile(coordinates);
+				if constexpr (c_BoardPiecePlacementIntegrityChecks) {
+					if (!tile) {
+						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no tile exists at those coordinates.", coordinates, i);
+					}
+				}
+				if constexpr (c_BoardPiecePlacementIntegrityChecks) {
+					if (!tile->HasPiece()) {
 						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no piece exists at the tile at those coordinates.", coordinates, i);
 					}
-				} else {
-					Utils::LogError("Placed pieces cache pointed at {} for index {}, but no tile exists at those coordinates.", coordinates, i);
 				}
+				result.emplace_back(coordinates, tile->GetPiece());
 			}
 		}
 		return result;
