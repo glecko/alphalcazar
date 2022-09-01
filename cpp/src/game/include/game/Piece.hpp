@@ -31,32 +31,39 @@ namespace Alphalcazar::Game {
 			, mOwner{ other.mOwner }
 		{}
 
+		/// Returns the type (that determines the movement order) of the piece
 		PieceType GetType() const {
 			return mType;
 		}
 
+		/// Retrusn the owner of the piece
 		PlayerId GetOwner() const {
 			return mOwner;
 		}
 
+		/// Returns the direction at which the piece is currently facing
 		Direction GetMovementDirection() const {
 			return mDirection;
 		}
 
+		/// Returns whether the piece can be pushed by the movement of other pieces
 		bool IsPushable() const {
 			return mType == c_PushablePieceType;
 		}
 
+		/// Returns whether the piece can push other pieces when moving
 		bool IsPusher() const {
 			return mType == c_PusherPieceType;
 		}
 
+		/// Returns if the data structure represents a valid piece
 		bool IsValid() const {
 			bool typeIsValid = mType != c_InvalidPieceType;
 			bool ownerIsValid = mOwner != PlayerId::NONE;
 			return typeIsValid && ownerIsValid;
 		}
 
+		/// Sets the direction at which the piece is facing
 		void SetMovementDirection(Direction direction) {
 			mDirection = direction;
 		}
