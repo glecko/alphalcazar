@@ -123,10 +123,15 @@ namespace Alphalcazar::Game {
 		 * Each chained movement will be described as a pair of the source tile from which a piece needs to be moved from and
 		 * the target tile it needs to be moved to.
 		 *
-		 * \note The list will be returned in the order the movements are supposed to be executed (with the last piece of the chain
+		 * \note The order of the array describes the order the movements are supposed to be executed (with the last piece of the chain
 		 * first and the movement of the pushing piece last)
+		 *
+		 * \returns A pair of [chainedMovements, chainedMovementsCount], where the first item is a fixed-size array populated from the back, and
+		 *          the second argument a counter describing how many valid movements exist in the array.
+		 *          For example, a count of 2 will indicate the array has the following structure: [invalid, invalid, invalid, movement_1, movement_2].
+		 *          The array is structured in this unusual way due to performance reasons.
 		 */
-		std::vector<MovementDescription> GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction);
+		std::pair<std::array<Board::MovementDescription, c_PlayAreaSize>, std::size_t> GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction);
 
 		/// Executes a specified function for every tile of this board
 		void LoopOverTiles(std::function<void(const Coordinates& coordinates, const Tile& tile)> action) const;

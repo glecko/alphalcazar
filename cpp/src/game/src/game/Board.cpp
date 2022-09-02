@@ -83,9 +83,10 @@ namespace Alphalcazar::Game {
 					MovePiece(*originTile, *targetTile, targetCoordinates);
 					movedPieces++;
 				} else if (originPiece->IsPusher()) {
-					auto chainedMovements = GetChainedPushMovements(originCoordinates, direction);
+					auto [chainedMovements, chainedMovementsCount] = GetChainedPushMovements(originCoordinates, direction);
 					// We execute the chained push movements in order
-					for (auto& [sourcePushTile, targetPushTile, targetPushCoordinate] : chainedMovements) {
+					for(std::size_t i = chainedMovements.size() - chainedMovementsCount; i < chainedMovements.size(); ++i) {
+						auto& [sourcePushTile, targetPushTile, targetPushCoordinate] = chainedMovements[i];
 						if (targetPushTile != nullptr) {
 							MovePiece(*sourcePushTile, *targetPushTile, targetPushCoordinate);
 						} else {
@@ -131,8 +132,9 @@ namespace Alphalcazar::Game {
 		return movedPieces;
 	}
 
-	std::vector<Board::MovementDescription> Board::GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction) {
-		std::vector<Board::MovementDescription> result;
+	std::pair<std::array<Board::MovementDescription, c_PlayAreaSize>, std::size_t> Board::GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction) {
+		// The max amount of chained pushed movements that can exist is \ref c_PlayAreaSize
+		auto result = std::make_pair<std::array<Board::MovementDescription, c_PlayAreaSize>, std::size_t>({}, 0);
 		Coordinates nextCoordinate = sourceCoordinates;
 		Tile* nextTile = GetTile(nextCoordinate);
 		while (nextTile && nextTile->HasPiece()) {
@@ -140,11 +142,11 @@ namespace Alphalcazar::Game {
 			auto pushToCoordinate = nextCoordinate.GetCoordinateInDirection(direction, 1);
 			auto pushToTile = GetTile(pushToCoordinate);
 
-			// Insert this movement (from the current tile to the tile we will push to) at the beginning
-			// of the vector, as the pushing movements will need to happen in order
+			// Insert movements back-to-front into the array, as the pushing movements will need to happen in order
 			// from the last piece on the chain to the first (pushing) piece
 			MovementDescription movement = std::make_tuple(nextTile, pushToTile, pushToCoordinate);
-			result.insert(result.begin(), movement);
+			result.first[result.first.size() - 1 - result.second] = movement;
+			result.second++;
 
 			// The tile and coordinates we are pushing to become the next tile/coordinates we evaluate
 			nextCoordinate = pushToCoordinate;
