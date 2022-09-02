@@ -13,23 +13,60 @@ namespace Alphalcazar::Game {
 	class Piece {
 	public:
 		/// Default constructor for \ref Piece, constructs an invalid piece
-		Piece() noexcept;
-		Piece(PlayerId owner, PieceType type) noexcept;
-		Piece(const Piece& other) noexcept;
-		~Piece();
+		Piece() noexcept
+			: mType{ c_InvalidPieceType }
+			, mDirection{ Direction::NONE }
+			, mOwner{ PlayerId::NONE }
+		{}
 
-		bool operator==(const Piece& other) const;
+		Piece(PlayerId owner, PieceType type) noexcept
+			: mType{ type }
+			, mDirection{ Direction::NONE }
+			, mOwner{ owner }
+		{}
 
-		PieceType GetType() const;
-		PlayerId GetOwner() const;
-		Direction GetMovementDirection() const;
+		/// Returns the type (that determines the movement order) of the piece
+		PieceType GetType() const {
+			return mType;
+		}
 
-		bool IsPushable() const;
-		bool IsPusher() const;
+		/// Retrusn the owner of the piece
+		PlayerId GetOwner() const {
+			return mOwner;
+		}
 
-		bool IsValid() const;
+		/// Returns the direction at which the piece is currently facing
+		Direction GetMovementDirection() const {
+			return mDirection;
+		}
 
-		void SetMovementDirection(Direction direction);
+		/// Returns whether the piece can be pushed by the movement of other pieces
+		bool IsPushable() const {
+			return mType == c_PushablePieceType;
+		}
+
+		/// Returns whether the piece can push other pieces when moving
+		bool IsPusher() const {
+			return mType == c_PusherPieceType;
+		}
+
+		/// Returns if the data structure represents a valid piece
+		bool IsValid() const {
+			bool typeIsValid = mType != c_InvalidPieceType;
+			bool ownerIsValid = mOwner != PlayerId::NONE;
+			return typeIsValid && ownerIsValid;
+		}
+
+		/// Sets the direction at which the piece is facing
+		void SetMovementDirection(Direction direction) {
+			mDirection = direction;
+		}
+
+		bool operator==(const Piece& other) const {
+			bool typeMatches = other.mType == mType;
+			bool ownerMatches = other.mOwner == mOwner;
+			return typeMatches && ownerMatches;
+		}
 	private:
 		/*!
 		 * \brief The type, or movement order, of the piece.
