@@ -43,7 +43,7 @@ namespace Alphalcazar::Game {
 
 	Board::~Board() {}
 
-	void Board::PlacePiece(const Coordinates& coordinates, Piece& piece) {
+	void Board::PlacePiece(const Coordinates& coordinates, const Piece& piece) {
 		Tile* tile = GetTile(coordinates);
 		if constexpr (c_BoardPiecePlacementIntegrityChecks) {
 			if (!tile) {
@@ -62,7 +62,7 @@ namespace Alphalcazar::Game {
 		SetPlacedPieceCoordinates(piece, coordinates);
 	}
 
-	void Board::PlacePiece(const Coordinates& coordinates, Piece& piece, Direction direction) {
+	void Board::PlacePiece(const Coordinates& coordinates, const Piece& piece, Direction direction) {
 		Tile* tile = GetTile(coordinates);
 		if constexpr (c_BoardPiecePlacementIntegrityChecks) {
 			if (!tile) {

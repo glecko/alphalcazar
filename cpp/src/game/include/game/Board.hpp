@@ -30,14 +30,14 @@ namespace Alphalcazar::Game {
 		 * May only be used to place pieces on the perimeter of the board, and automatically sets
 		 * the direction of the piece according to the placement direction of the perimeter tile.
 		 */
-		void PlacePiece(const Coordinates& coordinates, Piece& piece);
+		void PlacePiece(const Coordinates& coordinates, const Piece& piece);
 		/*!
 		 * \brief Places a given piece at the tile at the specified coordinates with a given direction.
 		 *
 		 * \note This method should not be called during a game, as it allows placement on any tile with any direction
 		 *       without enforcement of the game's rules. It may be used to set up starting positions or by unit tests.
 		 */
-		void PlacePiece(const Coordinates& coordinates, Piece& piece, Direction direction);
+		void PlacePiece(const Coordinates& coordinates, const Piece& piece, Direction direction);
 
 		/*!
 		 * \brief Execute one movement for all pieces currently on the board, in order
