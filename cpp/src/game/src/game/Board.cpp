@@ -2,6 +2,7 @@
 
 #include "game/Piece.hpp"
 #include "game/board_utils.hpp"
+#include "safety_checks.hpp"
 #include <util/Log.hpp>
 
 #include <algorithm>
@@ -43,28 +44,35 @@ namespace Alphalcazar::Game {
 	Board::~Board() {}
 
 	void Board::PlacePiece(const Coordinates& coordinates, const Piece& piece) {
-		if (auto* tile = GetTile(coordinates)) {
-			auto direction = coordinates.GetLegalPlacementDirection();
-			if (direction != Direction::NONE) {
-				tile->PlacePiece(piece);
-				tile->GetPiece()->SetMovementDirection(coordinates.GetLegalPlacementDirection());
-
-				SetPlacedPieceCoordinates(piece, coordinates);
+		Tile* tile = GetTile(coordinates);
+		if constexpr (c_BoardPiecePlacementIntegrityChecks) {
+			if (!tile) {
+				Utils::LogError("Attempted to place a piece on a non-existing perimeter tile (at {})", coordinates);
 			}
-		} else {
-			Utils::LogError("Attempted to place a piece on a non-existing perimeter tile (at {})", coordinates);
 		}
+		auto direction = coordinates.GetLegalPlacementDirection();
+		if constexpr (c_BoardPiecePlacementIntegrityChecks) {
+			if (direction == Direction::NONE) {
+				Utils::LogError("Legal placement direction of piece placement at {} was invalid.", coordinates);
+			}
+		}
+		tile->PlacePiece(piece);
+		tile->GetPiece()->SetMovementDirection(coordinates.GetLegalPlacementDirection());
+
+		SetPlacedPieceCoordinates(piece, coordinates);
 	}
 
 	void Board::PlacePiece(const Coordinates& coordinates, const Piece& piece, Direction direction) {
-		if (auto* tile = GetTile(coordinates)) {
-			tile->PlacePiece(piece);
-			tile->GetPiece()->SetMovementDirection(direction);
-
-			SetPlacedPieceCoordinates(piece, coordinates);
-		} else {
-			Utils::LogError("Attempted to place a piece on a non-existing tile (at {})", coordinates);
+		Tile* tile = GetTile(coordinates);
+		if constexpr (c_BoardPiecePlacementIntegrityChecks) {
+			if (!tile) {
+				Utils::LogError("Attempted to place a piece on a non-existing tile (at {})", coordinates);
+			}
 		}
+		tile->PlacePiece(piece);
+		tile->GetPiece()->SetMovementDirection(direction);
+
+		SetPlacedPieceCoordinates(piece, coordinates);
 	}
 
 	BoardMovesCount Board::ExecutePieceMove(const Piece& piece) {
@@ -83,9 +91,10 @@ namespace Alphalcazar::Game {
 					MovePiece(*originTile, *targetTile, targetCoordinates);
 					movedPieces++;
 				} else if (originPiece->IsPusher()) {
-					auto chainedMovements = GetChainedPushMovements(originCoordinates, direction);
+					auto [chainedMovements, chainedMovementsCount] = GetChainedPushMovements(originCoordinates, direction);
 					// We execute the chained push movements in order
-					for (auto& [sourcePushTile, targetPushTile, targetPushCoordinate] : chainedMovements) {
+					for(std::size_t i = chainedMovements.size() - chainedMovementsCount; i < chainedMovements.size(); ++i) {
+						auto& [sourcePushTile, targetPushTile, targetPushCoordinate] = chainedMovements[i];
 						if (targetPushTile != nullptr) {
 							MovePiece(*sourcePushTile, *targetPushTile, targetPushCoordinate);
 						} else {
@@ -131,8 +140,9 @@ namespace Alphalcazar::Game {
 		return movedPieces;
 	}
 
-	std::vector<Board::MovementDescription> Board::GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction) {
-		std::vector<Board::MovementDescription> result;
+	std::pair<std::array<Board::MovementDescription, c_PlayAreaSize>, std::size_t> Board::GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction) {
+		// The max amount of chained pushed movements that can exist is \ref c_PlayAreaSize
+		auto result = std::make_pair<std::array<Board::MovementDescription, c_PlayAreaSize>, std::size_t>({}, 0);
 		Coordinates nextCoordinate = sourceCoordinates;
 		Tile* nextTile = GetTile(nextCoordinate);
 		while (nextTile && nextTile->HasPiece()) {
@@ -140,11 +150,11 @@ namespace Alphalcazar::Game {
 			auto pushToCoordinate = nextCoordinate.GetCoordinateInDirection(direction, 1);
 			auto pushToTile = GetTile(pushToCoordinate);
 
-			// Insert this movement (from the current tile to the tile we will push to) at the beginning
-			// of the vector, as the pushing movements will need to happen in order
+			// Insert movements back-to-front into the array, as the pushing movements will need to happen in order
 			// from the last piece on the chain to the first (pushing) piece
 			MovementDescription movement = std::make_tuple(nextTile, pushToTile, pushToCoordinate);
-			result.insert(result.begin(), movement);
+			result.first[result.first.size() - 1 - result.second] = movement;
+			result.second++;
 
 			// The tile and coordinates we are pushing to become the next tile/coordinates we evaluate
 			nextCoordinate = pushToCoordinate;
@@ -264,7 +274,10 @@ namespace Alphalcazar::Game {
 			if (auto playerId = CheckRowCompleteness(startCoordinate, direction, distance); playerId.has_value()) {
 				if (candidateWinner.has_value() && candidateWinner != playerId) {
 					// Both players have completed at least one row/column/diagonal
-					return c_AcceptDraws ? GameResult::DRAW : GameResult::NONE;
+					if constexpr (c_AcceptDraws) {
+						return GameResult::DRAW;
+					}
+					return GameResult::NONE;
 				}
 				candidateWinner = playerId.value();
 			}
@@ -325,15 +338,18 @@ namespace Alphalcazar::Game {
 				if (excludePerimeter && coordinates.IsPerimeter()) {
 					continue;
 				}
-				if (auto* tile = GetTile(coordinates)) {
-					if (auto* piece = tile->GetPiece()) {
-						result.emplace_back(coordinates, *piece);
-					} else {
+				const Tile* tile = GetTile(coordinates);
+				if constexpr (c_BoardPiecePlacementIntegrityChecks) {
+					if (!tile) {
+						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no tile exists at those coordinates.", coordinates, i);
+					}
+				}
+				if constexpr (c_BoardPiecePlacementIntegrityChecks) {
+					if (!tile->HasPiece()) {
 						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no piece exists at the tile at those coordinates.", coordinates, i);
 					}
-				} else {
-					Utils::LogError("Placed pieces cache pointed at {} for index {}, but no tile exists at those coordinates.", coordinates, i);
 				}
+				result.emplace_back(coordinates, *tile->GetPiece());
 			}
 		}
 		return result;

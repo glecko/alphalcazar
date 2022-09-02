@@ -19,21 +19,64 @@ namespace Alphalcazar::Game {
 		Coordinate x = c_InvalidCoordinate;
 		Coordinate y = c_InvalidCoordinate;
 
-		bool operator==(const Coordinates& coord) const;
-		bool operator!=(const Coordinates& coord) const;
+		bool operator==(const Coordinates& coord) const {
+			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
+			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
+			bool xIsEqual = x == coord.x;
+			bool yIsEqual = y == coord.y;
+			return xIsEqual && yIsEqual;
+		}
+
+		bool operator!=(const Coordinates& coord) const {
+			return x != coord.x || y != coord.y;
+		}
+
+		/// Indicates if the coordinates represent a valid play area tile.
+		bool IsPlayArea() const {
+			return x >= 0 && x < c_PlayAreaSize&& y >= 0 && y < c_PlayAreaSize && !IsCorner();
+		}
 
 		/// Indicates if the coordinates represent a position in the perimeter of the board
-		bool IsPerimeter() const;
-		/// Indicates if the coordinates represent a corner of the play area. No tile will exist at these coordinates.
-		bool IsCorner() const;
-		/// Indicates if the coordinates represent a valid play area tile.
-		bool IsPlayArea() const;
+		bool IsPerimeter() const {
+			return x == 0 || x == c_PlayAreaSize - 1 || y == 0 || y == c_PlayAreaSize - 1;
+		}
+
 		/// Indicates if the coordinates represent the center of the board
-		bool IsCenter() const;
+		bool IsCenter() const {
+			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
+			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
+			bool xIsCenter = x == c_CenterCoordinate;
+			bool yIsCenter = y == c_CenterCoordinate;
+			return xIsCenter && yIsCenter;
+		}
+
 		/// Indicates if the coordinates represent a tile that is on either the row or column that contains the center tile of the board
-		bool IsOnCenterLane() const;
+		bool IsOnCenterLane() const {
+			return x == c_CenterCoordinate || y == c_CenterCoordinate;
+		}
+
+		/// Indicates if the coordinates represent a corner of the play area. No tile will exist at these coordinates.
+		bool IsCorner() const {
+			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
+			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
+			bool xIsPerimeter = x == 0 || x == c_PlayAreaSize - 1;
+			bool yIsPerimeter = y == 0 || y == c_PlayAreaSize - 1;
+			return xIsPerimeter && yIsPerimeter;
+		}
+
 		/// Indicates if the coordinates represent a corner of the board
-		bool IsBoardCorner() const;
+		bool IsBoardCorner() const {
+			return (x == 1 || x == c_BoardSize) && (y == 1 || y == c_BoardSize);
+		}
+
+		/// Returns whether the current coordinates are valid
+		bool Valid() const {
+			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
+			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
+			bool xIsInvalid = x != c_InvalidCoordinate;
+			bool yIsInvalid = y != c_InvalidCoordinate;
+			return xIsInvalid && yIsInvalid;
+		}
 
 		/*!
 		 * \brief Returns a new Coordinates object representing a movement at a fixed distance in the specified direction
@@ -49,9 +92,6 @@ namespace Alphalcazar::Game {
 		 */
 		Direction GetLegalPlacementDirection() const;
 
-		/// Returns whether the current coordinates are valid
-		bool Valid() const;
-
 		/// Builds and returns an instance of invalid coordinates
 		static Coordinates Invalid();
 
@@ -62,16 +102,12 @@ namespace Alphalcazar::Game {
 			for (Coordinate x = 1; x <= c_BoardSize; x++) {
 				result[i] = { x, 0 };
 				i++;
-			}
-			for (Coordinate x = 1; x <= c_BoardSize; x++) {
 				result[i] = { x, c_PlayAreaSize - 1 };
 				i++;
 			}
 			for (Coordinate y = 1; y <= c_BoardSize; y++) {
 				result[i] = { 0, y };
 				i++;
-			}
-			for (Coordinate y = 1; y <= c_BoardSize; y++) {
 				result[i] = { c_PlayAreaSize - 1, y };
 				i++;
 			}
