@@ -14,8 +14,6 @@ std::uint64_t executionTime(std::function<void()> function) {
 }
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
-	auto start = std::chrono::high_resolution_clock::now();
-
 	constexpr Alphalcazar::Strategy::MinMax::Depth c_MaxDepth = 5;
 	for (Alphalcazar::Strategy::MinMax::Depth depth = 1; depth <= c_MaxDepth; depth++) {
 		Alphalcazar::Strategy::MinMax::MinMaxStrategy strategy{ depth, true };
