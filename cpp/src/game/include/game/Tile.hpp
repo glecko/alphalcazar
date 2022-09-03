@@ -13,17 +13,13 @@ namespace Alphalcazar::Game {
 	 */
 	class Tile {
 	public:
-		Tile();
-		Tile(const Tile& other);
-		~Tile();
-
 		/// Places a piece on this tile
 		void PlacePiece(const Piece& piece);
 		/// Removes the piece that was placed on this tile, if any
 		void RemovePiece();
-		/// Returns the piece that is currently placed on this tile, or std::nullopt if no piece is on this tile
-		const Piece* GetPiece() const;
-		Piece* GetPiece();
+		/// Returns the piece that is currently placed on this tile, or an invalid piece if no piece exists on this tile
+		const Piece& GetPiece() const;
+		Piece& GetPiece();
 
 		bool HasPiece() const;
 	private:
