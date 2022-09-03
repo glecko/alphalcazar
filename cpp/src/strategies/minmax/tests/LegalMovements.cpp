@@ -12,8 +12,6 @@
 
 #include "setuphelpers.hpp"
 
-#include <vector>
-
 namespace Alphalcazar::Strategy::MinMax {
 	TEST(LegalMovements, CenterVerticalRowSymmetries) {
 		Game::Game game {};

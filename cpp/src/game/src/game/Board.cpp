@@ -322,11 +322,9 @@ namespace Alphalcazar::Game {
 		mPlacedPieceCoordinates[index] = coordinates;
 	}
 
-	Utils::StaticVector<std::pair<Coordinates, Piece>, c_PieceTypes> Board::GetPieces(PlayerId player, bool excludePerimeter) const {
-		Utils::StaticVector<std::pair<Coordinates, Piece>, c_PieceTypes> result;
-		auto [min, max] = GetPlacePieceIndexRange(player);
+	void Board::FetchPiecesFromIndexRange(std::size_t min, std::size_t max, bool excludePerimeter, std::function<void(const Coordinates& coordinates, const Piece& piece)> action) const {
 		for (std::size_t i = min; i <= max; i++) {
-			auto coordinates = mPlacedPieceCoordinates[i];
+			auto& coordinates = mPlacedPieceCoordinates[i];
 			if (coordinates.Valid()) {
 				if (excludePerimeter && coordinates.IsPerimeter()) {
 					continue;
@@ -340,33 +338,26 @@ namespace Alphalcazar::Game {
 						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no piece exists at the tile at those coordinates.", coordinates, i);
 					}
 				}
-				result.insert(std::make_pair(coordinates, tile->GetPiece()));
+				action(coordinates, tile->GetPiece());
 			}
 		}
+	}
+
+	Utils::StaticVector<std::pair<Coordinates, Piece>, c_PieceTypes> Board::GetPieces(PlayerId player, bool excludePerimeter) const {
+		Utils::StaticVector<std::pair<Coordinates, Piece>, c_PieceTypes> result;
+		auto [min, max] = GetPlacePieceIndexRange(player);
+		FetchPiecesFromIndexRange(min, max, excludePerimeter, [&result](const Coordinates& coordinates, const Piece& piece) {
+			result.insert(std::make_pair(coordinates, piece));
+		});
 		return result;
 	}
 
 	Utils::StaticVector<std::pair<Coordinates, Piece>, c_PieceTypes * 2> Board::GetPieces(bool excludePerimeter) const {
 		Utils::StaticVector<std::pair<Coordinates, Piece>, c_PieceTypes * 2> result;
 		auto [min, max] = GetPlacePieceIndexRange(PlayerId::NONE);
-		for (std::size_t i = min; i <= max; i++) {
-			auto coordinates = mPlacedPieceCoordinates[i];
-			if (coordinates.Valid()) {
-				if (excludePerimeter && coordinates.IsPerimeter()) {
-					continue;
-				}
-				const Tile* tile = GetTile(coordinates);
-				if constexpr (c_BoardPiecePlacementIntegrityChecks) {
-					if (!tile) {
-						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no tile exists at those coordinates.", coordinates, i);
-					}
-					if (!tile->HasPiece()) {
-						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no piece exists at the tile at those coordinates.", coordinates, i);
-					}
-				}
-				result.insert(std::make_pair(coordinates, tile->GetPiece()));
-			}
-		}
+		FetchPiecesFromIndexRange(min, max, excludePerimeter, [&result](const Coordinates& coordinates, const Piece& piece) {
+			result.insert(std::make_pair(coordinates, piece));
+		});
 		return result;
 	}
 

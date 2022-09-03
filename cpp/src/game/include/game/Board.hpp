@@ -96,10 +96,6 @@ namespace Alphalcazar::Game {
 		 */
 		std::bitset<c_PieceTypes> GetPiecePlacements(PlayerId player) const;
 	private:
-		template<std::size_t Capacity>
-		Utils::StaticVector<std::pair<Coordinates, Piece>, Capacity> GetPiecesInternal(PlayerId player, bool excludePerimeter = false) const {
-
-		}
 		/*!
 		 * \brief Executes one piece movement, if the specified piece is on the board
 		 *
@@ -145,6 +141,16 @@ namespace Alphalcazar::Game {
 		 *        If we wish to remove the piece from the array, set it to have invalid coordinates.
 		 */
 		void SetPlacedPieceCoordinates(const Piece& piece, const Coordinates& coordinates);
+
+		/*!
+		 * \brief Loops over a [min, max] range of piece placements, fetches the corresponding piece and executed a custom action for each of them.
+		 *
+		 * \param min The min of the range of the piece placements.
+		 * \param min The max of the range of the piece placements.
+		 * \param excludePerimeter Whether to skip executing the action for pieces placed on the perimeter of the board.
+		 * \param action The action to execute for every piece.
+		 */
+		void FetchPiecesFromIndexRange(std::size_t min, std::size_t max, bool excludePerimeter, std::function<void(const Coordinates& coordinates, const Piece& piece)> action) const;
 
 		/// 2D array containing all tiles of the board (both perimeter and board tiles) indexed by their coordinates
 		std::array<std::array<Tile, c_PlayAreaSize>, c_PlayAreaSize> mTiles;

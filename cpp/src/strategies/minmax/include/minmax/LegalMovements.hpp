@@ -5,7 +5,6 @@
 #include "minmax/minmax_aliases.hpp"
 #include <util/StaticVector.hpp>
 
-#include <vector>
 #include <tuple>
 
 namespace Alphalcazar::Game {
