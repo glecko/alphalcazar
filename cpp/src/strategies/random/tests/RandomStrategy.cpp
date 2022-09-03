@@ -31,7 +31,7 @@ namespace Alphalcazar::Strategy::Random {
 			// (1 if the entering piece of the first player blocked the entrance of the piece of the second player)
 			auto pieces = 0;
 			for (const auto* tile : board.GetTiles()) {
-				if (tile->GetPiece()) {
+				if (tile->HasPiece()) {
 					pieces += 1;
 				}
 			}
