@@ -31,7 +31,7 @@ namespace Alphalcazar::Game {
 				pieceIndex = 0;
 			}
 			board.PlacePiece(coordinates, piece);
-			EXPECT_EQ(*board.GetTile(coordinates)->GetPiece(), piece);
+			EXPECT_EQ(board.GetTile(coordinates)->GetPiece(), piece);
 		}
 		// Board should still be empty as we have only placed on perimeter tiles
 		EXPECT_EQ(board.IsFull(), false);
@@ -157,11 +157,11 @@ namespace Alphalcazar::Game {
 		auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_ONE);
 		EXPECT_EQ(executedMoves, 4);
 
-		EXPECT_EQ(*board.GetTile(1, 2)->GetPiece(), Piece(PlayerId::PLAYER_TWO, 5));
-		EXPECT_EQ(board.GetTile(3, 0)->GetPiece(), nullptr);
-		EXPECT_EQ(board.GetTile(0, 2)->GetPiece(), nullptr);
-		EXPECT_EQ(board.GetTile(2, 2)->GetPiece(), nullptr);
-		EXPECT_EQ(board.GetTile(3, 1)->GetPiece(), nullptr);
+		EXPECT_EQ(board.GetTile(1, 2)->GetPiece(), Piece(PlayerId::PLAYER_TWO, 5));
+		EXPECT_FALSE(board.GetTile(3, 0)->HasPiece());
+		EXPECT_FALSE(board.GetTile(0, 2)->HasPiece());
+		EXPECT_FALSE(board.GetTile(2, 2)->HasPiece());
+		EXPECT_FALSE(board.GetTile(3, 1)->HasPiece());
 		EXPECT_EQ(board.GetPieces().size(), 1);
 	}
 
@@ -177,8 +177,8 @@ namespace Alphalcazar::Game {
 		auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_ONE);
 		EXPECT_EQ(executedMoves, 0);
 
-		EXPECT_EQ(*board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PushablePieceType));
-		EXPECT_EQ(*board.GetTile(2, 3)->GetPiece(), Piece(PlayerId::PLAYER_TWO, c_PushablePieceType));
+		EXPECT_EQ(board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PushablePieceType));
+		EXPECT_EQ(board.GetTile(2, 3)->GetPiece(), Piece(PlayerId::PLAYER_TWO, c_PushablePieceType));
 		EXPECT_EQ(board.GetPieces().size(), 2);
 	}
 
@@ -207,15 +207,15 @@ namespace Alphalcazar::Game {
 		auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
 		EXPECT_EQ(executedMoves, 6);
 
-		EXPECT_EQ(*board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_TWO, 2));
-		EXPECT_EQ(board.GetTile(2, 0)->GetPiece(), nullptr);
-		EXPECT_EQ(board.GetTile(1, 1)->GetPiece(), nullptr);
-		EXPECT_EQ(board.GetTile(1, 2)->GetPiece(), nullptr);
-		EXPECT_EQ(board.GetTile(1, 4)->GetPiece(), nullptr);
-		EXPECT_EQ(*board.GetTile(3, 2)->GetPiece(), Piece(PlayerId::PLAYER_TWO, 3));
-		EXPECT_EQ(*board.GetTile(3, 3)->GetPiece(), Piece(PlayerId::PLAYER_TWO, c_PushablePieceType));
-		EXPECT_EQ(*board.GetTile(1, 3)->GetPiece(), Piece(PlayerId::PLAYER_TWO, 5));
-		EXPECT_EQ(*board.GetTile(2, 1)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PushablePieceType));
+		EXPECT_EQ(board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_TWO, 2));
+		EXPECT_FALSE(board.GetTile(2, 0)->HasPiece());
+		EXPECT_FALSE(board.GetTile(1, 1)->HasPiece());
+		EXPECT_FALSE(board.GetTile(1, 2)->HasPiece());
+		EXPECT_FALSE(board.GetTile(1, 4)->HasPiece());
+		EXPECT_EQ(board.GetTile(3, 2)->GetPiece(), Piece(PlayerId::PLAYER_TWO, 3));
+		EXPECT_EQ(board.GetTile(3, 3)->GetPiece(), Piece(PlayerId::PLAYER_TWO, c_PushablePieceType));
+		EXPECT_EQ(board.GetTile(1, 3)->GetPiece(), Piece(PlayerId::PLAYER_TWO, 5));
+		EXPECT_EQ(board.GetTile(2, 1)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PushablePieceType));
 		EXPECT_EQ(board.GetPieces().size(), 5);
 	}
 
@@ -234,9 +234,9 @@ namespace Alphalcazar::Game {
 		auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
 		EXPECT_EQ(executedMoves, 5);
 
-		EXPECT_EQ(*board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PusherPieceType));
-		EXPECT_EQ(*board.GetTile(3, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, 3));
-		EXPECT_EQ(board.GetTile(4, 2)->GetPiece(), nullptr);
+		EXPECT_EQ(board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PusherPieceType));
+		EXPECT_EQ(board.GetTile(3, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, 3));
+		EXPECT_FALSE(board.GetTile(4, 2)->HasPiece());
 		EXPECT_EQ(board.GetPieces().size(), 2);
 	}
 
@@ -254,8 +254,8 @@ namespace Alphalcazar::Game {
 			auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
 			EXPECT_EQ(executedMoves, 4);
 
-			EXPECT_EQ(*board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PusherPieceType));
-			EXPECT_EQ(*board.GetTile(2, 1)->GetPiece(), Piece(PlayerId::PLAYER_TWO, c_PusherPieceType));
+			EXPECT_EQ(board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PusherPieceType));
+			EXPECT_EQ(board.GetTile(2, 1)->GetPiece(), Piece(PlayerId::PLAYER_TWO, c_PusherPieceType));
 
 			EXPECT_EQ(board.GetPieces().size(), 2);
 		}
@@ -267,8 +267,8 @@ namespace Alphalcazar::Game {
 			auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_ONE);
 			EXPECT_EQ(executedMoves, 2);
 
-			EXPECT_EQ(board.GetTile(2, 2)->GetPiece(), nullptr);
-			EXPECT_EQ(*board.GetTile(2, 1)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PusherPieceType));
+			EXPECT_FALSE(board.GetTile(2, 2)->HasPiece());
+			EXPECT_EQ(board.GetTile(2, 1)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PusherPieceType));
 
 			EXPECT_EQ(board.GetPieces().size(), 1);
 		}
@@ -303,12 +303,12 @@ namespace Alphalcazar::Game {
 		auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
 		EXPECT_EQ(executedMoves, 8);
 
-		EXPECT_EQ(*board.GetTile(1, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, 1));
-		EXPECT_EQ(*board.GetTile(2, 3)->GetPiece(), Piece(PlayerId::PLAYER_ONE, 2));
-		EXPECT_EQ(*board.GetTile(2, 1)->GetPiece(), Piece(PlayerId::PLAYER_ONE, 5));
-		EXPECT_EQ(*board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_TWO, c_PusherPieceType));
-		EXPECT_EQ(board.GetTile(2, 4)->GetPiece(), nullptr);
-		EXPECT_EQ(board.GetTile(4, 1)->GetPiece(), nullptr);
+		EXPECT_EQ(board.GetTile(1, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, 1));
+		EXPECT_EQ(board.GetTile(2, 3)->GetPiece(), Piece(PlayerId::PLAYER_ONE, 2));
+		EXPECT_EQ(board.GetTile(2, 1)->GetPiece(), Piece(PlayerId::PLAYER_ONE, 5));
+		EXPECT_EQ(board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_TWO, c_PusherPieceType));
+		EXPECT_FALSE(board.GetTile(2, 4)->HasPiece());
+		EXPECT_FALSE(board.GetTile(4, 1)->HasPiece());
 
 		EXPECT_EQ(board.GetPieces().size(), 4);
 	}
@@ -349,10 +349,10 @@ namespace Alphalcazar::Game {
 		EXPECT_NE(boardCopy.GetTile(2, 0), nullptr);
 		EXPECT_NE(boardCopy.GetTile(2, 2), nullptr);
 
-		EXPECT_EQ(*boardCopy.GetTile(0, 1)->GetPiece(), pieceOne);
-		EXPECT_EQ(*boardCopy.GetTile(1, 0)->GetPiece(), pieceTwo);
-		EXPECT_EQ(*boardCopy.GetTile(2, 0)->GetPiece(), pieceThree);
-		EXPECT_EQ(*boardCopy.GetTile(2, 2)->GetPiece(), pieceFour);
+		EXPECT_EQ(boardCopy.GetTile(0, 1)->GetPiece(), pieceOne);
+		EXPECT_EQ(boardCopy.GetTile(1, 0)->GetPiece(), pieceTwo);
+		EXPECT_EQ(boardCopy.GetTile(2, 0)->GetPiece(), pieceThree);
+		EXPECT_EQ(boardCopy.GetTile(2, 2)->GetPiece(), pieceFour);
 	}
 
 	TEST(Board, GetBoardPieces) {
