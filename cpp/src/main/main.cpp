@@ -6,26 +6,31 @@
 
 #include <chrono>
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
+std::uint64_t executionTime(std::function<void()> function) {
 	auto start = std::chrono::high_resolution_clock::now();
+	function();
+	auto end = std::chrono::high_resolution_clock::now();
+	return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+}
 
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 	constexpr Alphalcazar::Strategy::MinMax::Depth c_MaxDepth = 5;
 	for (Alphalcazar::Strategy::MinMax::Depth depth = 1; depth <= c_MaxDepth; depth++) {
-		Alphalcazar::Strategy::MinMax::MinMaxStrategy strategy { depth, true };
-		Alphalcazar::Game::Game game {};
-		auto gameStart = std::chrono::high_resolution_clock::now();
-		// auto result = game.Play(strategy, strategy);
-		strategy.Execute(Alphalcazar::Game::PlayerId::PLAYER_ONE, game.GetLegalMoves(Alphalcazar::Game::PlayerId::PLAYER_ONE), game);
+		Alphalcazar::Strategy::MinMax::MinMaxStrategy strategy{ depth, true };
+		Alphalcazar::Game::Game game{};
+		auto firstTurnExecutionTimeMs = executionTime([&strategy, &game]() {
+			strategy.Execute(Alphalcazar::Game::PlayerId::PLAYER_ONE, game.GetLegalMoves(Alphalcazar::Game::PlayerId::PLAYER_ONE), game);
+		});
 		auto score = strategy.GetLastExecutedMoveScore();
-		auto gameEnd = std::chrono::high_resolution_clock::now();
-		auto gameExecutionTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(gameEnd - gameStart);
-		Alphalcazar::Utils::LogInfo("First move at depth {} took {}ms and calculated a score of {}", depth, gameExecutionTimeMs.count(), score);
+		Alphalcazar::Utils::LogInfo("First move at depth {} took {}ms and calculated a score of {}", depth, firstTurnExecutionTimeMs, score);
+
+		Alphalcazar::Strategy::MinMax::MinMaxStrategy fullGameStrategy{ depth, true };
+		Alphalcazar::Game::GameResult result = Alphalcazar::Game::GameResult::NONE;
+		auto fullGameExecutionTime = executionTime([&fullGameStrategy, &game, &result]() {
+			result = game.Play(fullGameStrategy, fullGameStrategy);
+		});
+		Alphalcazar::Utils::LogInfo("Game at depth {} took {}ms ended with result {}", depth, fullGameExecutionTime, static_cast<int>(result));
 	}
-
-	auto executionTime = std::chrono::high_resolution_clock::now() - start;
-	auto executionTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(executionTime);
-
-	Alphalcazar::Utils::LogInfo("Function execution took {}ms", executionTimeMs.count());
 
 	return 0;
 }
