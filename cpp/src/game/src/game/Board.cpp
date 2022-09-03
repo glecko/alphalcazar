@@ -140,9 +140,9 @@ namespace Alphalcazar::Game {
 		return movedPieces;
 	}
 
-	std::pair<std::array<Board::MovementDescription, c_PlayAreaSize>, std::size_t> Board::GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction) {
+	Utils::ReversedStaticVector<Board::MovementDescription, c_PlayAreaSize> Board::GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction) {
 		// The max amount of chained pushed movements that can exist is \ref c_PlayAreaSize
-		auto result = std::make_pair<std::array<Board::MovementDescription, c_PlayAreaSize>, std::size_t>({}, 0);
+		Utils::ReversedStaticVector<Board::MovementDescription, c_PlayAreaSize> result;
 		Coordinates nextCoordinate = sourceCoordinates;
 		Tile* nextTile = GetTile(nextCoordinate);
 		while (nextTile && nextTile->HasPiece()) {
@@ -153,8 +153,7 @@ namespace Alphalcazar::Game {
 			// Insert movements back-to-front into the array, as the pushing movements will need to happen in order
 			// from the last piece on the chain to the first (pushing) piece
 			MovementDescription movement = std::make_tuple(nextTile, pushToTile, pushToCoordinate);
-			result.first[result.first.size() - 1 - result.second] = movement;
-			result.second++;
+			result.insert(movement);
 
 			// The tile and coordinates we are pushing to become the next tile/coordinates we evaluate
 			nextCoordinate = pushToCoordinate;
@@ -216,37 +215,35 @@ namespace Alphalcazar::Game {
 		return nullptr;
 	}
 
-	std::vector<const Tile*> Board::GetTiles() const {
-		std::vector<const Tile*> result;
-		result.reserve(mTiles.size());
-		LoopOverTiles([&result](const Coordinates&, const Tile& tile) {
-			result.push_back(&tile);
+	std::array<const Tile*, c_PlayAreaTileCount> Board::GetTiles() const {
+		std::array<const Tile*, c_PlayAreaTileCount> result;
+		std::size_t index = 0;
+		LoopOverTiles([&result, &index](const Coordinates&, const Tile& tile) {
+			result[index] = &tile;
+			++index;
 		});
 		return result;
 	}
 
-	std::vector<const Tile*> Board::GetPerimeterTiles() const {
-		std::vector<const Tile*> result;
-		result.reserve(mTiles.size());
-		LoopOverTiles([&result](const Coordinates& coordinates, const Tile& tile) {
+	std::array<const Tile*, c_PerimeterTileCount> Board::GetPerimeterTiles() const {
+		std::array<const Tile*, c_PerimeterTileCount> result;
+		std::size_t index = 0;
+		LoopOverTiles([&result, &index](const Coordinates& coordinates, const Tile& tile) {
 			if (coordinates.IsPerimeter()) {
-				result.push_back(&tile);
+				result[index] = &tile;
+				++index;
 			}
 		});
 		return result;
 	}
 
-	std::vector<Coordinates> Board::GetLegalPlacementCoordinates() const {
-		std::vector<Coordinates> result;
+	Utils::StaticVector<Coordinates, c_PerimeterTileCount> Board::GetLegalPlacementCoordinates() const {
+		Utils::StaticVector<Coordinates, c_PerimeterTileCount> result;
 		constexpr auto perimeterCoordinates = Coordinates::GetPerimeterCoordinates();
-		// Allocating the maximum amount of memory the vector could potentially
-		// take up. Will waste memory sometimes but we'll use all of it most of the times,
-		// and memory usage is not as much of an issue as CPU usage here
-		result.reserve(perimeterCoordinates.size());
 		for (auto& coordinates : perimeterCoordinates) {
 			auto* tile = GetTile(coordinates);
 			if (!tile->HasPiece()) {
-				result.push_back(coordinates);
+				result.insert(coordinates);
 			}
 		}
 		return result;
@@ -325,13 +322,8 @@ namespace Alphalcazar::Game {
 		mPlacedPieceCoordinates[index] = coordinates;
 	}
 
-	std::vector<std::pair<Coordinates, Piece>> Board::GetPieces(PlayerId player, bool excludePerimeter) const {
-		std::vector<std::pair<Coordinates, Piece>> result;
-		// We preallocate space in the vector according to the max amount of pieces that could
-		// fit in the vector if all relevant pieces were on the board. Will waste memory sometimes
-		// but memory usage is not as much of an issue as CPU usage here.
-		result.reserve(player == PlayerId::NONE ? c_PieceTypes * 2 : c_PieceTypes);
-
+	Utils::StaticVector<std::pair<Coordinates, Piece>, c_PieceTypes> Board::GetPieces(PlayerId player, bool excludePerimeter) const {
+		Utils::StaticVector<std::pair<Coordinates, Piece>, c_PieceTypes> result;
 		auto [min, max] = GetPlacePieceIndexRange(player);
 		for (std::size_t i = min; i <= max; i++) {
 			auto coordinates = mPlacedPieceCoordinates[i];
@@ -348,7 +340,31 @@ namespace Alphalcazar::Game {
 						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no piece exists at the tile at those coordinates.", coordinates, i);
 					}
 				}
-				result.emplace_back(coordinates, tile->GetPiece());
+				result.insert(std::make_pair(coordinates, tile->GetPiece()));
+			}
+		}
+		return result;
+	}
+
+	Utils::StaticVector<std::pair<Coordinates, Piece>, c_PieceTypes * 2> Board::GetPieces(bool excludePerimeter) const {
+		Utils::StaticVector<std::pair<Coordinates, Piece>, c_PieceTypes * 2> result;
+		auto [min, max] = GetPlacePieceIndexRange(PlayerId::NONE);
+		for (std::size_t i = min; i <= max; i++) {
+			auto coordinates = mPlacedPieceCoordinates[i];
+			if (coordinates.Valid()) {
+				if (excludePerimeter && coordinates.IsPerimeter()) {
+					continue;
+				}
+				const Tile* tile = GetTile(coordinates);
+				if constexpr (c_BoardPiecePlacementIntegrityChecks) {
+					if (!tile) {
+						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no tile exists at those coordinates.", coordinates, i);
+					}
+					if (!tile->HasPiece()) {
+						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no piece exists at the tile at those coordinates.", coordinates, i);
+					}
+				}
+				result.insert(std::make_pair(coordinates, tile->GetPiece()));
 			}
 		}
 		return result;

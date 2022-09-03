@@ -15,7 +15,9 @@ namespace Alphalcazar::Strategy::MinMax {
 	std::pair<bool, bool> GetBoardSymmetries(const Game::Board& board) {
 		bool xSymmetry = true;
 		bool ySymmetry = true;
-		for (auto& [coordinates, piece] : board.GetPieces()) {
+		auto [pieces, piecesCount] = board.GetPieces();
+		for (std::size_t i = 0; i < piecesCount; ++i) {
+			auto& [coordinates, piece] = pieces[i];
 			auto direction = piece.GetMovementDirection();
 			if (coordinates.y != Game::c_CenterCoordinate || direction == Game::Direction::NORTH || direction == Game::Direction::SOUTH) {
 				// x-axis symmetry can only exist if all pieces (including perimeter ones) are placed along the horizontal center row
@@ -36,32 +38,34 @@ namespace Alphalcazar::Strategy::MinMax {
 		return std::make_pair(xSymmetry, ySymmetry);
 	}
 
-	void FilterSymmetricMovements(std::vector<Game::PlacementMove>& legalMoves, const Game::Board& board) {
-		auto symmetries = GetBoardSymmetries(board);
-		bool xSymmetry = symmetries.first;
-		bool ySymmetry = symmetries.second;
+	Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount> FilterSymmetricMovements(const Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount>& legalMoves, const Game::Board& board) {
+		auto [xSymmetry, ySymmetry] = GetBoardSymmetries(board);
+		// If there are no simmetries on the board, return all moves
+		if (!xSymmetry && !ySymmetry) {
+			return legalMoves;
+		}
 
-		legalMoves.erase(
-			std::remove_if(
-				legalMoves.begin(),
-				legalMoves.end(),
-				[xSymmetry, ySymmetry] (const Game::PlacementMove& move) {
-					if (xSymmetry && ySymmetry) {
-						// If the board has both x and y symmetry, it must be empty
-						// On an empty board, there are really only 2 different tiles on which to play : center or corner
-						// We simply select an arbitrary center tile and an arbitrary corner tile: (4, 2) and (4, 3)
-						return move.Coordinates.x != 4 || (move.Coordinates.y != 3 && move.Coordinates.y != 2);
-					} else if (xSymmetry) {
-						return move.Coordinates.y < Game::c_CenterCoordinate;
-					} else if (ySymmetry) {
-						return move.Coordinates.x < Game::c_CenterCoordinate;
-					}
-					// Do not delete any legal movements if there is no symmetry of any kind
-					return false;
+		Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount> filteredMoves;
+		for (std::size_t i = 0; i < legalMoves.size(); ++i) {
+			const Game::PlacementMove& move = legalMoves[i];
+			if (xSymmetry && ySymmetry) {
+				// If the board has both x and y symmetry, it must be empty
+				// On an empty board, there are really only 2 different tiles on which to play : center or corner
+				// We simply select an arbitrary center tile and an arbitrary corner tile: (4, 2) and (4, 3)
+				if (move.Coordinates.x == 4 && (move.Coordinates.y == 3 || move.Coordinates.y == 2)) {
+					filteredMoves.insert(move);
 				}
-			),
-			legalMoves.end()
-		);
+			} else if (xSymmetry) {
+				if (move.Coordinates.y >= Game::c_CenterCoordinate) {
+					filteredMoves.insert(move);
+				}
+			} else if (ySymmetry) {
+				if (move.Coordinates.x >= Game::c_CenterCoordinate) {
+					filteredMoves.insert(move);
+				}
+			}
+		}
+		return filteredMoves;
 	}
 
 	/*!
@@ -124,7 +128,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		return resultScore;
 	}
 
-	void SortLegalMovements(Game::PlayerId playerId, std::vector<Game::PlacementMove>& legalMoves, const Game::Board& board) {
+	void SortLegalMovements(Game::PlayerId playerId, Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount>& legalMoves, const Game::Board& board) {
 		auto opponentId = playerId == Game::PlayerId::PLAYER_ONE ? Game::PlayerId::PLAYER_TWO : Game::PlayerId::PLAYER_ONE;
 		std::size_t opponentBoardPieceCount = board.GetPieceCount(opponentId, true);
 		std::sort(legalMoves.begin(), legalMoves.end(), [board, opponentBoardPieceCount](const Game::PlacementMove& moveA, const Game::PlacementMove& moveB) {

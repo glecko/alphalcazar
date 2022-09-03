@@ -1,11 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 #include <memory>
 #include "aliases.hpp"
-#include "util/CallbackHandler.hpp"
 #include "Board.hpp"
+#include <util/StaticVector.hpp>
 
 namespace Alphalcazar::Game {
 	class Strategy;
@@ -62,15 +61,15 @@ namespace Alphalcazar::Game {
 		const Board& GetBoard() const;
 
 		/*!
-		 * \brief Returns a list of legal placement moves for the current player.
+		 * \brief Returns a \ref StaticVector of legal placement moves for the current player.
 		 *
 		 * A legal placement moves is defined as any combination of free perimeter tile and
 		 * available piece (in hand) the player has available.
 		 */
-		std::vector<PlacementMove> GetLegalMoves(PlayerId player) const;
+		Utils::StaticVector<PlacementMove, c_MaxLegalMovesCount> GetLegalMoves(PlayerId player) const;
 
 		/// Returns a list of all pieces that the specified player has in hand (are not placed on the board)
-		std::vector<Piece> GetPiecesInHand(PlayerId player) const;
+		Utils::StaticVector<Piece, c_PieceTypes> GetPiecesInHand(PlayerId player) const;
 	private:
 		/// Exchange the player with initiative
 		void SwapPlayerWithInitiative();

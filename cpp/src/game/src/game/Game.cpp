@@ -78,8 +78,8 @@ namespace Alphalcazar::Game {
 		mBoard.PlacePiece(move.Coordinates, piece);
 	}
 
-	std::vector<Piece> Game::GetPiecesInHand(PlayerId player) const {
-		std::vector<Piece> result;
+	Utils::StaticVector<Piece, c_PieceTypes> Game::GetPiecesInHand(PlayerId player) const {
+		Utils::StaticVector<Piece, c_PieceTypes> result;
 		if (player == PlayerId::NONE) {
 			return result;
 		}
@@ -88,25 +88,25 @@ namespace Alphalcazar::Game {
 		std::size_t placedPiecesCount = piecePlacements.count();
 		// If all pieces are on the board, immediatelly return an empty vector
 		if (placedPiecesCount != c_PieceTypes) {
-			result.reserve(c_PieceTypes - placedPiecesCount);
 			for (PieceType type = 1; type <= c_PieceTypes; type++) {
 				// Check if the piece type is not placed by the player on the board
 				if (!piecePlacements[type - 1]) {
-					result.emplace_back(player, type);
+					result.insert({ player, type });
 				}
 			}
 		}
 		return result;
 	}
 
-	std::vector<PlacementMove> Game::GetLegalMoves(PlayerId player) const {
-		std::vector<PlacementMove> result;
+	Utils::StaticVector<PlacementMove, c_MaxLegalMovesCount> Game::GetLegalMoves(PlayerId player) const {
+		Utils::StaticVector<PlacementMove, c_PieceTypes* c_PerimeterTileCount> result;
 		auto legalCoordinates = mBoard.GetLegalPlacementCoordinates();
-		std::vector<Piece> pieces = GetPiecesInHand(player);
-		result.reserve(pieces.size() * legalCoordinates.size());
-		for (auto& coordinates : legalCoordinates) {
-			for (auto& piece : pieces) {
-				result.emplace_back(coordinates, piece.GetType());
+		auto pieces = GetPiecesInHand(player);
+		for (std::size_t i = 0; i < legalCoordinates.size(); ++i) {
+			const auto& coordinates = legalCoordinates[i];
+			for (std::size_t k = 0; k < pieces.size(); ++k) {
+				const auto& piece = pieces[k];
+				result.insert({ coordinates, piece.GetType() });
 			}
 		}
 		return result;

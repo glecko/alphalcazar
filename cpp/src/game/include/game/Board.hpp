@@ -4,9 +4,9 @@
 #include "Coordinates.hpp"
 #include "parameters.hpp"
 #include "Tile.hpp"
+#include "util/StaticVector.hpp"
 
 #include <array>
-#include <vector>
 #include <memory>
 #include <optional>
 #include <functional>
@@ -57,21 +57,23 @@ namespace Alphalcazar::Game {
 		const Tile* GetTile(const Coordinates& coord) const;
 		const Tile* GetTile(Coordinate x, Coordinate y) const;
 		/// Returns all tiles of the board
-		std::vector<const Tile*> GetTiles() const;
+		std::array<const Tile*, c_PlayAreaTileCount> GetTiles() const;
 		/// Returns all perimeter tiles of the board
-		std::vector<const Tile*> GetPerimeterTiles() const;
+		std::array<const Tile*, c_PerimeterTileCount> GetPerimeterTiles() const;
 		/// Returns a list of all coordinates where a player may legally place a piece on their turn
-		std::vector<Coordinates> GetLegalPlacementCoordinates() const;
+		Utils::StaticVector<Coordinates, c_PerimeterTileCount> GetLegalPlacementCoordinates() const;
 
 		/// Returns the tile a given piece is placed on, or nullptr if the specified piece is not on the board
 		Tile* GetPieceTile(const Piece& piece);
 		/*!
-		 * \brief Returns a list of all pieces in play on the board (including perimeter)
+		 * \brief Returns a list of all pieces in play on the board (including perimeter by default).
 		 *
 		 * \param player If a valid player ID is specified, the function will only return pieces of this player.
 		 * \param excludePerimeter If true, pieces on the perimeter of the board will not be included on the list.
 		 */
-		std::vector<std::pair<Coordinates, Piece>> GetPieces(PlayerId player = PlayerId::NONE, bool excludePerimeter = false) const;
+		Utils::StaticVector<std::pair<Coordinates, Piece>, c_PieceTypes> GetPieces(PlayerId player, bool excludePerimeter = false) const;
+		Utils::StaticVector<std::pair<Coordinates, Piece>, c_PieceTypes * 2> GetPieces(bool excludePerimeter = false) const;
+
 		/*!
 		 * \brief Returns the amount of pieces a player has on the board.
 		 *
@@ -94,6 +96,10 @@ namespace Alphalcazar::Game {
 		 */
 		std::bitset<c_PieceTypes> GetPiecePlacements(PlayerId player) const;
 	private:
+		template<std::size_t Capacity>
+		Utils::StaticVector<std::pair<Coordinates, Piece>, Capacity> GetPiecesInternal(PlayerId player, bool excludePerimeter = false) const {
+
+		}
 		/*!
 		 * \brief Executes one piece movement, if the specified piece is on the board
 		 *
@@ -117,21 +123,16 @@ namespace Alphalcazar::Game {
 
 		using MovementDescription = std::tuple<Tile*, Tile*, Coordinates>;
 		/*!
-		 * \brief Returns a list of chained push movements that occur when a piece wants to move from the specified
+		 * \brief Returns a \ref ReversedStaticVector of chained push movements that occur when a piece wants to move from the specified
 		 *        source coordinates in the specified direction.
 		 *
 		 * Each chained movement will be described as a pair of the source tile from which a piece needs to be moved from and
 		 * the target tile it needs to be moved to.
 		 *
 		 * \note The order of the array describes the order the movements are supposed to be executed (with the last piece of the chain
-		 * first and the movement of the pushing piece last)
-		 *
-		 * \returns A pair of [chainedMovements, chainedMovementsCount], where the first item is a fixed-size array populated from the back, and
-		 *          the second argument a counter describing how many valid movements exist in the array.
-		 *          For example, a count of 2 will indicate the array has the following structure: [invalid, invalid, invalid, movement_1, movement_2].
-		 *          The array is structured in this unusual way due to performance reasons.
+		 *       first and the movement of the pushing piece last).
 		 */
-		std::pair<std::array<Board::MovementDescription, c_PlayAreaSize>, std::size_t> GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction);
+		Utils::ReversedStaticVector<Board::MovementDescription, c_PlayAreaSize> GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction);
 
 		/// Executes a specified function for every tile of this board
 		void LoopOverTiles(std::function<void(const Coordinates& coordinates, const Tile& tile)> action) const;

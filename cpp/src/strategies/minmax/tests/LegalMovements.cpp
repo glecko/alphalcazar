@@ -80,10 +80,10 @@ namespace Alphalcazar::Strategy::MinMax {
 		// On an empty board, all combinations of piece type and perimeter tile should create a legal move
 		EXPECT_EQ(legalMoves.size(), Game::c_PieceTypes * game.GetBoard().GetPerimeterTiles().size());
 
-		FilterSymmetricMovements(legalMoves, game.GetBoard());
+		auto filteredMoves = FilterSymmetricMovements(legalMoves, game.GetBoard());
 
 		// After filtering symmetric movements on an empty board, we expect to only have 2 options for each piece
-		EXPECT_EQ(legalMoves.size(), Game::c_PieceTypes * 2);
+		EXPECT_EQ(filteredMoves.size(), Game::c_PieceTypes * 2);
 	}
 
 	TEST(LegalMovements, FilterXAxisSymmetryMovements) {
@@ -93,7 +93,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, pieceSetups);
 
 		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
-		FilterSymmetricMovements(legalMoves, game.GetBoard());
+		auto filteredMoves = FilterSymmetricMovements(legalMoves, game.GetBoard());
 
 		/*
 		 * On a board with either x-axis or y-axis symmetry (but not both), the amount of available
@@ -103,7 +103,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		 * 2) Two sides cut in half (rounding up to include the center row in boards with odd sizes)
 		 */
 		const float expectedPerimeterTiles = Game::c_BoardSize + 2 * (std::ceil(Game::c_BoardSize / 2.f));
-		EXPECT_EQ(legalMoves.size(), static_cast<std::size_t>(expectedPerimeterTiles) * Game::c_PieceTypes);
+		EXPECT_EQ(filteredMoves.size(), static_cast<std::size_t>(expectedPerimeterTiles) * Game::c_PieceTypes);
 	}
 
 	TEST(LegalMovements, FilterNoSymmetryMovements) {
@@ -115,13 +115,13 @@ namespace Alphalcazar::Strategy::MinMax {
 
 		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_ONE);
 		auto legalMovesSize = legalMoves.size();
-		FilterSymmetricMovements(legalMoves, game.GetBoard());
+		auto filteredMoves = FilterSymmetricMovements(legalMoves, game.GetBoard());
 
 		// On this board, that has no symmetry, we expect all legal moves to be available after filtering
-		EXPECT_EQ(legalMoves.size(), legalMovesSize);
+		EXPECT_EQ(filteredMoves.size(), legalMovesSize);
 		// The legal moves size should be equal to all perimeter tiles (they are all empty) times
 		// al pieces minus 2, as player 1 has already placed 2 pieces on the board
-		EXPECT_EQ(legalMoves.size(), (Game::c_PieceTypes - 2) * game.GetBoard().GetPerimeterTiles().size());
+		EXPECT_EQ(filteredMoves.size(), (Game::c_PieceTypes - 2) * game.GetBoard().GetPerimeterTiles().size());
 	}
 
 	TEST(LegalMovements, SortLegalMovements) {
@@ -130,14 +130,13 @@ namespace Alphalcazar::Strategy::MinMax {
 		};
 		Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, pieceSetups);
 
-		std::vector<Game::PlacementMove> legalMoves {
-			// This movement will result in the piece not entering the board
-			{ { 1, 0 }, 3 },
-			// This movement will enter in the center lane
-			{ { 2, 0 }, 3 },
-			// This movement will enter in a lateral lane
-			{ { 3, 0 }, 3 }
-		};
+		Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount> legalMoves;
+		// This movement will result in the piece not entering the board
+		legalMoves.insert({ { 1, 0 }, 3 });
+		// This movement will enter in the center lane
+		legalMoves.insert({ { 2, 0 }, 3 });
+		// This movement will enter in a lateral lane
+		legalMoves.insert({ { 3, 0 }, 3 });
 		std::size_t sizeBeforeSorting = legalMoves.size();
 		SortLegalMovements(Game::PlayerId::PLAYER_ONE, legalMoves, game.GetBoard());
 		std::size_t sizeAfterSorting = legalMoves.size();
