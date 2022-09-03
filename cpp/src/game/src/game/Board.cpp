@@ -41,6 +41,12 @@ namespace {
 namespace Alphalcazar::Game {
 	Board::Board() {}
 
+	Board::Board(const Board& board) {
+		// Since everything in the board class is plain-old-data, we can just memcpy the board when doing a copy
+		// to avoid invoking \ref Tile or \ref Piece copy constructors
+		memcpy(reinterpret_cast<void*>(this), reinterpret_cast<const void*>(&board), sizeof(Board));
+	}
+
 	Board::~Board() {}
 
 	void Board::PlacePiece(const Coordinates& coordinates, const Piece& piece) {
@@ -57,7 +63,7 @@ namespace Alphalcazar::Game {
 			}
 		}
 		tile->PlacePiece(piece);
-		tile->GetPiece()->SetMovementDirection(coordinates.GetLegalPlacementDirection());
+		tile->GetPiece().SetMovementDirection(coordinates.GetLegalPlacementDirection());
 
 		SetPlacedPieceCoordinates(piece, coordinates);
 	}
@@ -70,7 +76,7 @@ namespace Alphalcazar::Game {
 			}
 		}
 		tile->PlacePiece(piece);
-		tile->GetPiece()->SetMovementDirection(direction);
+		tile->GetPiece().SetMovementDirection(direction);
 
 		SetPlacedPieceCoordinates(piece, coordinates);
 	}
@@ -81,16 +87,16 @@ namespace Alphalcazar::Game {
 		const Coordinates& originCoordinates = GetPlacedPieceCoordinates(piece);
 		if (originCoordinates.Valid()) {
 			Tile* originTile = GetTile(originCoordinates);
-			Piece* originPiece = originTile->GetPiece();
+			const Piece& originPiece = originTile->GetPiece();
 
-			auto direction = originPiece->GetMovementDirection();
+			auto direction = originPiece.GetMovementDirection();
 			Coordinates targetCoordinates = originCoordinates.GetCoordinateInDirection(direction, 1);
 			if (Tile* targetTile = GetTile(targetCoordinates)) {
-				Piece* targetTilePiece = targetTile->GetPiece();
-				if (targetTilePiece == nullptr) {
+				const Piece& targetTilePiece = targetTile->GetPiece();
+				if (!targetTilePiece.IsValid()) {
 					MovePiece(*originTile, *targetTile, targetCoordinates);
 					movedPieces++;
-				} else if (originPiece->IsPusher()) {
+				} else if (originPiece.IsPusher()) {
 					auto [chainedMovements, chainedMovementsCount] = GetChainedPushMovements(originCoordinates, direction);
 					// We execute the chained push movements in order
 					for(std::size_t i = chainedMovements.size() - chainedMovementsCount; i < chainedMovements.size(); ++i) {
@@ -104,7 +110,7 @@ namespace Alphalcazar::Game {
 						}
 						movedPieces++;
 					}
-				} else if (targetTilePiece->IsPushable() && !originPiece->IsPushable()) {
+				} else if (targetTilePiece.IsPushable() && !originPiece.IsPushable()) {
 					auto pushTargetCoordinates = originCoordinates.GetCoordinateInDirection(direction, 2);
 					auto* pushTargetTile = GetTile(pushTargetCoordinates);
 					// A non-pushing piece cannot push a pushable piece if there is a piece on the tile
@@ -164,21 +170,22 @@ namespace Alphalcazar::Game {
 	}
 
 	void Board::MovePiece(Tile& source, Tile& target, const Coordinates& targetCoordinates) {
-		if (auto* piece = source.GetPiece()) {
+		if (source.HasPiece()) {
+			const auto& piece = source.GetPiece();
 			// A piece that moves or is moved to a perimeter tile gets removed from play immediatelly
 			if (!targetCoordinates.IsPerimeter()) {
-				SetPlacedPieceCoordinates(*piece, targetCoordinates);
-				target.PlacePiece(*piece);
+				SetPlacedPieceCoordinates(piece, targetCoordinates);
+				target.PlacePiece(piece);
 			} else {
-				SetPlacedPieceCoordinates(*piece, Coordinates::Invalid());
+				SetPlacedPieceCoordinates(piece, Coordinates::Invalid());
 			}
 			source.RemovePiece();
 		}
 	}
 
 	void Board::RemovePiece(Tile& tile) {
-		if (auto* piece = tile.GetPiece()) {
-			SetPlacedPieceCoordinates(*piece, Coordinates::Invalid());
+		if (tile.HasPiece()) {
+			SetPlacedPieceCoordinates(tile.GetPiece(), Coordinates::Invalid());
 			tile.RemovePiece();
 		}
 	}
@@ -295,13 +302,13 @@ namespace Alphalcazar::Game {
 		// both players on it.
 		std::optional<PlayerId> candidateRowCompleter = std::nullopt;
 
-		for (Coordinate distance = 0; distance < length; distance++) {
+		for (Coordinate distance = 0; distance < length; ++distance) {
 			Coordinates nextCoordinate = startCoordinate.GetCoordinateInDirection(direction, distance);
-			if (auto piece = mTiles[nextCoordinate.x][nextCoordinate.y].GetPiece()) {
+			if (const auto& piece = mTiles[nextCoordinate.x][nextCoordinate.y].GetPiece(); piece.IsValid()) {
 				if (candidateRowCompleter == std::nullopt) {
 					// We appoint the owner of the first piece we find as our candidate
-					candidateRowCompleter = piece->GetOwner();
-				} else if (candidateRowCompleter != piece->GetOwner()) {
+					candidateRowCompleter = piece.GetOwner();
+				} else if (candidateRowCompleter != piece.GetOwner()) {
 					// If we find a piece that doesn't belong to the already determined candidate for completing the row
 					// we return nullopt as we know the row won't be complete
 					return std::nullopt;
@@ -343,13 +350,11 @@ namespace Alphalcazar::Game {
 					if (!tile) {
 						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no tile exists at those coordinates.", coordinates, i);
 					}
-				}
-				if constexpr (c_BoardPiecePlacementIntegrityChecks) {
 					if (!tile->HasPiece()) {
 						Utils::LogError("Placed pieces cache pointed at {} for index {}, but no piece exists at the tile at those coordinates.", coordinates, i);
 					}
 				}
-				result.emplace_back(coordinates, *tile->GetPiece());
+				result.emplace_back(coordinates, tile->GetPiece());
 			}
 		}
 		return result;

@@ -27,11 +27,11 @@ namespace Alphalcazar::Strategy::Random {
 			auto expectedLegalMoves = initialLegalMoves - perimeterTilesCount;
 			EXPECT_TRUE(playerOneMovesCount == expectedLegalMoves || playerTwoMovesCount == expectedLegalMoves);
 
-			// After a single turn has been played, we expect either 2 or 1 pieces on the board 
+			// After a single turn has been played, we expect either 2 or 1 pieces on the board
 			// (1 if the entering piece of the first player blocked the entrance of the piece of the second player)
 			auto pieces = 0;
 			for (const auto* tile : board.GetTiles()) {
-				if (tile->GetPiece()) {
+				if (tile->HasPiece()) {
 					pieces += 1;
 				}
 			}

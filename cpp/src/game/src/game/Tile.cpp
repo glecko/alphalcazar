@@ -1,19 +1,14 @@
 #include "game/Piece.hpp"
 #include "game/Tile.hpp"
+#include "safety_checks.hpp"
 #include <util/Log.hpp>
 
 namespace Alphalcazar::Game {
-	Tile::Tile() {}
-
-	Tile::Tile(const Tile& other)
-		: mPiece { other.mPiece }
-	{}
-
-	Tile::~Tile() {}
-
 	void Tile::PlacePiece(const Piece& piece) {
-		if (mPiece.IsValid()) {
-			Utils::LogError("Tried placing a piece on a tile that already had a piece on it.");
+		if constexpr (c_BoardPiecePlacementIntegrityChecks) {
+			if (mPiece.IsValid()) {
+				Utils::LogError("Tried placing a piece on a tile that already had a piece on it.");
+			}
 		}
 		mPiece = piece;
 	}
@@ -27,17 +22,11 @@ namespace Alphalcazar::Game {
 		return mPiece.IsValid();
 	}
 
-	const Piece* Tile::GetPiece() const {
-		if (mPiece.IsValid()) {
-			return &mPiece;
-		}
-		return nullptr;
+	const Piece& Tile::GetPiece() const {
+		return mPiece;
 	}
 
-	Piece* Tile::GetPiece() {
-		if (mPiece.IsValid()) {
-			return &mPiece;
-		}
-		return nullptr;
+	Piece& Tile::GetPiece() {
+		return mPiece;
 	}
 }

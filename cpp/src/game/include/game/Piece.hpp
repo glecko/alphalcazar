@@ -63,6 +63,8 @@ namespace Alphalcazar::Game {
 		}
 
 		bool operator==(const Piece& other) const {
+			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
+			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
 			bool typeMatches = other.mType == mType;
 			bool ownerMatches = other.mOwner == mOwner;
 			return typeMatches && ownerMatches;

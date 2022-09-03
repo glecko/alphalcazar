@@ -78,15 +78,17 @@ namespace Alphalcazar::Strategy::MinMax {
 		if (move.PieceType != Game::c_PusherPieceType) {
 			auto placementDirection = move.Coordinates.GetLegalPlacementDirection();
 			auto pieceTargetCoordinate = move.Coordinates.GetCoordinateInDirection(placementDirection, 1);
-			if (auto* pieceTargetTilePiece = board.GetTile(pieceTargetCoordinate)->GetPiece()) {
+			auto* pieceTargetTile = board.GetTile(pieceTargetCoordinate);
+			if (pieceTargetTile->HasPiece()) {
 				// There's a piece on the tile that our piece is looking at
 				// We check if we can expect the piece to be gone before our piece moves
 				// or if the piece can be pushed by us
-				if (!pieceTargetTilePiece->IsPushable()) {
-					auto blockingPieceTargetCoordinate = pieceTargetCoordinate.GetCoordinateInDirection(pieceTargetTilePiece->GetMovementDirection(), 1);
+				auto& pieceTargetTilePiece = pieceTargetTile->GetPiece();
+				if (!pieceTargetTilePiece.IsPushable()) {
+					auto blockingPieceTargetCoordinate = pieceTargetCoordinate.GetCoordinateInDirection(pieceTargetTilePiece.GetMovementDirection(), 1);
 					// We check if the target piece moves after us, or if it will attempt to move to the position where we have placed
 					// the piece, causing its movement to be blocked
-					if (pieceTargetTilePiece->GetType() > move.PieceType || blockingPieceTargetCoordinate == move.Coordinates) {
+					if (pieceTargetTilePiece.GetType() > move.PieceType || blockingPieceTargetCoordinate == move.Coordinates) {
 						return 0;
 					}
 				}
@@ -125,9 +127,12 @@ namespace Alphalcazar::Strategy::MinMax {
 	void SortLegalMovements(Game::PlayerId playerId, std::vector<Game::PlacementMove>& legalMoves, const Game::Board& board) {
 		auto opponentId = playerId == Game::PlayerId::PLAYER_ONE ? Game::PlayerId::PLAYER_TWO : Game::PlayerId::PLAYER_ONE;
 		std::size_t opponentBoardPieceCount = board.GetPieceCount(opponentId, true);
-		std::sort(legalMoves.begin(), legalMoves.end(), [board, opponentBoardPieceCount](const Game::PlacementMove& moveA, const Game::PlacementMove& moveB) {
+		for (auto& legalMove : legalMoves) {
+			legalMove.mHeuristicScore = GetHeuristicPlacementMoveScore(legalMove, board, opponentBoardPieceCount);
+		}
+		std::sort(legalMoves.begin(), legalMoves.end(), [](const Game::PlacementMove& moveA, const Game::PlacementMove& moveB) {
 			// Sort the vector by the heuristic score of the placement moves
-			return GetHeuristicPlacementMoveScore(moveA, board, opponentBoardPieceCount) > GetHeuristicPlacementMoveScore(moveB, board, opponentBoardPieceCount);
+			return moveA.mHeuristicScore > moveB.mHeuristicScore;
 		});
 	}
 }

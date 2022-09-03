@@ -6,6 +6,8 @@
 #include <fmt/format.h>
 
 namespace Alphalcazar::Game {
+	using Scoree = std::int32_t;
+
 	/*!
   	 * \brief Data structure with the minimnal information needed to uniquely represent a placement move.
 	 *
@@ -24,6 +26,8 @@ namespace Alphalcazar::Game {
 		/// Returns whether the placement move isvalid
 		bool Valid() const;
 		bool operator==(const PlacementMove& other) const;
+
+		Scoree mHeuristicScore = 0;
 	};
 
 }

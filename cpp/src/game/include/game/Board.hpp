@@ -22,6 +22,7 @@ namespace Alphalcazar::Game {
 	class Board {
 	public:
 		Board();
+		Board(const Board& board);
 		~Board();
 
 		/*!
