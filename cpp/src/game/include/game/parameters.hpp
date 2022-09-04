@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include "aliases.hpp"
+#include <cstddef>
 
 namespace Alphalcazar::Game {
 	/// The amount of pieces / piece types each player has in total
@@ -25,8 +26,14 @@ namespace Alphalcazar::Game {
 	/// The coordinate at the center of the board. This value will only have significance for odd board sizes.
 	constexpr Coordinate c_CenterCoordinate = c_BoardSize / 2 + 1;
 
+	/// The amount of tiles that make up the play area of the board. Is c_PlayAreaSize^2 minus the four corners
+	constexpr Coordinate c_PlayAreaTileCount = c_PlayAreaSize * c_PlayAreaSize - 4;
+
 	/// The amount of tiles that make up the perimeter of the board
 	constexpr Coordinate c_PerimeterTileCount = c_BoardSize * 4;
+
+	/// The maximum amount of legal moves that a player can have on their turn
+	constexpr std::size_t c_MaxLegalMovesCount = c_PieceTypes * c_PerimeterTileCount;
 
 	/*!
 	 * \brief Whether the game ends in a draw condition when both players complete a row.

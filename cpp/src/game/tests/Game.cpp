@@ -13,7 +13,7 @@
 namespace Alphalcazar::Game {
 	class MockStrategy final : public Strategy {
 	public:
-		virtual PlacementMove Execute(PlayerId playerId, const std::vector<PlacementMove>&, const Game&) override {
+		virtual PlacementMove Execute(PlayerId playerId, const Utils::StaticVector<PlacementMove, c_MaxLegalMovesCount>&, const Game&) override {
 			if (playerId == PlayerId::PLAYER_ONE) {
 				return { { 0, 2 }, 3 };
 			}

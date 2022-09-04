@@ -1,8 +1,8 @@
 #pragma once
 
 #include "aliases.hpp"
-
-#include <vector>
+#include "parameters.hpp"
+#include <util/StaticVector.hpp>
 
 namespace Alphalcazar::Game {
 	class Game;
@@ -28,6 +28,6 @@ namespace Alphalcazar::Game {
 		 * 
 		 * \returns The move to be executed.
 		 */
-		virtual PlacementMove Execute(PlayerId playerId, const std::vector<PlacementMove>& legalMoves, const Game& game) = 0;
+		virtual PlacementMove Execute(PlayerId playerId, const Utils::StaticVector<PlacementMove, c_MaxLegalMovesCount>& legalMoves, const Game& game) = 0;
 	};
 }

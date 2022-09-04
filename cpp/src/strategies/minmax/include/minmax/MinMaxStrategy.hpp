@@ -32,7 +32,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		MinMaxStrategy(const Depth depth, bool multithreaded = true);
 		~MinMaxStrategy();
 
-		virtual Game::PlacementMove Execute(Game::PlayerId playerId, const std::vector<Game::PlacementMove>& legalMoves, const Game::Game& game) override;
+		virtual Game::PlacementMove Execute(Game::PlayerId playerId, const Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount>& legalMoves, const Game::Game& game) override;
 
 		/// Returns the score calculated for the move returned by the last \ref Execute function call
 		Score GetLastExecutedMoveScore() const;
