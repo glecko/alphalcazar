@@ -8,6 +8,8 @@ namespace Alphalcazar::Game {
 	}
 
 	bool PlacementMove::operator==(const PlacementMove& other) const {
-		return PieceType == other.PieceType && Coordinates == other.Coordinates;
+		bool pieceTypesMatch = PieceType == other.PieceType;
+		bool coordinatesMatch = Coordinates == other.Coordinates;
+		return pieceTypesMatch && coordinatesMatch;
 	}
 }
