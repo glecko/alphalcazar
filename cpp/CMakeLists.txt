@@ -62,11 +62,17 @@ if(MSVC)
   # Warning level 4 and all warnings as errors
   add_compile_options(/W4)
   add_compile_options(/WX)
+
+  # Disable exception handling as this project does not make use of them
+  string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 else()
   # All warning levels and all warnings as errors
   add_compile_options(-Wall)
   add_compile_options(-Wextra)
   add_compile_options(-Werror)
+
+  # Disable exception handling as this project does not make use of them
+  add_compile_options(-fno-exceptions)
 endif()
 
 # Enable GoogleTest to discover tests

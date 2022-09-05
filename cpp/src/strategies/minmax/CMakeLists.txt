@@ -8,6 +8,9 @@ file(GLOB_RECURSE _sources
 )
 
 add_library(Alphalcazar.Strategy.MinMax STATIC ${_sources})
+if(MSVC)
+  target_compile_options(Alphalcazar.Strategy.MinMax PRIVATE /EHsc)
+endif()
 set_target_properties(Alphalcazar.Strategy.MinMax PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS true)
 set_property(TARGET Alphalcazar.Strategy.MinMax PROPERTY CXX_VISIBILITY_PRESET default)
 target_include_directories(Alphalcazar.Strategy.MinMax PUBLIC include/)

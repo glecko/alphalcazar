@@ -1,5 +1,7 @@
 #pragma once
 
+#define SPDLOG_NO_EXCEPTIONS
+
 #include <spdlog/spdlog.h>
 
 namespace Alphalcazar::Utils {

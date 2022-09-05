@@ -8,6 +8,9 @@ file(GLOB_RECURSE _sources
 )
 
 add_library(Alphalcazar.Utils STATIC ${_sources})
+if(MSVC)
+  target_compile_options(Alphalcazar.Utils PRIVATE /EHsc)
+endif()
 set_target_properties(Alphalcazar.Utils PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS true)
 set_property(TARGET Alphalcazar.Utils PROPERTY CXX_VISIBILITY_PRESET default)
 target_include_directories(Alphalcazar.Utils PUBLIC include/)

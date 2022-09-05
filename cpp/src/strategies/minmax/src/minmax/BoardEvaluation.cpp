@@ -4,6 +4,7 @@
 #include <game/Game.hpp>
 #include <game/Piece.hpp>
 #include <algorithm>
+#include <util/Log.hpp>
 
 namespace Alphalcazar::Strategy::MinMax {
 	/*!
@@ -48,8 +49,9 @@ namespace Alphalcazar::Strategy::MinMax {
 		case Game::GameResult::DRAW:
 			return 0;
 		default:
-			throw "Tried to convert invalid game result to score";
+			Utils::LogError("Tried to convert invalid game result to score");
 		}
+		return 0;
 	}
 
 	Score EvaluateBoard(Game::PlayerId playerId, const Game::Game& game) {
