@@ -3,10 +3,6 @@
 
 #include <game/Board.hpp>
 #include <game/Piece.hpp>
-#include <game/parameters.hpp>
-#include <game/Coordinates.hpp>
-#include <game/PlacementMove.hpp>
-
 #include <util/Log.hpp>
 
 #include <algorithm>
@@ -38,36 +34,6 @@ namespace Alphalcazar::Strategy::MinMax {
 		return std::make_pair(xSymmetry, ySymmetry);
 	}
 
-	Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount> FilterSymmetricMovements(const Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount>& legalMoves, const Game::Board& board) {
-		auto [xSymmetry, ySymmetry] = GetBoardSymmetries(board);
-		// If there are no simmetries on the board, return all moves
-		if (!xSymmetry && !ySymmetry) {
-			return legalMoves;
-		}
-
-		Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount> filteredMoves;
-		for (std::size_t i = 0; i < legalMoves.size(); ++i) {
-			const Game::PlacementMove& move = legalMoves[i];
-			if (xSymmetry && ySymmetry) {
-				// If the board has both x and y symmetry, it must be empty
-				// On an empty board, there are really only 2 different tiles on which to play : center or corner
-				// We simply select an arbitrary center tile and an arbitrary corner tile: (4, 2) and (4, 3)
-				if (move.Coordinates.x == 4 && (move.Coordinates.y == 3 || move.Coordinates.y == 2)) {
-					filteredMoves.insert(move);
-				}
-			} else if (xSymmetry) {
-				if (move.Coordinates.y >= Game::c_CenterCoordinate) {
-					filteredMoves.insert(move);
-				}
-			} else if (ySymmetry) {
-				if (move.Coordinates.x >= Game::c_CenterCoordinate) {
-					filteredMoves.insert(move);
-				}
-			}
-		}
-		return filteredMoves;
-	}
-
 	/*!
 	 * \brief Returns an heuristic approximation of the score we expect to gain from a given placement move, for sorting purposes
 	 *
@@ -75,7 +41,7 @@ namespace Alphalcazar::Strategy::MinMax {
 	 * \param board The board of the game for which the legal movement is valid.
 	 * \param opponentBoardPieces A list of the pieces the opponent has on the board (excluding perimeter)
 	 */
-	Score GetHeuristicPlacementMoveScore(const Game::PlacementMove& move, const Game::Board& board, const std::size_t opponentBoardPieceCount) {
+	Score GetHeuristicPlacementMoveScore(const ScoredPlacementMove& move, const Game::Board& board, const std::size_t opponentBoardPieceCount) {
 		// First, we check if we have good reason to believe that the movement would result in the placed
 		// piece not even entering the board. While this can be beneficial in some very specific situations,
 		// most times it would just be a blunder, so it makes sense to assign these movements the lowest score
@@ -128,12 +94,53 @@ namespace Alphalcazar::Strategy::MinMax {
 		return resultScore;
 	}
 
-	void SortLegalMovements(Game::PlayerId playerId, Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount>& legalMoves, const Game::Board& board) {
+	Utils::StaticVector<ScoredPlacementMove, Game::c_MaxLegalMovesCount> SortAndFilterMovements(Game::PlayerId playerId, const Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount>& legalMoves, const Game::Board& board) {
+		Utils::StaticVector<ScoredPlacementMove, Game::c_MaxLegalMovesCount> result;
+
+		auto [xSymmetry, ySymmetry] = GetBoardSymmetries(board);
 		auto opponentId = playerId == Game::PlayerId::PLAYER_ONE ? Game::PlayerId::PLAYER_TWO : Game::PlayerId::PLAYER_ONE;
 		std::size_t opponentBoardPieceCount = board.GetPieceCount(opponentId, true);
-		std::sort(legalMoves.begin(), legalMoves.end(), [board, opponentBoardPieceCount](const Game::PlacementMove& moveA, const Game::PlacementMove& moveB) {
-			// Sort the vector by the heuristic score of the placement moves
-			return GetHeuristicPlacementMoveScore(moveA, board, opponentBoardPieceCount) > GetHeuristicPlacementMoveScore(moveB, board, opponentBoardPieceCount);
+
+		// We build a list of \ref ScoredPlacementMove by looping through the legal moves, removing
+		// symmetrical moves and calculating their heuristic score (which will later be used to sort the list)
+		if (!xSymmetry && !ySymmetry) {
+			// If there are no simmetries on the board, build a list with all moves
+			for (std::size_t i = 0; i < legalMoves.size(); ++i) {
+				ScoredPlacementMove move{ legalMoves[i] };
+				move.Score = GetHeuristicPlacementMoveScore(move, board, opponentBoardPieceCount);
+				result.insert(move);
+			}
+		} else {
+			// Else, only insert and calculate the score for non-symmetrical moves
+			for (std::size_t i = 0; i < legalMoves.size(); ++i) {
+				ScoredPlacementMove move{ legalMoves[i] };
+				if (xSymmetry && ySymmetry) {
+					// If the board has both x and y symmetry, it must be empty
+					// On an empty board, there are really only 2 different tiles on which to play : center or corner
+					// We simply select an arbitrary center tile and an arbitrary corner tile: (4, 2) and (4, 3)
+					if (move.Coordinates.x == 4 && (move.Coordinates.y == 3 || move.Coordinates.y == 2)) {
+						move.Score = GetHeuristicPlacementMoveScore(move, board, opponentBoardPieceCount);
+						result.insert(move);
+					}
+				} else if (xSymmetry) {
+					if (move.Coordinates.y >= Game::c_CenterCoordinate) {
+						move.Score = GetHeuristicPlacementMoveScore(move, board, opponentBoardPieceCount);
+						result.insert(move);
+					}
+				} else if (ySymmetry) {
+					if (move.Coordinates.x >= Game::c_CenterCoordinate) {
+						move.Score = GetHeuristicPlacementMoveScore(move, board, opponentBoardPieceCount);
+						result.insert(move);
+					}
+				}
+			}
+		}
+
+		// Sort the list by the heuristic score of the placement moves
+		std::sort(result.begin(), result.end(), [](const ScoredPlacementMove& moveA, ScoredPlacementMove& moveB) {
+			return moveA.Score > moveB.Score;
 		});
+
+		return result;
 	}
 }
