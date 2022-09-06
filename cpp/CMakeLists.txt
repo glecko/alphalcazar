@@ -36,6 +36,8 @@ function(configure_conan_dependencies generator)
   else()
     conan_cmake_configure(REQUIRES spdlog/[>=1.4.1] GENERATORS ${generator})
   endif()
+  # Build spdlog without exceptions as we want exception handling to be disabled
+  add_definitions(-DSPDLOG_NO_EXCEPTIONS=1)
 endfunction()
 
 include(${CMAKE_BINARY_DIR}/conan.cmake)
@@ -65,6 +67,8 @@ if(MSVC)
 
   # Disable exception handling as this project does not make use of them
   string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+  # Make sure exceptions are disabled in the stdlib
+  add_definitions(-D_HAS_EXCEPTIONS=0)
 else()
   # All warning levels and all warnings as errors
   add_compile_options(-Wall)
