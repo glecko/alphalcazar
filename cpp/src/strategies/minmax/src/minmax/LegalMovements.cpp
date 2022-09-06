@@ -143,13 +143,4 @@ namespace Alphalcazar::Strategy::MinMax {
 
 		return result;
 	}
-
-	void SortLegalMovements(Game::PlayerId playerId, Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount>& legalMoves, const Game::Board& board) {
-		auto opponentId = playerId == Game::PlayerId::PLAYER_ONE ? Game::PlayerId::PLAYER_TWO : Game::PlayerId::PLAYER_ONE;
-		std::size_t opponentBoardPieceCount = board.GetPieceCount(opponentId, true);
-		std::sort(legalMoves.begin(), legalMoves.end(), [board, opponentBoardPieceCount](const Game::PlacementMove& moveA, const Game::PlacementMove& moveB) {
-			// Sort the vector by the heuristic score of the placement moves
-			return GetHeuristicPlacementMoveScore(moveA, board, opponentBoardPieceCount) > GetHeuristicPlacementMoveScore(moveB, board, opponentBoardPieceCount);
-		});
-	}
 }
