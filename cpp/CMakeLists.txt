@@ -62,6 +62,7 @@ endif()
 
 # Compiler-specific configuration
 if(MSVC)
+  message("Setting compile options for MSVS (Compiler type '${CMAKE_CXX_COMPILER_ID}')...")
   # Warning level 4 and all warnings as errors
   add_compile_options(/W4)
   add_compile_options(/WX)
@@ -79,6 +80,7 @@ if(MSVC)
   string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 elseif (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   # The following compile options are supported both by Clang++ and GCC
+  message("Setting compile options for Clang/GCC (Compiler type '${CMAKE_CXX_COMPILER_ID}')...")
 
   # All warning levels and all warnings as errors
   add_compile_options(-Wall)
