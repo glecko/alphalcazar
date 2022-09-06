@@ -13,7 +13,7 @@
 namespace Alphalcazar::Game {
 	class MockStrategy final : public Strategy {
 	public:
-		virtual PlacementMove Execute(PlayerId playerId, const std::vector<PlacementMove>&, const Game&) override {
+		virtual PlacementMove Execute(PlayerId playerId, const Utils::StaticVector<PlacementMove, c_MaxLegalMovesCount>&, const Game&) override {
 			if (playerId == PlayerId::PLAYER_ONE) {
 				return { { 0, 2 }, 3 };
 			}
@@ -71,8 +71,8 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(game.GetState().Turn, 0);
 		EXPECT_EQ(game.GetState().FirstMoveExecuted, true);
 		EXPECT_EQ(game.GetActivePlayer(), PlayerId::PLAYER_TWO);
-		EXPECT_EQ(game.GetBoard().GetTile(0, 3)->GetPiece()->GetOwner(), PlayerId::PLAYER_ONE);
-		EXPECT_EQ(game.GetBoard().GetTile(0, 3)->GetPiece()->GetType(), 3);
+		EXPECT_EQ(game.GetBoard().GetTile(0, 3)->GetPiece().GetOwner(), PlayerId::PLAYER_ONE);
+		EXPECT_EQ(game.GetBoard().GetTile(0, 3)->GetPiece().GetType(), 3);
 
 		// After playing the second placement move, we expect the end turn phase to have been
 		// evaluated and the pieces to have moved.
@@ -82,11 +82,11 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(game.GetActivePlayer(), PlayerId::PLAYER_TWO);
 		EXPECT_FALSE(game.GetBoard().GetTile(0, 3)->HasPiece());
 		EXPECT_FALSE(game.GetBoard().GetTile(2, 0)->HasPiece());
-		EXPECT_EQ(game.GetBoard().GetTile(1, 3)->GetPiece()->GetType(), 3);
-		EXPECT_EQ(game.GetBoard().GetTile(2, 1)->GetPiece()->GetType(), 5);
+		EXPECT_EQ(game.GetBoard().GetTile(1, 3)->GetPiece().GetType(), 3);
+		EXPECT_EQ(game.GetBoard().GetTile(2, 1)->GetPiece().GetType(), 5);
 
 		// We also expect the piece spawned from move 2 to belong to player 2
-		EXPECT_EQ(game.GetBoard().GetTile(2, 1)->GetPiece()->GetOwner(), PlayerId::PLAYER_TWO);
+		EXPECT_EQ(game.GetBoard().GetTile(2, 1)->GetPiece().GetOwner(), PlayerId::PLAYER_TWO);
 
 		// On the next turn, we expect the first placement move to be played by player 2,
 		// as the player with initiative should have switched
@@ -94,7 +94,7 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(game.GetState().Turn, 1);
 		EXPECT_EQ(game.GetActivePlayer(), PlayerId::PLAYER_ONE);
 		EXPECT_EQ(game.GetState().FirstMoveExecuted, true);
-		EXPECT_EQ(game.GetBoard().GetTile(0, 1)->GetPiece()->GetOwner(), PlayerId::PLAYER_TWO);
+		EXPECT_EQ(game.GetBoard().GetTile(0, 1)->GetPiece().GetOwner(), PlayerId::PLAYER_TWO);
 		EXPECT_EQ(game.GetState().Turn, 1);
 		EXPECT_EQ(game.GetState().FirstMoveExecuted, true);
 	}

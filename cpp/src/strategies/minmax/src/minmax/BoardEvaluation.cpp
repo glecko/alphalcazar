@@ -54,8 +54,9 @@ namespace Alphalcazar::Strategy::MinMax {
 
 	Score EvaluateBoard(Game::PlayerId playerId, const Game::Game& game) {
 		Score totalScore = 0;
-		auto pieces = game.GetBoard().GetPieces();
-		for (auto& [coordinates, piece] : pieces) {
+		auto [pieces, piecesCount] = game.GetBoard().GetPieces();
+		for (std::size_t i = 0; i < piecesCount; ++i) {
+			auto& [coordinates, piece] = pieces[i];
 			if (!coordinates.IsPerimeter()) {
 				auto direction = piece.GetMovementDirection();
 				float pieceScoreMultiplier = GetPieceScoreMultiplier(coordinates, direction);

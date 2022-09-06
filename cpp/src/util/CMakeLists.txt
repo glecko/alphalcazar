@@ -15,3 +15,7 @@ set_target_properties(Alphalcazar.Utils PROPERTIES LINKER_LANGUAGE CXX)
 
 find_package(spdlog REQUIRED)
 target_link_libraries(Alphalcazar.Utils PUBLIC ${CONAN_LIBS_SPDLOG} spdlog::spdlog)
+
+if (BUILD_TESTS)
+  add_subdirectory(tests)
+endif()

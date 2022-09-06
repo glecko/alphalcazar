@@ -52,6 +52,8 @@ namespace Alphalcazar::Game {
 
 		/// Returns if the data structure represents a valid piece
 		bool IsValid() const {
+			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
+			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
 			bool typeIsValid = mType != c_InvalidPieceType;
 			bool ownerIsValid = mOwner != PlayerId::NONE;
 			return typeIsValid && ownerIsValid;
