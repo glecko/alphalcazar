@@ -49,7 +49,7 @@ jobs:
     - name: Install latest conan 1 version
       run: |
         pip install --upgrade wheel
-        pip install --upgrade conan<2
+        pip install --upgrade "conan<2"
     - name: Build with CMake
       uses: lukka/run-cmake@v2
       env:
