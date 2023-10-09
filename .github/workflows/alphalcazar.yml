@@ -5,7 +5,7 @@ on:
     branches: [ master ]
   pull_request:
     branches:
-      - '**'
+      - 'master'
     types:
       - opened
       - synchronize
@@ -13,57 +13,48 @@ on:
       - ready_for_review
 
 jobs:
-  test-cpp-windows:
-    name: Test (C++17 - Windows)
+  test-cpp:
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+
+        include:
+          - os: windows-latest
+            shell: powershell
+            env_cc: cl.exe
+            env_cxx: cl.exe
+
+          - os: ubuntu-latest
+            shell: bash
+            env_cc: clang
+            env_cxx: clang++
+  
+    name: Test (C++17 - ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
-        shell: powershell
-    runs-on: windows-2022
+        shell: ${{ matrix.shell }}
+
     steps:
     - uses: actions/checkout@v2
     - name: Configure command prompt for MSVC++
       uses: ilammy/msvc-dev-cmd@v1
+      if: matrix.os == 'windows-latest'
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
-    - name: Install conan
+    - name: Install latest conan 1 version
       run: |
         pip install --upgrade wheel
-        pip install --upgrade conan
+        pip install --upgrade "conan<2"
     - name: Build with CMake
       uses: lukka/run-cmake@v2
       env:
-        CC: cl.exe
-        CXX: cl.exe
-      with:
-        buildDirectory: '${{ runner.temp }}/build/${{ runner.os }}'
-        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-        cmakeListsTxtPath: '${{ github.workspace }}/cpp/CMakeLists.txt'
-        cmakeAppendedArgs: "-G Ninja -DCMAKE_BUILD_TYPE=Release"
-    - name: Test
-      run: |
-        cd '${{ runner.temp }}/build/${{ runner.os }}'
-        ctest -C Release --timeout 600 -V
-
-  test-cpp-linux:
-    name: Test (C++17 - Linux)
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - name: Install conan
-      run: |
-        pip install --upgrade wheel
-        pip install --upgrade conan
-    - name: Build with CMake
-      uses: lukka/run-cmake@v2
-      env:
-        CC: clang
-        CXX: clang++
+        CC: ${{ matrix.env_cc }}
+        CXX: ${{ matrix.env_cxx }}
       with:
         buildDirectory: '${{ runner.temp }}/build/${{ runner.os }}'
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
