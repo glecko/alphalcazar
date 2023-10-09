@@ -1,13 +1,17 @@
 #pragma once
 
 #include "aliases.hpp"
-#include "Coordinates.hpp"
+#include "parameters.hpp"
 #include <type_traits>
 
 namespace Alphalcazar::Game {
+	/// Mask used to obtain the owner from the piece info. See the docstring of \ref mPieceInfo
 	constexpr std::uint8_t c_PieceOwnerMask = 0b00000011;
+	/// Mask used to obtain the direction from the piece info. See the docstring of \ref mPieceInfo
 	constexpr std::uint8_t c_PieceDirectionMask = 0b00011100;
+	/// Mask used to obtain the piece type from the piece info. See the docstring of \ref mPieceInfo
 	constexpr std::uint8_t c_PieceTypeMask = 0b11100000;
+	/// Mask used to obtain the piece owner & type data from the piece info. See the docstring of \ref mPieceInfo
 	constexpr std::uint8_t c_PieceTypeAndOwnerMask = c_PieceOwnerMask ^ c_PieceTypeMask;
 
 	/*!
