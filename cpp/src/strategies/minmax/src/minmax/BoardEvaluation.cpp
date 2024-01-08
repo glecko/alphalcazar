@@ -17,25 +17,28 @@ namespace Alphalcazar::Strategy::MinMax {
 	float GetPieceScoreMultiplier(const Game::Coordinates& coordinates, Game::Direction direction) {
 		if (coordinates.IsCenter()) {
 			return c_CenterPieceMultiplier;
-		} else if (coordinates.IsBoardCorner()) {
+		}
+		
+		if (coordinates.IsBoardCorner()) {
 			// In the board corners, a piece can only have recently entered the board
 			// or be about to leave it
-			auto pieceTargetCoordinate = coordinates.GetCoordinateInDirection(direction, 1);
+			const auto pieceTargetCoordinate = coordinates.GetCoordinateInDirection(direction, 1);
 			if (pieceTargetCoordinate.IsPerimeter()) {
 				return c_PieceAboutToExitMultiplier;
-			} else {
-				return c_FreshCornerPieceMultiplier;
 			}
-		} else {
-			// The piece is on one of the center lanes, but not in the center tile
-			auto pieceTargetCoordinate = coordinates.GetCoordinateInDirection(direction, 1);
-			if (pieceTargetCoordinate.IsPerimeter()) {
-				// The piece is about to exit the board
-				return c_PieceAboutToExitMultiplier;
-			} else if (pieceTargetCoordinate.IsCenter()) {
-				// The piece just entered the center lane and wants to move to the center
-				return c_FreshCenterLanePieceMultiplier;
-			}
+			return c_FreshCornerPieceMultiplier;
+		}
+		
+		// The piece is on one of the center lanes, but not in the center tile
+		const auto pieceTargetCoordinate = coordinates.GetCoordinateInDirection(direction, 1);
+		if (pieceTargetCoordinate.IsPerimeter()) {
+			// The piece is about to exit the board
+			return c_PieceAboutToExitMultiplier;
+		}
+		
+		if (pieceTargetCoordinate.IsCenter()) {
+			// The piece just entered the center lane and wants to move to the center
+			return c_FreshCenterLanePieceMultiplier;
 		}
 		return 1.f;
 	}
@@ -60,13 +63,13 @@ namespace Alphalcazar::Strategy::MinMax {
 		for (std::size_t i = 0; i < piecesCount; ++i) {
 			auto& [coordinates, piece] = pieces[i];
 			if (!coordinates.IsPerimeter()) {
-				auto direction = piece.GetMovementDirection();
-				float pieceScoreMultiplier = GetPieceScoreMultiplier(coordinates, direction);
+				const Game::Direction direction = piece.GetMovementDirection();
+				const float pieceScoreMultiplier = GetPieceScoreMultiplier(coordinates, direction);
 
 				// The piece on board score array stores all piece types in order, meaning that
 				// the score of a certain piece type will be located at index (type - 1)
-				Score pieceOnBoardScore = c_PieceOnBoardScores[piece.GetType() - 1];
-				Score pieceScore = static_cast<Score>(pieceOnBoardScore * pieceScoreMultiplier);
+				const Score pieceOnBoardScore = c_PieceOnBoardScores[piece.GetType() - 1];
+				const Score pieceScore = static_cast<Score>(pieceOnBoardScore * pieceScoreMultiplier);
 
 				// Add the score if the piece belongs to the player for which we are evaluating the score
 				// or subtract it if it belongs to the opponent
@@ -81,8 +84,8 @@ namespace Alphalcazar::Strategy::MinMax {
 	}
 
 	Score GetDepthAdjustedScore(Score score, Depth depth) {
-		Score depthPenalty = depth * c_DepthScorePenalty;
-		Score penalty = std::min(depthPenalty, static_cast<Score>(std::abs(score)));
+		const Score depthPenalty = depth * c_DepthScorePenalty;
+		const Score penalty = std::min(depthPenalty, std::abs(score));
 		if (score > 0) {
 			score -= penalty;
 		} else {

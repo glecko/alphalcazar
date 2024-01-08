@@ -2,7 +2,6 @@
 
 #include "minmax/minmax_aliases.hpp"
 #include "game/parameters.hpp"
-#include "game/Coordinates.hpp"
 
 #include <array>
 
@@ -19,9 +18,9 @@ namespace Alphalcazar::Strategy::MinMax {
 	 *
 	 * This will ensure that if several moves lead to the same position/result (a win, for example), the
 	 * move that achieves this in the least amount of moves will be chosen. On the contrary, this will ensure
-	 * that an inevitable loss will be posponed as much as possible.
+	 * that an inevitable loss will be postponed as much as possible.
 	 *
-	 * \note The value of this penalty should be low enough to never have an impact on the score appart
+	 * \note The value of this penalty should be low enough to never have an impact on the score apart
 	 * from deciding between moves with equal score but different depth.
 	 */
 	constexpr Score c_DepthScorePenalty = 1;

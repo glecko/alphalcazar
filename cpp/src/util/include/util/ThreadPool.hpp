@@ -32,7 +32,7 @@ namespace Alphalcazar::Utils {
         /// A virtual class to allow storing multiple specialized \ref TaskContainerBase in the same queue
         class TaskContainerBase {
         public:
-            virtual ~TaskContainerBase() {};
+            virtual ~TaskContainerBase() = default;
             virtual void Execute() = 0;
         };
 
@@ -76,7 +76,7 @@ namespace Alphalcazar::Utils {
     auto ThreadPool::Execute(F function) {
         static_assert(!std::is_function_v<F>, "ThreadPool::Execute function type needs to be callable.");
 
-        std::unique_lock<std::mutex> queueLock{ mTaskMutex, std::defer_lock };
+        std::unique_lock queueLock{ mTaskMutex, std::defer_lock };
         std::packaged_task<std::invoke_result_t<F>()> packagedTask{ std::bind(function) };
         std::future<std::invoke_result_t<F>> future = packagedTask.get_future();
 

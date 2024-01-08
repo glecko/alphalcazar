@@ -1,9 +1,6 @@
 #pragma once
 
-#include "aliases.hpp"
 #include "Piece.hpp"
-#include <memory>
-#include <optional>
 
 namespace Alphalcazar::Game {
 	/*!

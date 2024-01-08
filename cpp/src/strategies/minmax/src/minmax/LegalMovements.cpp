@@ -3,7 +3,6 @@
 
 #include <game/Board.hpp>
 #include <game/Piece.hpp>
-#include <util/Log.hpp>
 
 #include <algorithm>
 
@@ -14,7 +13,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		auto [pieces, piecesCount] = board.GetPieces();
 		for (std::size_t i = 0; i < piecesCount; ++i) {
 			auto& [coordinates, piece] = pieces[i];
-			auto direction = piece.GetMovementDirection();
+			const Game::Direction direction = piece.GetMovementDirection();
 			if (coordinates.y != Game::c_CenterCoordinate || direction == Game::Direction::NORTH || direction == Game::Direction::SOUTH) {
 				// x-axis symmetry can only exist if all pieces (including perimeter ones) are placed along the horizontal center row
 				// and all pieces are pointing east or west. A single piece not following these conditions breaks symmetry.
@@ -39,15 +38,15 @@ namespace Alphalcazar::Strategy::MinMax {
 	 *
 	 * \param move The move for which to calculate the heuristic approximation.
 	 * \param board The board of the game for which the legal movement is valid.
-	 * \param opponentBoardPieces A list of the pieces the opponent has on the board (excluding perimeter)
+	 * \param opponentBoardPieceCount Amount of pieces the opponent has on the board (excluding perimeter)
 	 */
 	Score GetHeuristicPlacementMoveScore(const ScoredPlacementMove& move, const Game::Board& board, const std::size_t opponentBoardPieceCount) {
 		// First, we check if we have good reason to believe that the movement would result in the placed
 		// piece not even entering the board. While this can be beneficial in some very specific situations,
 		// most times it would just be a blunder, so it makes sense to assign these movements the lowest score
 		if (move.PieceType != Game::c_PusherPieceType) {
-			auto placementDirection = move.Coordinates.GetLegalPlacementDirection();
-			auto pieceTargetCoordinate = move.Coordinates.GetCoordinateInDirection(placementDirection, 1);
+			const auto placementDirection = move.Coordinates.GetLegalPlacementDirection();
+			const auto pieceTargetCoordinate = move.Coordinates.GetCoordinateInDirection(placementDirection, 1);
 			auto* pieceTargetTile = board.GetTile(pieceTargetCoordinate);
 			if (pieceTargetTile->HasPiece()) {
 				// There's a piece on the tile that our piece is looking at
@@ -55,7 +54,7 @@ namespace Alphalcazar::Strategy::MinMax {
 				// or if the piece can be pushed by us
 				auto& pieceTargetTilePiece = pieceTargetTile->GetPiece();
 				if (!pieceTargetTilePiece.IsPushable()) {
-					auto blockingPieceTargetCoordinate = pieceTargetCoordinate.GetCoordinateInDirection(pieceTargetTilePiece.GetMovementDirection(), 1);
+					const auto blockingPieceTargetCoordinate = pieceTargetCoordinate.GetCoordinateInDirection(pieceTargetTilePiece.GetMovementDirection(), 1);
 					// We check if the target piece moves after us, or if it will attempt to move to the position where we have placed
 					// the piece, causing its movement to be blocked
 					if (pieceTargetTilePiece.GetType() > move.PieceType || blockingPieceTargetCoordinate == move.Coordinates) {
@@ -98,22 +97,22 @@ namespace Alphalcazar::Strategy::MinMax {
 		Utils::StaticVector<ScoredPlacementMove, Game::c_MaxLegalMovesCount> result;
 
 		auto [xSymmetry, ySymmetry] = GetBoardSymmetries(board);
-		auto opponentId = playerId == Game::PlayerId::PLAYER_ONE ? Game::PlayerId::PLAYER_TWO : Game::PlayerId::PLAYER_ONE;
-		std::size_t opponentBoardPieceCount = board.GetPieceCount(opponentId, true);
+		const auto opponentId = playerId == Game::PlayerId::PLAYER_ONE ? Game::PlayerId::PLAYER_TWO : Game::PlayerId::PLAYER_ONE;
+		const std::size_t opponentBoardPieceCount = board.GetPieceCount(opponentId, true);
 
 		// We build a list of \ref ScoredPlacementMove by looping through the legal moves, removing
 		// symmetrical moves and calculating their heuristic score (which will later be used to sort the list)
 		if (!xSymmetry && !ySymmetry) {
-			// If there are no simmetries on the board, build a list with all moves
-			for (std::size_t i = 0; i < legalMoves.size(); ++i) {
-				ScoredPlacementMove move{ legalMoves[i] };
+			// If there are no symmetries on the board, build a list with all moves
+			for (const auto& legalMove : legalMoves) {
+				ScoredPlacementMove move{legalMove};
 				move.Score = GetHeuristicPlacementMoveScore(move, board, opponentBoardPieceCount);
 				result.insert(move);
 			}
 		} else {
 			// Else, only insert and calculate the score for non-symmetrical moves
-			for (std::size_t i = 0; i < legalMoves.size(); ++i) {
-				ScoredPlacementMove move{ legalMoves[i] };
+			for (const auto& legalMove : legalMoves) {
+				ScoredPlacementMove move{legalMove};
 				if (xSymmetry && ySymmetry) {
 					// If the board has both x and y symmetry, it must be empty
 					// On an empty board, there are really only 2 different tiles on which to play : center or corner
@@ -137,7 +136,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		}
 
 		// Sort the list by the heuristic score of the placement moves
-		std::sort(result.begin(), result.end(), [](const ScoredPlacementMove& moveA, ScoredPlacementMove& moveB) {
+		std::sort(result.begin(), result.end(), [](const ScoredPlacementMove& moveA, const ScoredPlacementMove& moveB) {
 			return moveA.Score > moveB.Score;
 		});
 

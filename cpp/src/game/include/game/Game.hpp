@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
 #include "aliases.hpp"
 #include "Board.hpp"
 #include <util/StaticVector.hpp>
@@ -90,7 +89,7 @@ namespace Alphalcazar::Game {
 		 *
 		 * \param executedMoves The amount of moves executed on the last turn.
 		 */
-		GameResult EvaluateGameResult(BoardMovesCount executedMoves);
+		GameResult EvaluateGameResult(BoardMovesCount executedMoves) const;
 
 		/// The board on which the game is being played
 		Board mBoard;

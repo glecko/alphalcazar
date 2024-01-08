@@ -4,8 +4,6 @@
 #include "minmax/config.hpp"
 
 #include <game/Game.hpp>
-#include <game/Tile.hpp>
-#include <game/Piece.hpp>
 #include <game/parameters.hpp>
 #include <game/PlacementMove.hpp>
 
@@ -23,7 +21,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		 * It's the only winning move as the (3,2) is about to be occupied by the opponent's 3,
 		 * and the 2 piece is the only non-pushable piece player 2 has that moves before that 3 piece.
 		 */
-		std::vector<PieceSetup> pieceSetups {
+		const std::vector<PieceSetup> pieceSetups {
 			{ Game::PlayerId::PLAYER_TWO, 3, Game::Direction::NORTH, { 1, 1 } },
 			{ Game::PlayerId::PLAYER_TWO, 4, Game::Direction::NORTH, { 2, 1 } },
 
@@ -33,7 +31,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, pieceSetups);
 
 		// Results should be the same independently of depth
-		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
+		const auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
 		Game::Coordinates winningCoordinates { 4, 2 };
 		for (Depth depth = 1; depth <= 2; depth++) {
 			MinMaxStrategy strategy { depth };
@@ -59,15 +57,15 @@ namespace Alphalcazar::Strategy::MinMax {
 		 * If the movement is not blocked, player 2 can win by playing anything on (2,4). The only way for player 2 to
 		 * avoid an immediate loss is to play any piece on (2,4).
 		 */
-		std::vector<PieceSetup> pieceSetups {
+		const std::vector<PieceSetup> pieceSetups {
 			{ Game::PlayerId::PLAYER_ONE, 5, Game::Direction::EAST, { 1, 1 } },
 			{ Game::PlayerId::PLAYER_ONE, 4, Game::Direction::WEST, { 3, 2 } },
 
 			{ Game::PlayerId::PLAYER_TWO, 4, Game::Direction::WEST, { 1, 2 } }
 		};
-		Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_TWO, false, pieceSetups);
+		const Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_TWO, false, pieceSetups);
 
-		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
+		const auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
 
 		// Player 2 should decide to play a piece on the (2,4) square regardless of the search depth
 		// and regardless of if the strategy is executed on multiple or a single thread
@@ -103,7 +101,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		 * enough as player 1 does not have the innitiative this turn. The only piece that can move before the opponent's
 		 * 2 and 3 is the 1 piece, which will be pushed and won't prevent the loss.
 		 */
-		std::vector<PieceSetup> pieceSetups {
+		const std::vector<PieceSetup> pieceSetups {
 			{ Game::PlayerId::PLAYER_TWO, 5, Game::Direction::SOUTH, { 2, 3 } },
 			{ Game::PlayerId::PLAYER_TWO, 2, Game::Direction::SOUTH, { 3, 3 } },
 			{ Game::PlayerId::PLAYER_TWO, 3, Game::Direction::NORTH, { 1, 1 } },
@@ -112,12 +110,12 @@ namespace Alphalcazar::Strategy::MinMax {
 
 			{ Game::PlayerId::PLAYER_ONE, 2, Game::Direction::WEST, { 1, 3 } }
 		};
-		Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_TWO, true, pieceSetups);
+		const Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_TWO, true, pieceSetups);
 
-		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_ONE);
+		const auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_ONE);
 
 		MinMaxStrategy strategy { 1 };
-		auto move = strategy.Execute(Game::PlayerId::PLAYER_ONE, legalMoves, game);
+		const auto move = strategy.Execute(Game::PlayerId::PLAYER_ONE, legalMoves, game);
 
 		// Positions at which the pushing piece can be played to avoid an immediate loss
 		std::vector<Game::Coordinates> expectedCoordinates {
@@ -135,7 +133,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		 * They can avoid losing this round by playing the pushing piece at (2,0), but next round they will
 		 * be unable to block both squares where P1 can mate, and will not have the pushing piece in hand.
 		 */
-		std::vector<PieceSetup> pieceSetups {
+		const std::vector<PieceSetup> pieceSetups {
 			{ Game::PlayerId::PLAYER_ONE, 2, Game::Direction::SOUTH, { 2, 3 } },
 			{ Game::PlayerId::PLAYER_ONE, 3, Game::Direction::EAST, { 1, 2 } },
 			// The first move played this turn
@@ -146,11 +144,11 @@ namespace Alphalcazar::Strategy::MinMax {
 		};
 		Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, pieceSetups);
 
-		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
+		const auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
 
-		Game::Coordinates expectedCoordinates = { 2, 0 };
-		Game::PieceType expectedPieceType = Game::c_PusherPieceType;
-		Score expectedScore = -c_WinConditionScore + c_DepthScorePenalty;
+		constexpr Game::Coordinates expectedCoordinates = { 2, 0 };
+		constexpr Game::PieceType expectedPieceType = Game::c_PusherPieceType;
+		constexpr Score expectedScore = -c_WinConditionScore + c_DepthScorePenalty;
 		{
 			MinMaxStrategy strategy{ 2 };
 			auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
@@ -165,7 +163,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		// At depth 3, the strategy should return exactly the same result
 		{
 			MinMaxStrategy strategy{ 3 };
-			auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
+			const auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
 
 			EXPECT_EQ(move.PieceType, expectedPieceType);
 			EXPECT_TRUE(move.Coordinates.x == expectedCoordinates.x && move.Coordinates.y == expectedCoordinates.y);
@@ -186,7 +184,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		 * They only has piece 5 in hand, and as long as they keeps it for the next move (makes it not enter the board)
 		 * they will be able to use it next round to win the game, no reply from player 1 possible.
 		 */
-		std::vector<PieceSetup> pieceSetups {
+		const std::vector<PieceSetup> pieceSetups {
 			{ Game::PlayerId::PLAYER_ONE, 1, Game::Direction::EAST, { 2, 3 } },
 			{ Game::PlayerId::PLAYER_ONE, 2, Game::Direction::WEST, { 3, 2 } },
 			// The first move played this turn
@@ -199,11 +197,11 @@ namespace Alphalcazar::Strategy::MinMax {
 			{ Game::PlayerId::PLAYER_TWO, 3, Game::Direction::WEST, { 3, 3 } },
 			{ Game::PlayerId::PLAYER_TWO, 4, Game::Direction::EAST, { 2, 2 } }
 		};
-		Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, pieceSetups);
+		const Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, pieceSetups);
 
 		MinMaxStrategy strategy { 2 };
-		auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
-		auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
+		const auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_TWO);
+		const auto move = strategy.Execute(Game::PlayerId::PLAYER_TWO, legalMoves, game);
 
 		// These are the perimeter tiles at which placing the 5 piece would cause it to enter the board
 		// Player 2 must place the piece on any tile except these ones to be able to win next round.

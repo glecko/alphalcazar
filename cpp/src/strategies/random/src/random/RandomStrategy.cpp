@@ -5,8 +5,7 @@
 
 namespace Alphalcazar::Strategy::Random {
 	RandomStrategy::RandomStrategy() 
-		: mRandomDevice {}
-		, mRandomEngine { mRandomDevice() }
+		: mRandomEngine { mRandomDevice() }
 	{}
 
 	Game::PlacementMove RandomStrategy::Execute(Game::PlayerId, const Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount>& legalMoves, const Game::Game&) {

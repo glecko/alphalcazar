@@ -23,13 +23,13 @@ namespace Alphalcazar::Game {
 	class Piece {
 	public:
 		/// Default constructor for \ref Piece, constructs an invalid piece
-		Piece() noexcept {}
+		Piece() noexcept = default;
 
 		Piece(PlayerId owner, PieceType type) noexcept {
 			// Combine the bit representations of the owner and type (shifted 5 bits to the left to be properly aligned).
 			// The resulting \ref mPieceInfo will have the bits representing the direction (4-6 from the left) set to 0.
-			auto alignedOwnerData = static_cast<std::underlying_type<PlayerId>::type>(owner);
-			PieceType alignedTypeData = (type << 5);
+			const auto alignedOwnerData = static_cast<std::underlying_type<PlayerId>::type>(owner);
+			const PieceType alignedTypeData = (type << 5);
 			mPieceInfo = alignedTypeData ^ alignedOwnerData;
 		}
 
@@ -49,7 +49,7 @@ namespace Alphalcazar::Game {
 
 		/// Returns the direction at which the piece is currently facing
 		Direction GetMovementDirection() const {
-			std::uint8_t unalignedDirectionData = mPieceInfo & c_PieceDirectionMask;
+			const std::uint8_t unalignedDirectionData = mPieceInfo & c_PieceDirectionMask;
 			std::uint8_t alignedDirectionData = unalignedDirectionData >> 2;
 			return static_cast<Direction>(alignedDirectionData);
 		}
@@ -67,21 +67,21 @@ namespace Alphalcazar::Game {
 		/// Returns if the data structure represents a valid piece
 		bool IsValid() const {
 			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
-			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
-			bool typeIsValid = GetType() != c_InvalidPieceType;
-			bool ownerIsValid = (mPieceInfo & c_PieceOwnerMask) != 0;
+			// we parallelize the comparisons to avoid branching (causing a potential instruction-level cache miss)
+			const bool typeIsValid = GetType() != c_InvalidPieceType;
+			const bool ownerIsValid = (mPieceInfo & c_PieceOwnerMask) != 0;
 			return typeIsValid && ownerIsValid;
 		}
 
 		/// Sets the direction at which the piece is facing
 		void SetMovementDirection(Direction direction) {
-			std::uint8_t alignedDirectionData = static_cast<std::uint8_t>(direction) << 2;
+			const std::uint8_t alignedDirectionData = static_cast<std::uint8_t>(direction) << 2;
 			mPieceInfo ^= alignedDirectionData;
 		}
 
 		bool operator==(const Piece& other) const {
-			std::uint8_t pieceTypeAndOwnerData = mPieceInfo & c_PieceTypeAndOwnerMask;
-			std::uint8_t otherPieceTypeAndOwnerData = other.mPieceInfo & c_PieceTypeAndOwnerMask;
+			const std::uint8_t pieceTypeAndOwnerData = mPieceInfo & c_PieceTypeAndOwnerMask;
+			const std::uint8_t otherPieceTypeAndOwnerData = other.mPieceInfo & c_PieceTypeAndOwnerMask;
 			return pieceTypeAndOwnerData == otherPieceTypeAndOwnerData;
 		}
 	private:
@@ -93,7 +93,7 @@ namespace Alphalcazar::Game {
 		 * Since currently there are 6 possible values for this state (5 pieces and invalid), we use 3 bits (8 possible states) for it.
 		 *
 		 * The next 2 bits (4-6 from the left) are used to represent the movement direction of the piece while it is in play on the board.
-		 * In theory there are 9 possible states for this field (4 cardinal directions, 4 intercardinal directions and the invalid state).
+		 * In theory there are 9 possible states for this field (4 cardinal directions, 4 inter-cardinal directions and the invalid state).
 		 * However, the game rules currently only allow pieces to have one of the 4 cardinal directions. Therefore we can (until this changes) use
 		 * 3 bits (8 possible states) for it.
 		 *

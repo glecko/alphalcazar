@@ -33,7 +33,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		}
 	}
 
-	MinMaxStrategy::~MinMaxStrategy() {}
+	MinMaxStrategy::~MinMaxStrategy() = default;
 
 	Game::PlacementMove MinMaxStrategy::Execute(Game::PlayerId playerId, const Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount>& legalMoves, const Game::Game& game) {
 		auto candidateMoves =  SortAndFilterMovements(playerId, legalMoves, game.GetBoard());
@@ -47,8 +47,7 @@ namespace Alphalcazar::Strategy::MinMax {
 			using MoveFutureResult = std::pair<Score, Game::PlacementMove>;
 			std::vector<std::future<MoveFutureResult>> moveFutures;
 			moveFutures.reserve(candidateMoves.size());
-			for (std::size_t i = 0; i < candidateMoves.size(); ++i) {
-				const ScoredPlacementMove& move = candidateMoves[i];
+			for (const auto& move : candidateMoves) {
 				auto moveFuture = mThreadPool->Execute([this, playerId, move, game]() -> MoveFutureResult {
 					auto moveScore = GetNextBestScore(playerId, move, mDepth, game, mFirstLevelAlpha, c_BetaStartingValue);
 					mFirstLevelAlpha = std::max(mFirstLevelAlpha.load(), moveScore);
@@ -63,7 +62,7 @@ namespace Alphalcazar::Strategy::MinMax {
 
 			for (std::size_t i = 0; i < moveFutures.size(); i++) {
 				auto& moveFuture = moveFutures[i];
-				MoveFutureResult moveFutureResult = moveFuture.get();
+				const MoveFutureResult moveFutureResult = moveFuture.get();
 				if (moveFutureResult.first > bestScore) {
 					bestScore = moveFutureResult.first;
 					bestMoveIndex = i;
@@ -73,7 +72,7 @@ namespace Alphalcazar::Strategy::MinMax {
 			Score alpha = c_AlphaStartingValue;
 			for (std::size_t i = 0; i < candidateMoves.size(); ++i) {
 				auto& move = candidateMoves[i];
-				auto moveScore = GetNextBestScore(playerId, move, mDepth, game, alpha, c_BetaStartingValue);
+				const auto moveScore = GetNextBestScore(playerId, move, mDepth, game, alpha, c_BetaStartingValue);
 				if (moveScore > bestScore) {
 					bestScore = moveScore;
 					alpha = moveScore;
@@ -93,10 +92,9 @@ namespace Alphalcazar::Strategy::MinMax {
 		}
 		Score bestScore = c_AlphaStartingValue;
 		// We are in "Max" so we are evaluating the player who is executing the strategy
-		auto legalMoves = game.GetLegalMoves(playerId);
+		const auto legalMoves = game.GetLegalMoves(playerId);
 		auto candidateMoves = SortAndFilterMovements(playerId, legalMoves, game.GetBoard());
-		for (std::size_t i = 0; i < candidateMoves.size(); ++i) {
-			const auto& move = candidateMoves[i];
+		for (const auto& move : candidateMoves) {
 			auto nextBestScore = GetNextBestScore(playerId, move, depth, game, alpha, beta);
 
 			bestScore = std::max(nextBestScore, bestScore);
@@ -118,11 +116,10 @@ namespace Alphalcazar::Strategy::MinMax {
 		}
 		Score bestScore = c_BetaStartingValue;
 		// We are in "Min" so we are evaluating the opponent
-		auto opponentId = playerId == Game::PlayerId::PLAYER_ONE ? Game::PlayerId::PLAYER_TWO : Game::PlayerId::PLAYER_ONE;
-		auto legalMoves = game.GetLegalMoves(opponentId);
+		const auto opponentId = playerId == Game::PlayerId::PLAYER_ONE ? Game::PlayerId::PLAYER_TWO : Game::PlayerId::PLAYER_ONE;
+		const auto legalMoves = game.GetLegalMoves(opponentId);
 		auto candidateMoves = SortAndFilterMovements(playerId, legalMoves, game.GetBoard());
-		for (std::size_t i = 0; i < candidateMoves.size(); ++i) {
-			const auto& move = candidateMoves[i];
+		for (const auto& move : candidateMoves) {
 			auto nextBestScore = GetNextBestScore(playerId, move, depth, game, alpha, beta);
 			bestScore = std::min(nextBestScore, bestScore);
 			beta = std::min(bestScore, beta);
@@ -135,15 +132,15 @@ namespace Alphalcazar::Strategy::MinMax {
 
 	Score MinMaxStrategy::GetNextBestScore(Game::PlayerId playerId, const Game::PlacementMove& move, Depth depth, const Game::Game& game, Score alpha, Score beta) {
 		Game::Game gameCopy = game;
-		auto result = gameCopy.PlayNextPlacementMove(move);
-		Score nextBestScore = 0;
+		const auto result = gameCopy.PlayNextPlacementMove(move);
+		Score nextBestScore;
 		if (result != Game::GameResult::NONE) {
 			nextBestScore = GameResultToScore(playerId, result);
 		} else {
 			// Only decrease the depth if this placement move completed a turn
 			// as we want to evaluate complete turns only, never half a turn
-			Depth nextDepth = gameCopy.GetState().FirstMoveExecuted ? depth : depth - 1;
-			Game::PlayerId activePlayerId = gameCopy.GetActivePlayer();
+			const Depth nextDepth = gameCopy.GetState().FirstMoveExecuted ? depth : depth - 1;
+			const Game::PlayerId activePlayerId = gameCopy.GetActivePlayer();
 			if (activePlayerId == playerId) {
 				nextBestScore = Max(playerId, nextDepth, gameCopy, alpha, beta);
 			} else {

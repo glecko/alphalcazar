@@ -58,10 +58,10 @@ namespace Alphalcazar::Game {
 			}
 		}
 
-		std::size_t directionOffset = static_cast<std::size_t>(direction);
+		const std::size_t directionOffset = static_cast<std::size_t>(direction);
 		const auto& offset = c_DirectionOffsets[directionOffset];
-		Coordinate xOffset = offset.first * distance;
-		Coordinate yOffset = offset.second * distance;
+		const Coordinate xOffset = offset.first * distance;
+		const Coordinate yOffset = offset.second * distance;
 		return Coordinates{ x + xOffset, y + yOffset };
 	}
 

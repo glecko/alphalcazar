@@ -6,8 +6,6 @@
 #include <util/StaticVector.hpp>
 #include <game/PlacementMove.hpp>
 
-#include <tuple>
-
 namespace Alphalcazar::Game {
 	class Board;
 }
@@ -15,9 +13,9 @@ namespace Alphalcazar::Game {
 namespace Alphalcazar::Strategy::MinMax {
 	/// A small extension of the \ref PlacementMove data structure adding a heuristic score for quicker sorting
 	struct ScoredPlacementMove final : public Game::PlacementMove {
-		ScoredPlacementMove() {}
-		ScoredPlacementMove(const Game::PlacementMove& placementMove) 
-			: Game::PlacementMove{ placementMove }
+		ScoredPlacementMove() = default;
+		ScoredPlacementMove(const PlacementMove& placementMove) 
+			: PlacementMove{ placementMove }
 		{}
 
 		/// The heuristic score calculated for this placement move
@@ -54,7 +52,7 @@ namespace Alphalcazar::Strategy::MinMax {
 
 // We define the specializations of parse & format to make \ref ScoredPlacementMove formattable. Based on: https://fmt.dev/latest/api.html#format-api
 template <> struct fmt::formatter<Alphalcazar::Strategy::MinMax::ScoredPlacementMove> {
-	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+	constexpr auto parse(const format_parse_context& ctx) -> decltype(ctx.begin()) {
 		return ctx.begin();
 	}
 

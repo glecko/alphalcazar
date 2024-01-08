@@ -22,8 +22,8 @@ namespace Alphalcazar::Game {
 		bool operator==(const Coordinates& coord) const {
 			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
 			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
-			bool xIsEqual = x == coord.x;
-			bool yIsEqual = y == coord.y;
+			const bool xIsEqual = x == coord.x;
+			const bool yIsEqual = y == coord.y;
 			return xIsEqual && yIsEqual;
 		}
 
@@ -45,8 +45,8 @@ namespace Alphalcazar::Game {
 		bool IsCenter() const {
 			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
 			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
-			bool xIsCenter = x == c_CenterCoordinate;
-			bool yIsCenter = y == c_CenterCoordinate;
+			const bool xIsCenter = x == c_CenterCoordinate;
+			const bool yIsCenter = y == c_CenterCoordinate;
 			return xIsCenter && yIsCenter;
 		}
 
@@ -59,8 +59,8 @@ namespace Alphalcazar::Game {
 		bool IsCorner() const {
 			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
 			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
-			bool xIsPerimeter = x == 0 || x == c_PlayAreaSize - 1;
-			bool yIsPerimeter = y == 0 || y == c_PlayAreaSize - 1;
+			const bool xIsPerimeter = x == 0 || x == c_PlayAreaSize - 1;
+			const bool yIsPerimeter = y == 0 || y == c_PlayAreaSize - 1;
 			return xIsPerimeter && yIsPerimeter;
 		}
 
@@ -73,8 +73,8 @@ namespace Alphalcazar::Game {
 		bool Valid() const {
 			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
 			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
-			bool xIsInvalid = x != c_InvalidCoordinate;
-			bool yIsInvalid = y != c_InvalidCoordinate;
+			const bool xIsInvalid = x != c_InvalidCoordinate;
+			const bool yIsInvalid = y != c_InvalidCoordinate;
 			return xIsInvalid && yIsInvalid;
 		}
 
@@ -133,7 +133,7 @@ namespace std {
 
 // We define the specializations of parse & format to make \ref Coordinates formattable. Based on: https://fmt.dev/latest/api.html#format-api
 template <> struct fmt::formatter<Alphalcazar::Game::Coordinates> {
-	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+	constexpr auto parse(const format_parse_context& ctx) -> decltype(ctx.begin()) {
 		return ctx.begin();
 	}
 

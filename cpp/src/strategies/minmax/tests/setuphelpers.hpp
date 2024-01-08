@@ -1,3 +1,5 @@
+#pragma once
+
 #include <game/Game.hpp>
 #include <game/aliases.hpp>
 

@@ -7,7 +7,6 @@
 #include "util/StaticVector.hpp"
 
 #include <array>
-#include <memory>
 #include <optional>
 #include <functional>
 #include <bitset>

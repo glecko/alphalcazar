@@ -5,8 +5,8 @@ namespace Alphalcazar::Utils {
         mThreads.reserve(threadCount);
         for (size_t i = 0; i < threadCount; i++) {
             mThreads.emplace_back(
-                std::thread([this]() {
-                    std::unique_lock<std::mutex> queueLock{ mTaskMutex, std::defer_lock };
+                [this]() {
+                    std::unique_lock queueLock{ mTaskMutex, std::defer_lock };
 
                     while (true) {
                         queueLock.lock();
@@ -16,14 +16,14 @@ namespace Alphalcazar::Utils {
 
                         if (mThreadsStopping && mTasks.empty()) return;
 
-                        std::unique_ptr<TaskContainerBase> task = std::move(mTasks.front());
+                        const std::unique_ptr<TaskContainerBase> task = std::move(mTasks.front());
 
                         mTasks.pop();
                         queueLock.unlock();
 
                         task->Execute();
                     }
-                })
+                }
             );
         }
     }
