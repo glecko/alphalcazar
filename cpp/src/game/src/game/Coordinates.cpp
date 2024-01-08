@@ -29,7 +29,7 @@ namespace Alphalcazar::Game {
 	}};
 
 	Direction Coordinates::GetLegalPlacementDirection() const {
-		if (c_CoordinatesIntegrityChecks) {
+		if constexpr (c_CoordinatesIntegrityChecks) {
 			if (!IsPerimeter()) {
 				// Pieces cannot be placed on non-perimeter tiles.
 				return Direction::NONE;
@@ -37,13 +37,14 @@ namespace Alphalcazar::Game {
 		}
 		if (x == 0) {
 			return Direction::EAST;
-		} else if (x == c_PlayAreaSize - 1) {
-			return Direction::WEST;
-		} else if (y == 0) {
-			return Direction::NORTH;
-		} else {
-			return Direction::SOUTH;
 		}
+		if (x == c_PlayAreaSize - 1) {
+			return Direction::WEST;
+		}
+		if (y == 0) {
+			return Direction::NORTH;
+		}
+		return Direction::SOUTH;
 	}
 
 	Coordinates Coordinates::GetCoordinateInDirection(Direction direction, Coordinate distance) const {
@@ -58,7 +59,7 @@ namespace Alphalcazar::Game {
 			}
 		}
 
-		const std::size_t directionOffset = static_cast<std::size_t>(direction);
+		const auto directionOffset = static_cast<std::size_t>(direction);
 		const auto& offset = c_DirectionOffsets[directionOffset];
 		const Coordinate xOffset = offset.first * distance;
 		const Coordinate yOffset = offset.second * distance;

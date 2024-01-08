@@ -95,7 +95,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		const auto legalMoves = game.GetLegalMoves(playerId);
 		auto candidateMoves = SortAndFilterMovements(playerId, legalMoves, game.GetBoard());
 		for (const auto& move : candidateMoves) {
-			auto nextBestScore = GetNextBestScore(playerId, move, depth, game, alpha, beta);
+			const auto nextBestScore = GetNextBestScore(playerId, move, depth, game, alpha, beta);
 
 			bestScore = std::max(nextBestScore, bestScore);
 			alpha = std::max(bestScore, alpha);
@@ -120,7 +120,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		const auto legalMoves = game.GetLegalMoves(opponentId);
 		auto candidateMoves = SortAndFilterMovements(playerId, legalMoves, game.GetBoard());
 		for (const auto& move : candidateMoves) {
-			auto nextBestScore = GetNextBestScore(playerId, move, depth, game, alpha, beta);
+			const auto nextBestScore = GetNextBestScore(playerId, move, depth, game, alpha, beta);
 			bestScore = std::min(nextBestScore, bestScore);
 			beta = std::min(bestScore, beta);
 			if (beta < alpha) {

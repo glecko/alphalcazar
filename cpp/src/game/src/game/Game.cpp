@@ -83,7 +83,7 @@ namespace Alphalcazar::Game {
 
 		const auto piecePlacements = mBoard.GetPiecePlacements(player);
 		const std::size_t placedPiecesCount = piecePlacements.count();
-		// If all pieces are on the board, immediatelly return an empty vector
+		// If all pieces are on the board, immediately return an empty vector
 		if (placedPiecesCount != c_PieceTypes) {
 			for (PieceType type = 1; type <= c_PieceTypes; type++) {
 				// Check if the piece type is not placed by the player on the board

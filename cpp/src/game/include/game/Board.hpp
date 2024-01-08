@@ -130,8 +130,8 @@ namespace Alphalcazar::Game {
 		Utils::ReversedStaticVector<Board::MovementDescription, c_PlayAreaSize> GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction);
 
 		/// Executes a specified function for every tile of this board
-		void LoopOverTiles(std::function<void(const Coordinates& coordinates, const Tile& tile)> action) const;
-		void LoopOverTiles(std::function<void(const Coordinates& coordinates, Tile& tile)> action);
+		void LoopOverTiles(const std::function<void(const Coordinates& coordinates, const Tile& tile)>& action) const;
+		void LoopOverTiles(const std::function<void(const Coordinates& coordinates, Tile& tile)>& action);
 
 		/// Get the coordinates at which a given piece is placed on the board. Returns invalid coordinates if the piece does not exist on the board.
 		Coordinates& GetPlacedPieceCoordinates(const Piece& piece);
@@ -149,7 +149,7 @@ namespace Alphalcazar::Game {
 		 * \param excludePerimeter Whether to skip executing the action for pieces placed on the perimeter of the board.
 		 * \param action The action to execute for every piece.
 		 */
-		void FetchPiecesFromIndexRange(std::size_t min, std::size_t max, bool excludePerimeter, std::function<void(const Coordinates& coordinates, const Piece& piece)> action) const;
+		void FetchPiecesFromIndexRange(std::size_t min, std::size_t max, bool excludePerimeter, const std::function<void(const Coordinates& coordinates, const Piece& piece)>& action) const;
 
 		/// 2D array containing all tiles of the board (both perimeter and board tiles) indexed by their coordinates
 		std::array<std::array<Tile, c_PlayAreaSize>, c_PlayAreaSize> mTiles;

@@ -82,7 +82,7 @@ namespace Alphalcazar::Game {
 			const Piece& originPiece = originTile->GetPiece();
 
 			const Direction direction = originPiece.GetMovementDirection();
-			Coordinates targetCoordinates = originCoordinates.GetCoordinateInDirection(direction, 1);
+			const Coordinates targetCoordinates = originCoordinates.GetCoordinateInDirection(direction, 1);
 			if (Tile* targetTile = GetTile(targetCoordinates)) {
 				const Piece& targetTilePiece = targetTile->GetPiece();
 				if (!targetTilePiece.IsValid()) {
@@ -114,12 +114,12 @@ namespace Alphalcazar::Game {
 						movedPieces += 2;
 					} else if (originCoordinates.IsPerimeter()) {
 						// if a piece was unable to perform any movement on its turn while sitting on
-						// a perimeter tile, it is immediatelly removed from play
+						// a perimeter tile, it is immediately removed from play
 						RemovePiece(*originTile);
 					}
 				} else if (originCoordinates.IsPerimeter()) {
 					// if a piece was unable to perform any movement on its turn while sitting on
-					// a perimeter tile, it is immediatelly removed from play
+					// a perimeter tile, it is immediately removed from play
 					RemovePiece(*originTile);
 				}
 			}
@@ -140,13 +140,13 @@ namespace Alphalcazar::Game {
 
 	Utils::ReversedStaticVector<Board::MovementDescription, c_PlayAreaSize> Board::GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction) {
 		// The max amount of chained pushed movements that can exist is \ref c_PlayAreaSize
-		Utils::ReversedStaticVector<Board::MovementDescription, c_PlayAreaSize> result;
+		Utils::ReversedStaticVector<MovementDescription, c_PlayAreaSize> result;
 		Coordinates nextCoordinate = sourceCoordinates;
 		Tile* nextTile = GetTile(nextCoordinate);
 		while (nextTile && nextTile->HasPiece()) {
 			// Get the coordinates and tile this piece will be pushed to
-			auto pushToCoordinate = nextCoordinate.GetCoordinateInDirection(direction, 1);
-			auto pushToTile = GetTile(pushToCoordinate);
+			const auto pushToCoordinate = nextCoordinate.GetCoordinateInDirection(direction, 1);
+			Tile* pushToTile = GetTile(pushToCoordinate);
 
 			// Insert movements back-to-front into the array, as the pushing movements will need to happen in order
 			// from the last piece on the chain to the first (pushing) piece
@@ -163,7 +163,7 @@ namespace Alphalcazar::Game {
 	void Board::MovePiece(Tile& source, Tile& target, const Coordinates& targetCoordinates) {
 		if (source.HasPiece()) {
 			const auto& piece = source.GetPiece();
-			// A piece that moves or is moved to a perimeter tile gets removed from play immediatelly
+			// A piece that moves or is moved to a perimeter tile gets removed from play immediately
 			if (!targetCoordinates.IsPerimeter()) {
 				SetPlacedPieceCoordinates(piece, targetCoordinates);
 				target.PlacePiece(piece);
@@ -249,7 +249,7 @@ namespace Alphalcazar::Game {
 	bool Board::IsFull() const {
 		bool result = true;
 		LoopOverTiles([&result](const Coordinates& coordinates, const Tile& tile) {
-			// If we find a single non-perimetter file that has no piece on it, we return false
+			// If we find a single non-perimeter file that has no piece on it, we return false
 			if (!coordinates.IsPerimeter() && !tile.HasPiece()) {
 				result = false;
 				return;
@@ -291,7 +291,7 @@ namespace Alphalcazar::Game {
 		std::optional<PlayerId> candidateRowCompleter = std::nullopt;
 
 		for (Coordinate distance = 0; distance < length; ++distance) {
-			Coordinates nextCoordinate = startCoordinate.GetCoordinateInDirection(direction, distance);
+			const Coordinates nextCoordinate = startCoordinate.GetCoordinateInDirection(direction, distance);
 			if (const auto& piece = mTiles[nextCoordinate.x][nextCoordinate.y].GetPiece(); piece.IsValid()) {
 				if (candidateRowCompleter == std::nullopt) {
 					// We appoint the owner of the first piece we find as our candidate
@@ -310,16 +310,16 @@ namespace Alphalcazar::Game {
 	}
 
 	Coordinates& Board::GetPlacedPieceCoordinates(const Piece& piece) {
-		std::size_t index = GetPlacedPieceTypeIndex(piece);
+		const std::size_t index = GetPlacedPieceTypeIndex(piece);
 		return mPlacedPieceCoordinates[index];
 	}
 
 	void Board::SetPlacedPieceCoordinates(const Piece& piece, const Coordinates& coordinates) {
-		std::size_t index = GetPlacedPieceTypeIndex(piece);
+		const std::size_t index = GetPlacedPieceTypeIndex(piece);
 		mPlacedPieceCoordinates[index] = coordinates;
 	}
 
-	void Board::FetchPiecesFromIndexRange(std::size_t min, std::size_t max, bool excludePerimeter, std::function<void(const Coordinates& coordinates, const Piece& piece)> action) const {
+	void Board::FetchPiecesFromIndexRange(std::size_t min, std::size_t max, bool excludePerimeter, const std::function<void(const Coordinates& coordinates, const Piece& piece)>& action) const {
 		for (std::size_t i = min; i <= max; i++) {
 			auto& coordinates = mPlacedPieceCoordinates[i];
 			if (coordinates.Valid()) {
@@ -363,9 +363,9 @@ namespace Alphalcazar::Game {
 			return 0;
 		}
 		std::size_t pieceCount = 0;
-		auto [min, max] = GetPlacePieceIndexRange(player);
+		const auto [min, max] = GetPlacePieceIndexRange(player);
 		for (std::size_t i = min; i <= max; i++) {
-			auto coordinates = mPlacedPieceCoordinates[i];
+			const auto& coordinates = mPlacedPieceCoordinates[i];
 			if (coordinates.Valid()) {
 				if (!excludePerimeter || !coordinates.IsPerimeter()) {
 					pieceCount++;
@@ -388,7 +388,7 @@ namespace Alphalcazar::Game {
 		return result;
 	}
 
-	void Board::LoopOverTiles(std::function<void(const Coordinates& coordinates, const Tile& tile)> action) const {
+	void Board::LoopOverTiles(const std::function<void(const Coordinates& coordinates, const Tile& tile)>& action) const {
 		for (Coordinate x = 0; x <= c_PlayAreaSize - 1; x++) {
 			for (Coordinate y = 0; y <= c_PlayAreaSize - 1; y++) {
 				Coordinates coordinates { x, y };
@@ -401,7 +401,7 @@ namespace Alphalcazar::Game {
 		}
 	}
 
-	void Board::LoopOverTiles(std::function<void(const Coordinates& coordinates, Tile& tile)> action) {
+	void Board::LoopOverTiles(const std::function<void(const Coordinates& coordinates, Tile& tile)>& action) {
 		for (Coordinate x = 0; x <= c_PlayAreaSize - 1; x++) {
 			for (Coordinate y = 0; y <= c_PlayAreaSize - 1; y++) {
 				Coordinates coordinates { x, y };
