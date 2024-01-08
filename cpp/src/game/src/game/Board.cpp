@@ -409,7 +409,7 @@ namespace Alphalcazar::Game {
 	void Board::LoopOverTiles(const std::function<bool(const Coordinates& coordinates, Tile& tile)>& action) {
 		for (Coordinate x = 0; x <= c_PlayAreaSize - 1; x++) {
 			for (Coordinate y = 0; y <= c_PlayAreaSize - 1; y++) {
-				Coordinates coordinates { x, y };
+				const Coordinates coordinates { x, y };
 				if (coordinates.IsCorner()) {
 					// The corners of the play area don't exist
 					continue;
