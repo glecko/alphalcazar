@@ -19,7 +19,7 @@ namespace Alphalcazar::Strategy::Random {
 	class RandomStrategy final : public Game::Strategy {
 	public:
 		RandomStrategy();
-		virtual Game::PlacementMove Execute(Game::PlayerId playerId, const Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount>& legalMoves, const Game::Game& game) override;
+		Game::PlacementMove Execute(Game::PlayerId playerId, const Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount>& legalMoves, const Game::Game& game) override;
 	private:
 		std::random_device mRandomDevice;
 		std::mt19937 mRandomEngine;

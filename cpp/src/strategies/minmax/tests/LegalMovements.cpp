@@ -5,7 +5,6 @@
 
 #include <game/Game.hpp>
 #include <game/Piece.hpp>
-#include <game/Tile.hpp>
 #include <game/Board.hpp>
 #include <game/parameters.hpp>
 #include <game/PlacementMove.hpp>
@@ -21,7 +20,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		EXPECT_TRUE(xSymmetryEmpty);
 		EXPECT_TRUE(ySymmetryEmpty);
 
-		Game::Piece pieceOne { Game::PlayerId::PLAYER_ONE, 1 };
+		const Game::Piece pieceOne { Game::PlayerId::PLAYER_ONE, 1 };
 		game.GetBoard().PlacePiece({ 2, 2 }, pieceOne, Game::Direction::NORTH);
 
 		// A piece in the center pointing north should create Y symmetry
@@ -29,7 +28,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		EXPECT_FALSE(xSymmetryCenterPiece);
 		EXPECT_TRUE(ySymmetryCenterPiece);
 
-		Game::Piece pieceTwo { Game::PlayerId::PLAYER_ONE, 2 };
+		const Game::Piece pieceTwo { Game::PlayerId::PLAYER_ONE, 2 };
 		game.GetBoard().PlacePiece({ 2, 3 }, pieceTwo, Game::Direction::EAST);
 
 		// Once we have added a second piece, still in the center row but facing east, all symmetries should be broken
@@ -39,7 +38,7 @@ namespace Alphalcazar::Strategy::MinMax {
 	}
 
 	TEST(LegalMovements, CornerSymmetries) {
-		std::vector<PieceSetup> pieceSetups{
+		const std::vector<PieceSetup> pieceSetups{
 			{ Game::PlayerId::PLAYER_ONE, 1, Game::Direction::NORTH, { 1, 1 } },
 		};
 		Game::Game game = SetupGameForMinMaxTesting(Game::PlayerId::PLAYER_ONE, true, pieceSetups);

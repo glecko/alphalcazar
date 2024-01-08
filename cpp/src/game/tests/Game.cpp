@@ -8,12 +8,10 @@
 #include "game/PlacementMove.hpp"
 #include "game/parameters.hpp"
 
-#include "testhelpers.hpp"
-
 namespace Alphalcazar::Game {
 	class MockStrategy final : public Strategy {
 	public:
-		virtual PlacementMove Execute(PlayerId playerId, const Utils::StaticVector<PlacementMove, c_MaxLegalMovesCount>&, const Game&) override {
+		PlacementMove Execute(PlayerId playerId, const Utils::StaticVector<PlacementMove, c_MaxLegalMovesCount>&, const Game&) override {
 			if (playerId == PlayerId::PLAYER_ONE) {
 				return { { 0, 2 }, 3 };
 			}
@@ -22,7 +20,7 @@ namespace Alphalcazar::Game {
 	};
 
 	TEST(Game, InitialGameState) {
-		Game game{};
+		const Game game{};
 
 		EXPECT_EQ(game.GetActivePlayer(), PlayerId::PLAYER_ONE);
 		EXPECT_EQ(game.GetPlayerByInitiative(true), PlayerId::PLAYER_ONE);

@@ -36,7 +36,7 @@ namespace Alphalcazar::Game {
 
 // We define the specializations of parse & format to make \ref PlacementMove formattable. Based on: https://fmt.dev/latest/api.html#format-api
 template <> struct fmt::formatter<Alphalcazar::Game::PlacementMove> {
-	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+	constexpr auto parse(const format_parse_context& ctx) -> decltype(ctx.begin()) {
 		return ctx.begin();
 	}
 

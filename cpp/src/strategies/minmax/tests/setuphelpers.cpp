@@ -9,7 +9,7 @@ namespace Alphalcazar::Strategy::MinMax {
 		game.GetState().FirstMoveExecuted = firstMoveExecuted;
 		game.GetState().PlayerWithInitiative = playerWithInitiative;
 
-		for (auto& pieceSetup : pieceSetups) {
+		for (const auto& pieceSetup : pieceSetups) {
 			Game::Piece piece{ pieceSetup.PlayerId, pieceSetup.PieceType };
 			game.GetBoard().PlacePiece(pieceSetup.Coordinates, piece, pieceSetup.Direction);
 		}

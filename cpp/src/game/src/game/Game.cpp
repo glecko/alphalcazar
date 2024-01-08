@@ -1,17 +1,14 @@
 #include "game/Game.hpp"
 
-#include "game/Tile.hpp"
 #include "game/PlacementMove.hpp"
 #include "game/parameters.hpp"
 #include "game/Strategy.hpp"
 #include "game/Piece.hpp"
 
-#include <util/Log.hpp>
-
 namespace Alphalcazar::Game {
-	Game::Game() {}
+	Game::Game() = default;
 
-	Game::~Game() {};
+	Game::~Game() = default;
 
 	GameResult Game::Play(Strategy& firstPlayerStrategy, Strategy& secondPlayerStrategy) {
 		GameResult result = GameResult::NONE;
@@ -27,7 +24,7 @@ namespace Alphalcazar::Game {
 	}
 
 	GameResult Game::PlayNextPlacementMove(const PlacementMove& move) {
-		PlayerId activePlayer = GetActivePlayer();
+		const PlayerId activePlayer = GetActivePlayer();
 		auto result = GameResult::NONE;
 		ExecutePlacementMove(activePlayer, move);
 		if (mState.FirstMoveExecuted) {
@@ -39,7 +36,7 @@ namespace Alphalcazar::Game {
 	}
 
 	GameResult Game::EvaluateTurnEndPhase() {
-		auto executedMoves = mBoard.ExecuteMoves(mState.PlayerWithInitiative);
+		const auto executedMoves = mBoard.ExecuteMoves(mState.PlayerWithInitiative);
 		mState.Turn += 1;
 		mState.FirstMoveExecuted = false;
 		SwapPlayerWithInitiative();
@@ -65,16 +62,16 @@ namespace Alphalcazar::Game {
 	}
 
 	void Game::ExecutePlayerMove(PlayerId playerId, Strategy& strategy) {
-		auto legalMoves = GetLegalMoves(playerId);
+		const auto legalMoves = GetLegalMoves(playerId);
 		// If a player has no available legal moves, their turn is skipped
 		if (legalMoves.size() > 0) {
-			auto placementMove = strategy.Execute(playerId, legalMoves, *this);
+			const auto placementMove = strategy.Execute(playerId, legalMoves, *this);
 			ExecutePlacementMove(playerId, placementMove);
 		}
 	}
 
 	void Game::ExecutePlacementMove(PlayerId playerId, const PlacementMove& move) {
-		Piece piece = { playerId, move.PieceType };
+		const Piece piece = { playerId, move.PieceType };
 		mBoard.PlacePiece(move.Coordinates, piece);
 	}
 
@@ -84,9 +81,9 @@ namespace Alphalcazar::Game {
 			return result;
 		}
 
-		auto piecePlacements = mBoard.GetPiecePlacements(player);
-		std::size_t placedPiecesCount = piecePlacements.count();
-		// If all pieces are on the board, immediatelly return an empty vector
+		const auto piecePlacements = mBoard.GetPiecePlacements(player);
+		const std::size_t placedPiecesCount = piecePlacements.count();
+		// If all pieces are on the board, immediately return an empty vector
 		if (placedPiecesCount != c_PieceTypes) {
 			for (PieceType type = 1; type <= c_PieceTypes; type++) {
 				// Check if the piece type is not placed by the player on the board
@@ -100,19 +97,17 @@ namespace Alphalcazar::Game {
 
 	Utils::StaticVector<PlacementMove, c_MaxLegalMovesCount> Game::GetLegalMoves(PlayerId player) const {
 		Utils::StaticVector<PlacementMove, c_PieceTypes* c_PerimeterTileCount> result;
-		auto legalCoordinates = mBoard.GetLegalPlacementCoordinates();
-		auto pieces = GetPiecesInHand(player);
-		for (std::size_t i = 0; i < legalCoordinates.size(); ++i) {
-			const auto& coordinates = legalCoordinates[i];
-			for (std::size_t k = 0; k < pieces.size(); ++k) {
-				const auto& piece = pieces[k];
+		const auto legalCoordinates = mBoard.GetLegalPlacementCoordinates();
+		const auto pieces = GetPiecesInHand(player);
+		for (const Coordinates& coordinates : legalCoordinates) {
+			for (const Piece& piece : pieces) {
 				result.insert({ coordinates, piece.GetType() });
 			}
 		}
 		return result;
 	}
 
-	GameResult Game::EvaluateGameResult(BoardMovesCount) {
+	GameResult Game::EvaluateGameResult(BoardMovesCount) const {
 		return mBoard.GetResult();
 	}
 
@@ -123,13 +118,11 @@ namespace Alphalcazar::Game {
 	PlayerId Game::GetPlayerByInitiative(bool initiative) const {
 		if (initiative) {
 			return mState.PlayerWithInitiative;
-		} else {
-			if (mState.PlayerWithInitiative == PlayerId::PLAYER_ONE) {
-				return PlayerId::PLAYER_TWO;
-			} else {
-				return PlayerId::PLAYER_ONE;
-			}
 		}
+		if (mState.PlayerWithInitiative == PlayerId::PLAYER_ONE) {
+			return PlayerId::PLAYER_TWO;
+		}
+		return PlayerId::PLAYER_ONE;
 	}
 
 	void Game::SwapPlayerWithInitiative() {

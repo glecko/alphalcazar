@@ -29,10 +29,10 @@ namespace Alphalcazar::Strategy::MinMax {
 	 */
 	class MinMaxStrategy final : public Game::Strategy {
 	public:
-		MinMaxStrategy(const Depth depth, bool multithreaded = true);
-		~MinMaxStrategy();
+		MinMaxStrategy(Depth depth, bool multithreaded = true);
+		~MinMaxStrategy() override;
 
-		virtual Game::PlacementMove Execute(Game::PlayerId playerId, const Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount>& legalMoves, const Game::Game& game) override;
+		Game::PlacementMove Execute(Game::PlayerId playerId, const Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount>& legalMoves, const Game::Game& game) override;
 
 		/// Returns the score calculated for the move returned by the last \ref Execute function call
 		Score GetLastExecutedMoveScore() const;

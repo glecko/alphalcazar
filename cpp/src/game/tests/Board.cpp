@@ -16,7 +16,7 @@ namespace Alphalcazar::Game {
 		EXPECT_EQ(board.IsFull(), false);
 		EXPECT_EQ(board.GetResult(), GameResult::NONE);
 		// We expect a square of c_PlayAreaSize size without the 4 corners
-		auto tiles = board.GetTiles();
+		const auto tiles = board.GetTiles();
 		EXPECT_EQ(tiles.size(), c_PlayAreaSize * c_PlayAreaSize - 4);
 		EXPECT_EQ(board.GetPerimeterTiles().size(), c_PerimeterTileCount);
 	}
@@ -53,9 +53,9 @@ namespace Alphalcazar::Game {
 
 	TEST(Board, GetCompletRowResult) {
 		Board board {};
-		Piece pieceOne { PlayerId::PLAYER_ONE, 1 };
-		Piece pieceTwo { PlayerId::PLAYER_ONE, 2 };
-		Piece pieceThree { PlayerId::PLAYER_ONE, 3 };
+		const Piece pieceOne { PlayerId::PLAYER_ONE, 1 };
+		const Piece pieceTwo { PlayerId::PLAYER_ONE, 2 };
+		const Piece pieceThree { PlayerId::PLAYER_ONE, 3 };
 
 		// We complete the south-most row of the board with pieces of
 		// player 1, so that player should win
@@ -71,11 +71,11 @@ namespace Alphalcazar::Game {
 
 	TEST(Board, GetMultiplePlayersRowResult) {
 		Board board {};
-		Piece pieceOne { PlayerId::PLAYER_ONE, 1 };
-		Piece pieceTwo { PlayerId::PLAYER_TWO, 2 };
-		Piece pieceThree { PlayerId::PLAYER_ONE, 3 };
-		Piece pieceFour { PlayerId::PLAYER_TWO, 4 };
-		Piece pieceFive { PlayerId::PLAYER_TWO, 5 };
+		const Piece pieceOne { PlayerId::PLAYER_ONE, 1 };
+		const Piece pieceTwo { PlayerId::PLAYER_TWO, 2 };
+		const Piece pieceThree { PlayerId::PLAYER_ONE, 3 };
+		const Piece pieceFour { PlayerId::PLAYER_TWO, 4 };
+		const Piece pieceFive { PlayerId::PLAYER_TWO, 5 };
 
 		// In this test we complete a row and a diagonal in a way
 		// that both of them have pieces of both players, so no player should win
@@ -97,11 +97,11 @@ namespace Alphalcazar::Game {
 
 	TEST(Board, GetCompletDiagonalResult) {
 		Board board {};
-		Piece pieceOne { PlayerId::PLAYER_TWO, 1 };
-		Piece pieceTwo { PlayerId::PLAYER_TWO, 2 };
-		Piece pieceThree { PlayerId::PLAYER_TWO, 3 };
-		Piece pieceFour { PlayerId::PLAYER_ONE, 4 };
-		Piece pieceFive { PlayerId::PLAYER_ONE, 5 };
+		const Piece pieceOne { PlayerId::PLAYER_TWO, 1 };
+		const Piece pieceTwo { PlayerId::PLAYER_TWO, 2 };
+		const Piece pieceThree { PlayerId::PLAYER_TWO, 3 };
+		const Piece pieceFour { PlayerId::PLAYER_ONE, 4 };
+		const Piece pieceFive { PlayerId::PLAYER_ONE, 5 };
 
 		// In this test we complete a diagonal with pieces of player 2
 		// so they should win. We afterwards place some pieces of player 1
@@ -126,7 +126,7 @@ namespace Alphalcazar::Game {
 		// First we set up a board where player 1 has completed the center
 		// column and wins. Next we set up pieces so that player 2 also completes a column
 		// and the game should result in a draw or in no result depending on if draws are accepted
-		std::vector<PieceSetup> pieceSetups {
+		const std::vector<PieceSetup> pieceSetups {
 			{ PlayerId::PLAYER_ONE, 1, Direction::NORTH, { 2, 1 } },
 			{ PlayerId::PLAYER_ONE, 2, Direction::NORTH, { 2, 2 } },
 			{ PlayerId::PLAYER_ONE, 3, Direction::SOUTH, { 2, 3 } },
@@ -134,9 +134,9 @@ namespace Alphalcazar::Game {
 		Board board = SetupBoardForTesting(pieceSetups);
 		EXPECT_EQ(board.GetResult(), GameResult::PLAYER_ONE_WINS);
 
-		Piece pieceFour { PlayerId::PLAYER_TWO, 4 };
-		Piece pieceFive { PlayerId::PLAYER_TWO, 5 };
-		Piece pieceSix { PlayerId::PLAYER_TWO, 5 };
+		const Piece pieceFour { PlayerId::PLAYER_TWO, 4 };
+		const Piece pieceFive { PlayerId::PLAYER_TWO, 5 };
+		const Piece pieceSix { PlayerId::PLAYER_TWO, 5 };
 		board.GetTile(3, 1)->PlacePiece(pieceFour);
 		board.GetTile(3, 2)->PlacePiece(pieceFive);
 		board.GetTile(3, 3)->PlacePiece(pieceSix);
@@ -147,14 +147,14 @@ namespace Alphalcazar::Game {
 		// Piece 1 on (1,1) will move north to (1,2) (+1 movement)
 		// Piece 2 on (3,1) will move south to (3,0). Since it exited the board it is removed from play (+1 movement)
 		// Piece 5 on (2,2) will moves east to (1,2) pushing piece 1 outside the board (+2 movements)
-		std::vector<PieceSetup> pieceSetups {
+		const std::vector<PieceSetup> pieceSetups {
 			{ PlayerId::PLAYER_ONE, c_PushablePieceType, Direction::NORTH, { 1, 1 } },
 			{ PlayerId::PLAYER_ONE, 2, Direction::SOUTH, { 3, 1 } },
 			{ PlayerId::PLAYER_TWO, 5, Direction::WEST, { 2, 2 } }
 		};
 		Board board = SetupBoardForTesting(pieceSetups);
 
-		auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_ONE);
+		const auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_ONE);
 		EXPECT_EQ(executedMoves, 4);
 
 		EXPECT_EQ(board.GetTile(1, 2)->GetPiece(), Piece(PlayerId::PLAYER_TWO, 5));
@@ -168,13 +168,13 @@ namespace Alphalcazar::Game {
 	TEST(Board, PushablePiecesDontPushEachOther) {
 		// Two pushable pieces are facing each other. As pushable pieces cannot
 		// push another pushable piece, we expect no movements to happen in this setup
-		std::vector<PieceSetup> pieceSetups {
+		const std::vector<PieceSetup> pieceSetups {
 			{ PlayerId::PLAYER_ONE, c_PushablePieceType, Direction::NORTH, { 2, 2 } },
 			{ PlayerId::PLAYER_TWO, c_PushablePieceType, Direction::SOUTH, { 2, 3 } }
 		};
 		Board board = SetupBoardForTesting(pieceSetups);
 
-		auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_ONE);
+		const auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_ONE);
 		EXPECT_EQ(executedMoves, 0);
 
 		EXPECT_EQ(board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PushablePieceType));
@@ -193,7 +193,7 @@ namespace Alphalcazar::Game {
 		 * - Piece 3 of player 2 on (3,1) will move north to (3,2) pushing piece 1 of player 2 to (3,3) (+2 movements)
 		 * - Piece 5 of player 2 on (1,4) will freely enter the board to (1,3) (+1 movement)
 		 */
-		std::vector<PieceSetup> pieceSetups {
+		const std::vector<PieceSetup> pieceSetups {
 			{ PlayerId::PLAYER_ONE, c_PushablePieceType, Direction::EAST, { 2, 1 } },
 			{ PlayerId::PLAYER_ONE, 2, Direction::NORTH, { 2, 0 } },
 
@@ -204,7 +204,7 @@ namespace Alphalcazar::Game {
 		};
 		Board board = SetupBoardForTesting(pieceSetups);
 
-		auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
+		const auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
 		EXPECT_EQ(executedMoves, 6);
 
 		EXPECT_EQ(board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_TWO, 2));
@@ -224,14 +224,14 @@ namespace Alphalcazar::Game {
 		// Piece 3 (1,2) moves freely to (2,2) (+1 movement)
 		// The pushing piece (1,2) moves to (2,2), pushing piece 3 to (3,2)
 		// and piece 2 outside the board (+3 movements)
-		std::vector<PieceSetup> pieceSetups {
+		const std::vector<PieceSetup> pieceSetups {
 			{ PlayerId::PLAYER_ONE, 2, Direction::NORTH, { 3, 1 } },
 			{ PlayerId::PLAYER_ONE, 3, Direction::SOUTH, { 2, 3 } },
 			{ PlayerId::PLAYER_ONE, c_PusherPieceType, Direction::EAST, { 1, 2 } },
 		};
 		Board board = SetupBoardForTesting(pieceSetups);
 
-		auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
+		const auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
 		EXPECT_EQ(executedMoves, 5);
 
 		EXPECT_EQ(board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PusherPieceType));
@@ -251,7 +251,7 @@ namespace Alphalcazar::Game {
 		{
 			// If player 2 is the starting player, we expect both pieces to push each other
 			// and end up in exactly the same positions, resulting in 4 movements (2 for each push)
-			auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
+			const auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
 			EXPECT_EQ(executedMoves, 4);
 
 			EXPECT_EQ(board.GetTile(2, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, c_PusherPieceType));
@@ -264,7 +264,7 @@ namespace Alphalcazar::Game {
 			// However, on the next turn, when player 1 moves first, their pushing piece on (2,2)
 			// will push the pusher of player 2 off the board, after which the pusher of player 2
 			// will not execute any movement because it will have been removed from play
-			auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_ONE);
+			const auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_ONE);
 			EXPECT_EQ(executedMoves, 2);
 
 			EXPECT_FALSE(board.GetTile(2, 2)->HasPiece());
@@ -288,7 +288,7 @@ namespace Alphalcazar::Game {
 		 * - Piece 4 of player 1 will not move as it has been pushed outside the board
 		 * - Piece 5 of player 1 (3,1) will move freely to (2,1) (+1 movement)
 		 */
-		std::vector<PieceSetup> pieceSetups {
+		const std::vector<PieceSetup> pieceSetups {
 			{ PlayerId::PLAYER_ONE, c_PushablePieceType, Direction::EAST, { 1, 2 } },
 			{ PlayerId::PLAYER_ONE, 2, Direction::WEST, { 3, 2 } },
 			{ PlayerId::PLAYER_ONE, c_PusherPieceType, Direction::SOUTH, { 2, 3 } },
@@ -300,7 +300,7 @@ namespace Alphalcazar::Game {
 		};
 		Board board = SetupBoardForTesting(pieceSetups);
 
-		auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
+		const auto executedMoves = board.ExecuteMoves(PlayerId::PLAYER_TWO);
 		EXPECT_EQ(executedMoves, 8);
 
 		EXPECT_EQ(board.GetTile(1, 2)->GetPiece(), Piece(PlayerId::PLAYER_ONE, 1));
@@ -315,8 +315,8 @@ namespace Alphalcazar::Game {
 
 	TEST(Board, LegalPlacementTiles) {
 		Board board {};
-		Piece pieceOne { PlayerId::PLAYER_ONE, 1 };
-		Piece pieceTwo { PlayerId::PLAYER_ONE, 2 };
+		const Piece pieceOne { PlayerId::PLAYER_ONE, 1 };
+		const Piece pieceTwo { PlayerId::PLAYER_ONE, 2 };
 
 		auto legalPlacementTiles = board.GetLegalPlacementCoordinates();
 		// On an empty board we should have as many options as the size of the perimeter
@@ -327,17 +327,17 @@ namespace Alphalcazar::Game {
 		board.PlacePiece(legalPlacementTiles[0], pieceOne);
 		board.PlacePiece(legalPlacementTiles[1], pieceTwo);
 
-		auto legalTilesAfterPlacement = board.GetLegalPlacementCoordinates();
+		const auto legalTilesAfterPlacement = board.GetLegalPlacementCoordinates();
 		EXPECT_EQ(legalTilesAfterPlacement.size(), perimeterSize - 2);
 	}
 
 	TEST(Board, CopyPreservesState) {
 		Board board {};
-		Piece pieceOne { PlayerId::PLAYER_ONE, 1 };
-		Piece pieceTwo { PlayerId::PLAYER_ONE, 2 };
-		Piece pieceThree { PlayerId::PLAYER_TWO, 3 };
-		Piece pieceFour { PlayerId::PLAYER_TWO, 4 };
-
+		const Piece pieceOne { PlayerId::PLAYER_ONE, 1 };
+		const Piece pieceTwo { PlayerId::PLAYER_ONE, 2 };
+		const Piece pieceThree { PlayerId::PLAYER_TWO, 3 };
+		const Piece pieceFour { PlayerId::PLAYER_TWO, 4 };
+ 
 		board.PlacePiece({ 0, 1 }, pieceOne);
 		board.PlacePiece({ 1, 0 }, pieceTwo);
 		board.PlacePiece({ 2, 0 }, pieceThree);
@@ -357,10 +357,10 @@ namespace Alphalcazar::Game {
 
 	TEST(Board, GetBoardPieces) {
 		Board board{};
-		Piece pieceOnePlayerOne{ PlayerId::PLAYER_ONE, 1 };
-		Piece pieceOnePlayerTwo{ PlayerId::PLAYER_TWO, 1 };
-		Piece pieceFourPlayerOne{ PlayerId::PLAYER_ONE, 4 };
-		Piece pieceFourPlayerTwo{ PlayerId::PLAYER_TWO, 4 };
+		const Piece pieceOnePlayerOne{ PlayerId::PLAYER_ONE, 1 };
+		const Piece pieceOnePlayerTwo{ PlayerId::PLAYER_TWO, 1 };
+		const Piece pieceFourPlayerOne{ PlayerId::PLAYER_ONE, 4 };
+		const Piece pieceFourPlayerTwo{ PlayerId::PLAYER_TWO, 4 };
 
 		EXPECT_EQ(board.GetPieces().size(), 0);
 		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_ONE).size(), 0);
@@ -374,8 +374,8 @@ namespace Alphalcazar::Game {
 
 		{
 			auto pieces = board.GetPieces();
-			auto playerOnePieces = board.GetPieces(PlayerId::PLAYER_ONE);
-			auto playerTwoPieces = board.GetPieces(PlayerId::PLAYER_TWO);
+			const auto playerOnePieces = board.GetPieces(PlayerId::PLAYER_ONE);
+			const auto playerTwoPieces = board.GetPieces(PlayerId::PLAYER_TWO);
 			EXPECT_EQ(pieces.size(), 4);
 			EXPECT_EQ(playerOnePieces.size(), 2);
 			EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_ONE), 2);
@@ -388,15 +388,15 @@ namespace Alphalcazar::Game {
 		}
 
 
-		Piece pieceTwoPlayerTwo{ PlayerId::PLAYER_TWO, 2 };
-		Piece pieceThreePlayerTwo{ PlayerId::PLAYER_TWO, 3 };
+		const Piece pieceTwoPlayerTwo{ PlayerId::PLAYER_TWO, 2 };
+		const Piece pieceThreePlayerTwo{ PlayerId::PLAYER_TWO, 3 };
 		board.PlacePiece({ 1, 1 }, pieceTwoPlayerTwo, Direction::EAST);
 		board.PlacePiece({ 2, 1 }, pieceThreePlayerTwo, Direction::WEST);
 
 		{
-			auto pieces = board.GetPieces();
-			auto playerOnePieces = board.GetPieces(PlayerId::PLAYER_ONE);
-			auto playerTwoPieces = board.GetPieces(PlayerId::PLAYER_TWO);
+			const auto pieces = board.GetPieces();
+			const auto playerOnePieces = board.GetPieces(PlayerId::PLAYER_ONE);
+			const auto playerTwoPieces = board.GetPieces(PlayerId::PLAYER_TWO);
 			EXPECT_EQ(pieces.size(), 6);
 			EXPECT_EQ(playerOnePieces.size(), 2);
 			EXPECT_EQ(board.GetPieceCount(PlayerId::PLAYER_ONE), 2);
@@ -407,10 +407,10 @@ namespace Alphalcazar::Game {
 
 	TEST(Board, GetBoardPiecesWithoutPerimeter) {
 		Board board{};
-		Piece pieceOnePlayerOne{ PlayerId::PLAYER_ONE, 1 };
-		Piece pieceOnePlayerTwo{ PlayerId::PLAYER_TWO, 1 };
-		Piece pieceTwoPlayerOne{ PlayerId::PLAYER_ONE, 2 };
-		Piece pieceTwoPlayerTwo{ PlayerId::PLAYER_TWO, 2 };
+		const Piece pieceOnePlayerOne{ PlayerId::PLAYER_ONE, 1 };
+		const Piece pieceOnePlayerTwo{ PlayerId::PLAYER_TWO, 1 };
+		const Piece pieceTwoPlayerOne{ PlayerId::PLAYER_ONE, 2 };
+		const Piece pieceTwoPlayerTwo{ PlayerId::PLAYER_TWO, 2 };
 
 		// Place a player 1 piece on the perimeter
 		board.PlacePiece({ 0, 1 }, pieceOnePlayerOne);
@@ -448,13 +448,13 @@ namespace Alphalcazar::Game {
 
 	TEST(Board, GetPiecePlacements) {
 		Board board{};
-		Piece pieceOnePlayerOne{ PlayerId::PLAYER_ONE, 1 };
-		Piece pieceOnePlayerTwo{ PlayerId::PLAYER_TWO, 1 };
+		const Piece pieceOnePlayerOne{ PlayerId::PLAYER_ONE, 1 };
+		const Piece pieceOnePlayerTwo{ PlayerId::PLAYER_TWO, 1 };
 
 		// Place a player 1 piece on the board
 		board.PlacePiece({ 2, 2 }, pieceOnePlayerOne, Direction::NORTH);
 		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_ONE).size(), 1);
-		auto playerOnePlacements = board.GetPiecePlacements(PlayerId::PLAYER_ONE);
+		const auto playerOnePlacements = board.GetPiecePlacements(PlayerId::PLAYER_ONE);
 		for (std::size_t i = 0; i < playerOnePlacements.size(); i++) {
 			EXPECT_TRUE(i == 0 ? playerOnePlacements[i] : !playerOnePlacements[i]);
 		}
@@ -462,7 +462,7 @@ namespace Alphalcazar::Game {
 		// Place a player 2 piece on the board
 		board.PlacePiece({ 2, 3 }, pieceOnePlayerTwo, Direction::NORTH);
 		EXPECT_EQ(board.GetPieces(PlayerId::PLAYER_TWO).size(), 1);
-		auto playerTwoPlacements = board.GetPiecePlacements(PlayerId::PLAYER_TWO);
+		const auto playerTwoPlacements = board.GetPiecePlacements(PlayerId::PLAYER_TWO);
 		for (std::size_t i = 0; i < playerTwoPlacements.size(); i++) {
 			EXPECT_TRUE(i == 0 ? playerTwoPlacements[i] : !playerTwoPlacements[i]);
 		}
