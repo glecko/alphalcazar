@@ -9,7 +9,7 @@ list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 
 # Set vs-specific config
 if(CMAKE_GENERATOR MATCHES "^Visual Studio.*$")
-  set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Alphalcazar)
+  set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Alphalcazar.Benchmark.MinMaxStrategy)
 endif()
 
 # Build options
