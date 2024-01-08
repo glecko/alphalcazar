@@ -6,10 +6,10 @@ This folder contains the C++17 implementation of the project, which is the curre
 
 ### Required software
 
-- Microsoft Visual Studio Community 2019
-- CMake 3.23.0
-- Python 3.10 (to install conan)
-- Conan (via `pip install conan`)
+- Microsoft Visual Studio Community 2019/2022
+- [CMake 3.23.0](https://cmake.org/download) or above
+- [Python 3.10](https://www.python.org/downloads/) or above (to install conan)
+- Latest Conan 1.x version (via `pip install "conan<2"`)
 
 ### Generate the project solution
 
