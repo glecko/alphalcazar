@@ -201,7 +201,7 @@ namespace Alphalcazar::Game {
 	}
 
 	const Tile* Board::GetTile(Coordinate x, Coordinate y) const {
-		Coordinates coord{ x, y };
+		const Coordinates coord{ x, y };
 		return GetTile(coord);
 	}
 

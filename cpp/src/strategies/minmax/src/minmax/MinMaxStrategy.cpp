@@ -49,7 +49,7 @@ namespace Alphalcazar::Strategy::MinMax {
 			moveFutures.reserve(candidateMoves.size());
 			for (const auto& move : candidateMoves) {
 				auto moveFuture = mThreadPool->Execute([this, playerId, move, game]() -> MoveFutureResult {
-					auto moveScore = GetNextBestScore(playerId, move, mDepth, game, mFirstLevelAlpha, c_BetaStartingValue);
+					const auto moveScore = GetNextBestScore(playerId, move, mDepth, game, mFirstLevelAlpha, c_BetaStartingValue);
 					mFirstLevelAlpha = std::max(mFirstLevelAlpha.load(), moveScore);
 					return std::make_pair(moveScore, move);
 				});

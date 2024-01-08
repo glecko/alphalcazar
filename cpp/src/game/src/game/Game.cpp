@@ -97,8 +97,8 @@ namespace Alphalcazar::Game {
 
 	Utils::StaticVector<PlacementMove, c_MaxLegalMovesCount> Game::GetLegalMoves(PlayerId player) const {
 		Utils::StaticVector<PlacementMove, c_PieceTypes* c_PerimeterTileCount> result;
-		auto legalCoordinates = mBoard.GetLegalPlacementCoordinates();
-		auto pieces = GetPiecesInHand(player);
+		const auto legalCoordinates = mBoard.GetLegalPlacementCoordinates();
+		const auto pieces = GetPiecesInHand(player);
 		for (const Coordinates& coordinates : legalCoordinates) {
 			for (const Piece& piece : pieces) {
 				result.insert({ coordinates, piece.GetType() });
