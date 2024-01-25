@@ -218,6 +218,7 @@ namespace Alphalcazar::Game {
 		LoopOverTiles([&result, &index](const Coordinates&, const Tile& tile) {
 			result[index] = &tile;
 			++index;
+			return false;
 		});
 		return result;
 	}
@@ -230,6 +231,7 @@ namespace Alphalcazar::Game {
 				result[index] = &tile;
 				++index;
 			}
+			return false;
 		});
 		return result;
 	}
@@ -252,8 +254,9 @@ namespace Alphalcazar::Game {
 			// If we find a single non-perimeter file that has no piece on it, we return false
 			if (!coordinates.IsPerimeter() && !tile.HasPiece()) {
 				result = false;
-				return;
+				return true;
 			}
+			return false;
 		});
 		return result;
 	}
@@ -388,28 +391,32 @@ namespace Alphalcazar::Game {
 		return result;
 	}
 
-	void Board::LoopOverTiles(const std::function<void(const Coordinates& coordinates, const Tile& tile)>& action) const {
+	void Board::LoopOverTiles(const std::function<bool(const Coordinates& coordinates, const Tile& tile)>& action) const {
 		for (Coordinate x = 0; x <= c_PlayAreaSize - 1; x++) {
 			for (Coordinate y = 0; y <= c_PlayAreaSize - 1; y++) {
-				Coordinates coordinates { x, y };
+				const Coordinates coordinates { x, y };
 				if (coordinates.IsCorner()) {
 					// The corners of the play area don't exist
 					continue;
 				}
-				action(coordinates, mTiles[x][y]);
+				if (action(coordinates, mTiles[x][y])) {
+					return;
+				}
 			}
 		}
 	}
 
-	void Board::LoopOverTiles(const std::function<void(const Coordinates& coordinates, Tile& tile)>& action) {
+	void Board::LoopOverTiles(const std::function<bool(const Coordinates& coordinates, Tile& tile)>& action) {
 		for (Coordinate x = 0; x <= c_PlayAreaSize - 1; x++) {
 			for (Coordinate y = 0; y <= c_PlayAreaSize - 1; y++) {
-				Coordinates coordinates { x, y };
+				const Coordinates coordinates { x, y };
 				if (coordinates.IsCorner()) {
 					// The corners of the play area don't exist
 					continue;
 				}
-				action(coordinates, mTiles[x][y]);
+				if (action(coordinates, mTiles[x][y])) {
+					return;
+				}
 			}
 		}
 	}
