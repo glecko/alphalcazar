@@ -1,0 +1,12 @@
+---
+Language: Cpp
+Standard: Cpp17
+BasedOnStyle: LLVM
+BreakBeforeBraces: Attach
+NamespaceIndentation: All
+ColumnLimit: 240
+MaxEmptyLinesToKeep: 1
+IndentWidth: 4
+TabWidth: 4
+UseTab: Always
+---
