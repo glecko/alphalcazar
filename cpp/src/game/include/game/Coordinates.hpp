@@ -21,7 +21,7 @@ namespace Alphalcazar::Game {
 
 		bool operator==(const Coordinates& coord) const {
 			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
-			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
+			// we parallelize the comparisons to avoid branching (causing a potential instruction-level cache miss)
 			const bool xIsEqual = x == coord.x;
 			const bool yIsEqual = y == coord.y;
 			return xIsEqual && yIsEqual;
@@ -44,7 +44,7 @@ namespace Alphalcazar::Game {
 		/// Indicates if the coordinates represent the center of the board
 		bool IsCenter() const {
 			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
-			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
+			// we parallelize the comparisons to avoid branching (causing a potential instruction-level cache miss)
 			const bool xIsCenter = x == c_CenterCoordinate;
 			const bool yIsCenter = y == c_CenterCoordinate;
 			return xIsCenter && yIsCenter;
@@ -58,7 +58,7 @@ namespace Alphalcazar::Game {
 		/// Indicates if the coordinates represent a corner of the play area. No tile will exist at these coordinates.
 		bool IsCorner() const {
 			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
-			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
+			// we parallelize the comparisons to avoid branching (causing a potential instruction-level cache miss)
 			const bool xIsPerimeter = x == 0 || x == c_PlayAreaSize - 1;
 			const bool yIsPerimeter = y == 0 || y == c_PlayAreaSize - 1;
 			return xIsPerimeter && yIsPerimeter;
@@ -72,7 +72,7 @@ namespace Alphalcazar::Game {
 		/// Returns whether the current coordinates are valid
 		bool Valid() const {
 			// Since at all calls of this function, all relevant values are loaded in the L1 cache,
-			// we parallelise the comparisons to avoid branching (causing a potential instruction-level cache miss)
+			// we parallelize the comparisons to avoid branching (causing a potential instruction-level cache miss)
 			const bool xIsInvalid = x != c_InvalidCoordinate;
 			const bool yIsInvalid = y != c_InvalidCoordinate;
 			return xIsInvalid && yIsInvalid;
@@ -124,8 +124,8 @@ namespace std {
 	template <>
 	struct hash<Alphalcazar::Game::Coordinates> {
 		std::size_t operator()(const Alphalcazar::Game::Coordinates& coordinates) const noexcept {
-			auto xHash = hash<Alphalcazar::Game::Coordinate>()(coordinates.x);
-			auto yHash = hash<Alphalcazar::Game::Coordinate>()(coordinates.y);
+			const auto xHash = hash<Alphalcazar::Game::Coordinate>()(coordinates.x);
+			const auto yHash = hash<Alphalcazar::Game::Coordinate>()(coordinates.y);
 			return ((xHash ^ (yHash << 1)) >> 1);
 		}
 	};
