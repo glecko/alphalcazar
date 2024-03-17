@@ -13,7 +13,8 @@ endif()
 # Build options
 option(BUILD_MINMAX_STRATEGY "Build minmax strategy" ON)
 option(BUILD_RANDOM_STRATEGY "Build random strategy" ON)
-option(BUILD_TESTS "Compile tests" ON)
+option(BUILD_TESTS "Build tests" ON)
+option(BUILD_UI "Build the UI" ON)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -29,7 +30,7 @@ if(MSVC)
 
   # The current (and subsequent) versions of CMake hardcode the /EHsc (c++ exception handling) and /GR (C++ RTTI)
   # flags for MSVS, which forces us to do this string replacement hack in order to disable them:
-  # https://gitlab.kitware.com/cmake/cmake/blob/v3.24.0/Modules/Platform/Windows-MSVC.cmake#L194
+# https://gitlab.kitware.com/cmake/cmake/blob/v3.24.0/Modules/Platform/Windows-MSVC.cmake#L194
 
   # Disable exception handling as this project does not make use of them
   string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
