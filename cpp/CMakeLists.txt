@@ -15,7 +15,8 @@ endif()
 # Build options
 option(BUILD_MINMAX_STRATEGY "Build minmax strategy" ON)
 option(BUILD_RANDOM_STRATEGY "Build random strategy" ON)
-option(BUILD_TESTS "Compile tests" ON)
+option(BUILD_TESTS "Build tests" ON)
+option(BUILD_UI "Build the UI" OFF)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -31,11 +32,21 @@ if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
 endif()
 
 function(configure_conan_dependencies generator)
+  set(PROJECT_CONAN_DEPENDENCIES spdlog/[>=1.4.1])
+
   if(BUILD_TESTS)
-    conan_cmake_configure(REQUIRES gtest/1.10.0 spdlog/[>=1.4.1] GENERATORS ${generator})
-  else()
-    conan_cmake_configure(REQUIRES spdlog/[>=1.4.1] GENERATORS ${generator})
+    list(APPEND PROJECT_CONAN_DEPENDENCIES gtest/1.10.0)
   endif()
+
+  if(BUILD_UI)
+    list(APPEND PROJECT_CONAN_DEPENDENCIES imgui/1.90.1)
+    list(APPEND PROJECT_CONAN_DEPENDENCIES vulkan-headers/1.3.268.0)
+    list(APPEND PROJECT_CONAN_DEPENDENCIES vulkan-loader/1.3.268.0)
+    list(APPEND PROJECT_CONAN_DEPENDENCIES glfw/3.3.8)
+  endif()
+
+  conan_cmake_configure(REQUIRES ${PROJECT_CONAN_DEPENDENCIES} GENERATORS ${generator})
+
   # Build spdlog without exceptions as we want exception handling to be disabled
   add_definitions(-DSPDLOG_NO_EXCEPTIONS=1)
 endfunction()

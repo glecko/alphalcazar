@@ -59,7 +59,7 @@ jobs:
         buildDirectory: '${{ runner.temp }}/build/${{ runner.os }}'
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/cpp/CMakeLists.txt'
-        cmakeAppendedArgs: "-G Ninja -DCMAKE_BUILD_TYPE=Release"
+        cmakeAppendedArgs: "-G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_UI=ON"
     - name: Test
       run: |
         cd '${{ runner.temp }}/build/${{ runner.os }}'
