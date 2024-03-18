@@ -12,6 +12,15 @@ on:
       - reopened
       - ready_for_review
 
+env:
+  LINUX_IMGUI_PREREQUISITES: libgl1-mesa-dev libgl-dev libx11-xcb-dev libfontenc-dev libxaw7-dev libxcomposite-dev libxcursor-dev
+                             libxdamage-dev libxfixes-dev libxi-dev libxinerama-dev libxmu-dev libxmuu-dev libxpm-dev libxrandr-dev
+                             libxres-dev libxss-dev libxtst-dev libxv-dev libxxf86vm-dev libxcb-glx0-dev libxcb-render-util0-dev
+                             libxcb-xkb-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev libxcb-shape0-dev
+                             libxcb-sync-dev libxcb-xfixes0-dev libxcb-xinerama0-dev libxcb-dri3-dev libxcb-cursor-dev libxcb-dri2-0-dev
+                             libxcb-dri3-dev libxcb-present-dev libxcb-composite0-dev libxcb-ewmh-dev libxcb-res0-dev libxcb-util-dev
+                             libxcb-util0-dev
+
 jobs:
   test-cpp:
     strategy:
@@ -39,17 +48,32 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Configure command prompt for MSVC++
       uses: ilammy/msvc-dev-cmd@v1
       if: matrix.os == 'windows-latest'
+
+    - name: Install linux system dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: sudo apt-get update -q && sudo apt-get install -q -y $LINUX_IMGUI_PREREQUISITES
+
+    - name: Setup Vulkan SDK
+      uses: humbletim/setup-vulkan-sdk@v1.2.0
+      with:
+        vulkan-query-version: 1.3.268.0
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
+        vulkan-use-cache: true
+
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
+
     - name: Install latest conan 1 version
       run: |
         pip install --upgrade wheel
         pip install --upgrade "conan<2"
+
     - name: Build with CMake
       uses: lukka/run-cmake@v2
       env:
@@ -59,7 +83,8 @@ jobs:
         buildDirectory: '${{ runner.temp }}/build/${{ runner.os }}'
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/cpp/CMakeLists.txt'
-        cmakeAppendedArgs: "-G Ninja -DCMAKE_BUILD_TYPE=Release"
+        cmakeAppendedArgs: "-G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_UI=ON"
+
     - name: Test
       run: |
         cd '${{ runner.temp }}/build/${{ runner.os }}'

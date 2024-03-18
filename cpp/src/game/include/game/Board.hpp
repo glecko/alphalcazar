@@ -94,6 +94,14 @@ namespace Alphalcazar::Game {
 		 * \param player The player for which the piece placements will be returned
 		 */
 		std::bitset<c_PieceTypes> GetPiecePlacements(PlayerId player) const;
+
+		/*!
+		 * \brief Executes a specified function for every tile of this board.
+		 *
+		 * \param action The function to execute for each tile. If it returns true, the loop will be interrupted.
+		 */
+		void LoopOverTiles(const std::function<bool(const Coordinates& coordinates, const Tile& tile)>& action) const;
+		void LoopOverTiles(const std::function<bool(const Coordinates& coordinates, Tile& tile)>& action);
 	private:
 		/*!
 		 * \brief Executes one piece movement, if the specified piece is on the board
@@ -128,14 +136,6 @@ namespace Alphalcazar::Game {
 		 *       first and the movement of the pushing piece last).
 		 */
 		Utils::ReversedStaticVector<Board::MovementDescription, c_PlayAreaSize> GetChainedPushMovements(const Coordinates& sourceCoordinates, Direction direction);
-		
-		/*!
-		 * \brief Executes a specified function for every tile of this board.
-		 *
-		 * \param action The function to execute for each tile. If it returns true, the loop will be interrupted.
-		 */
-		void LoopOverTiles(const std::function<bool(const Coordinates& coordinates, const Tile& tile)>& action) const;
-		void LoopOverTiles(const std::function<bool(const Coordinates& coordinates, Tile& tile)>& action);
 
 		/// Get the coordinates at which a given piece is placed on the board. Returns invalid coordinates if the piece does not exist on the board.
 		Coordinates& GetPlacedPieceCoordinates(const Piece& piece);
