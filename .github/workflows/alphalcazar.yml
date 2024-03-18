@@ -12,6 +12,9 @@ on:
       - reopened
       - ready_for_review
 
+env:
+  LINUX_OPENGL_PREREQUISITES: libgl1-mesa-dev libgl-dev
+
 jobs:
   test-cpp:
     strategy:
@@ -39,17 +42,25 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    
     - name: Configure command prompt for MSVC++
       uses: ilammy/msvc-dev-cmd@v1
       if: matrix.os == 'windows-latest'
+
+    - name: Install linux system dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: sudo apt-get update -q && sudo apt-get install -q -y $LINUX_OPENGL_PREREQUISITES
+
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
+
     - name: Install latest conan 1 version
       run: |
         pip install --upgrade wheel
         pip install --upgrade "conan<2"
+
     - name: Build with CMake
       uses: lukka/run-cmake@v2
       env:
@@ -60,6 +71,7 @@ jobs:
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/cpp/CMakeLists.txt'
         cmakeAppendedArgs: "-G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_UI=ON"
+
     - name: Test
       run: |
         cd '${{ runner.temp }}/build/${{ runner.os }}'
