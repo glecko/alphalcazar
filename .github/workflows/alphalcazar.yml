@@ -57,7 +57,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: sudo apt-get update -q && sudo apt-get install -q -y $LINUX_IMGUI_PREREQUISITES
 
-    - name: Prepare Vulkan SDK
+    - name: Setup Vulkan SDK
       uses: humbletim/setup-vulkan-sdk@v1.2.0
       with:
         vulkan-query-version: 1.3.268.0
