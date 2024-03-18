@@ -13,12 +13,12 @@ on:
       - ready_for_review
 
 env:
-  LINUX_OPENGL_PREREQUISITES: libgl1-mesa-dev libgl-dev libx11-xcb-dev libfontenc-dev libxaw7-dev libxcomposite-dev libxcursor-dev
+  LINUX_IMGUI_PREREQUISITES: libgl1-mesa-dev libgl-dev libx11-xcb-dev libfontenc-dev libxaw7-dev libxcomposite-dev libxcursor-dev
                               libxdamage-dev libxfixes-dev libxi-dev libxinerama-dev libxmu-dev libxmuu-dev libxpm-dev libxrandr-dev
                               libxres-dev libxss-dev libxtst-dev libxv-dev libxxf86vm-dev libxcb-glx0-dev libxcb-render-util0-dev
                               libxcb-xkb-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev libxcb-shape0-dev
                               libxcb-sync-dev libxcb-xfixes0-dev libxcb-xinerama0-dev libxcb-dri3-dev libxcb-cursor-dev libxcb-dri2-0-dev
-                              libxcb-dri3-dev libxcb-present-dev libxcb-composite0-dev libxcb-ewmh-dev libxcb-res0-dev
+                              libxcb-dri3-dev libxcb-present-dev libxcb-composite0-dev libxcb-ewmh-dev libxcb-res0-dev libxcb-util-dev libxcb-util0-dev
 
 jobs:
   test-cpp:
@@ -54,7 +54,7 @@ jobs:
 
     - name: Install linux system dependencies
       if: matrix.os == 'ubuntu-latest'
-      run: sudo apt-get update -q && sudo apt-get install -q -y $LINUX_OPENGL_PREREQUISITES
+      run: sudo apt-get update -q && sudo apt-get install -q -y $LINUX_IMGUI_PREREQUISITES
 
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
