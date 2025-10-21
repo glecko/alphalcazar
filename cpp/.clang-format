@@ -9,4 +9,7 @@ MaxEmptyLinesToKeep: 1
 IndentWidth: 4
 TabWidth: 4
 UseTab: Always
+PointerAlignment: Left
+ReferenceAlignment: Left
+SeparateDefinitionBlocks: Always
 ---
