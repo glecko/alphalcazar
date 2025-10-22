@@ -1,6 +1,8 @@
 # Build folder
 build/
-cmake-build-debug/
+
+# CMake user presets file
+CMakeUserPresets.json
 
 # IDE's
 .vscode/

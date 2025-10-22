@@ -41,7 +41,7 @@ template <> struct fmt::formatter<Alphalcazar::Game::PlacementMove> {
 	}
 
     template <typename FormatContext>
-    auto format(const Alphalcazar::Game::PlacementMove& move, FormatContext& ctx) -> decltype(ctx.out()) {
+    auto format(const Alphalcazar::Game::PlacementMove& move, FormatContext& ctx) const -> decltype(ctx.out()) {
         return format_to(ctx.out(), "Piece {} -> {}", move.PieceType, move.Coordinates);
     }
 };

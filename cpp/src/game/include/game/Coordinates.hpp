@@ -4,6 +4,7 @@
 #include "game/parameters.hpp"
 #include <fmt/format.h>
 #include <array>
+#include <limits>
 
 namespace Alphalcazar::Game {
 	constexpr Coordinate c_InvalidCoordinate = std::numeric_limits<Coordinate>::max();
@@ -138,7 +139,7 @@ template <> struct fmt::formatter<Alphalcazar::Game::Coordinates> {
 	}
 
 	template <typename FormatContext>
-	auto format(const Alphalcazar::Game::Coordinates& coordinates, FormatContext& ctx) -> decltype(ctx.out()) {
+	auto format(const Alphalcazar::Game::Coordinates& coordinates, FormatContext& ctx) const -> decltype(ctx.out()) {
 		return format_to(ctx.out(), "({},{})", coordinates.x, coordinates.y);
 	}
 };
