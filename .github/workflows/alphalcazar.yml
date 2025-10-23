@@ -54,8 +54,7 @@ jobs:
       working-directory: ${{ github.workspace }}/cpp
       run: |
         conan profile detect
-        conan create . -s compiler.cppstd=17
-        conan install . -s build_type=Release --build=missing --output-folder='${{ runner.temp }}/build/${{ runner.os }}'
+        conan install . -s build_type=Release -s compiler.cppstd=17 --build=missing --output-folder='${{ runner.temp }}/build/${{ runner.os }}'
     - name: Build with CMake
       uses: lukka/run-cmake@v10
       env:
