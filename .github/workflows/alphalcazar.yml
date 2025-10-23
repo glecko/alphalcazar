@@ -51,6 +51,7 @@ jobs:
         pip install --upgrade wheel
         pip install --upgrade "conan<3"
     - name: Install conan dependencies
+      working-directory: ${{ github.workspace }}/cpp
       run: |
         conan install . -s build_type=Release --build=missing --output-folder='${{ runner.temp }}/build/${{ runner.os }}'
     - name: Build with CMake
@@ -59,13 +60,13 @@ jobs:
         CC: ${{ matrix.env_cc }}
         CXX: ${{ matrix.env_cxx }}
       with:
-        buildDirectory: '${{ runner.temp }}/build/${{ runner.os }}'
+        buildDirectory: ${{ runner.temp }}/build/${{ runner.os }}
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/cpp/CMakeLists.txt'
-        cmakeAppendedArgs: "-G Ninja -DCMAKE_BUILD_TYPE=Release"
-    - name: Test
+        cmakeAppendedArgs: "-G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake"
+    - name: Run tests
+      working-directory: ${{ runner.temp }}/build/${{ runner.os }}
       run: |
-        cd '${{ runner.temp }}/build/${{ runner.os }}'
         ctest -C Release --timeout 600 -V
 
   test-python:
@@ -73,16 +74,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.11
+    - name: Set up Python 3.8
       uses: actions/setup-python@v6
       with:
-        python-version: 3.11
+        python-version: 3.8
     - name: Install dependencies
+      working-directory: python_deprecated
       run: |
-        cd python_deprecated
+        cd 
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Test with pytest
+      working-directory: python_deprecated
       run: |
-        cd python_deprecated
         pytest
