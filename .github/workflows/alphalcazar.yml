@@ -67,7 +67,7 @@ jobs:
       with:
         buildDirectory: ${{ runner.temp }}/build/${{ runner.os }}
         cmakeListsTxtPath: '${{ github.workspace }}/cpp/CMakeLists.txt'
-        workflowPreset: 'conan-release'
+        buildPreset: 'conan-release'
     - name: Run tests
       working-directory: ${{ runner.temp }}/build/${{ runner.os }}
       run: |
