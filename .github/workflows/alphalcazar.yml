@@ -54,7 +54,9 @@ jobs:
       working-directory: ${{ github.workspace }}/cpp
       run: |
         conan profile detect
-        conan install . -s build_type=Release -s compiler.cppstd=17 --build=missing --output-folder='${{ runner.temp }}/build/${{ runner.os }}'
+        conan install . -s build_type=Release  --build=missing --output-folder='${{ runner.temp }}/build/${{ runner.os }}'
+    - name: Install CMake
+      uses: lukka/get-cmake@v3.24
     - name: Build with CMake
       uses: lukka/run-cmake@v10
       env:
@@ -62,9 +64,8 @@ jobs:
         CXX: ${{ matrix.env_cxx }}
       with:
         buildDirectory: ${{ runner.temp }}/build/${{ runner.os }}
-        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         cmakeListsTxtPath: '${{ github.workspace }}/cpp/CMakeLists.txt'
-        cmakeAppendedArgs: "-G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake"
+        workflowPreset: 'conan-release'
     - name: Run tests
       working-directory: ${{ runner.temp }}/build/${{ runner.os }}
       run: |
