@@ -9,6 +9,8 @@
 #include <util/Log.hpp>
 #include "util/ThreadPool.hpp"
 
+#include <algorithm>
+
 namespace Alphalcazar::Strategy::MinMax {
 	/// The initial value of the "alpha" parameter of the minmax algorithm
 	constexpr Score c_AlphaStartingValue = -c_WinConditionScore * 10;
