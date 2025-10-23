@@ -1,11 +1,9 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.24)
+
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES, ${CMAKE_CURRENT_LIST_DIR}/cmake_external/conan_provider.cmake)
 
 # Project
 project(alphalcazar CXX)
-
-# Include conan cmake
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
-list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 
 # Set vs-specific config
 if(CMAKE_GENERATOR MATCHES "^Visual Studio.*$")
@@ -21,44 +19,6 @@ option(BUILD_TESTS "Compile tests" ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED)
 
-# Install depencencies with conan
-# This code has been fetched from conan cmake's README: https://github.com/conan-io/cmake-conan
-if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
-  message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-  file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.18.1/conan.cmake"
-                "${CMAKE_BINARY_DIR}/conan.cmake"
-                TLS_VERIFY ON)
-endif()
-
-function(configure_conan_dependencies generator)
-  if(BUILD_TESTS)
-    conan_cmake_configure(REQUIRES gtest/1.10.0 spdlog/[>=1.4.1] GENERATORS ${generator})
-  else()
-    conan_cmake_configure(REQUIRES spdlog/[>=1.4.1] GENERATORS ${generator})
-  endif()
-  # Build spdlog without exceptions as we want exception handling to be disabled
-  add_definitions(-DSPDLOG_NO_EXCEPTIONS=1)
-endfunction()
-
-include(${CMAKE_BINARY_DIR}/conan.cmake)
-conan_check(VERSION 1.49.0 REQUIRED)
-# If the generator is multi config (ex. MSVS) install conan dependencies
-# with the cmake_find_package_multi generator for each of the CMAKE_CONFIGURATION_TYPES.
-# For single-config generators (ex. Ninja on CI), use the cmake_find_package generator.
-get_property(multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-if(multi_config)
-  configure_conan_dependencies(cmake_find_package_multi)
-  foreach(TYPE ${CMAKE_CONFIGURATION_TYPES})
-      message("Installing conan dependencies for configuration type '${TYPE}'...")
-      conan_cmake_autodetect(settings BUILD_TYPE ${TYPE})
-      conan_cmake_install(PATH_OR_REFERENCE . BUILD missing SETTINGS ${settings})
-  endforeach()
-else()
-  message("Installing conan dependencies for single configuration type '${CMAKE_BUILD_TYPE}'...")
-  configure_conan_dependencies(cmake_find_package)
-  conan_cmake_autodetect(settings)
-  conan_cmake_install(PATH_OR_REFERENCE . BUILD missing SETTINGS ${settings})
-endif()
 
 # Compiler-specific configuration
 if(MSVC)
@@ -69,10 +29,11 @@ if(MSVC)
 
   # The current (and subsequent) versions of CMake hardcode the /EHsc (c++ exception handling) and /GR (C++ RTTI)
   # flags for MSVS, which forces us to do this string replacement hack in order to disable them:
-  # https://gitlab.kitware.com/cmake/cmake/blob/v3.9.1/Modules/Platform/Windows-MSVC.cmake#L151
+  # https://gitlab.kitware.com/cmake/cmake/blob/v3.24.0/Modules/Platform/Windows-MSVC.cmake#L194
 
   # Disable exception handling as this project does not make use of them
   string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+
   # Make sure exceptions are disabled in the stdlib implementation of MSVS
   add_definitions(-D_HAS_EXCEPTIONS=0)
 

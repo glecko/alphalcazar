@@ -57,7 +57,7 @@ template <> struct fmt::formatter<Alphalcazar::Strategy::MinMax::ScoredPlacement
 	}
 
 	template <typename FormatContext>
-	auto format(const Alphalcazar::Strategy::MinMax::ScoredPlacementMove& move, FormatContext& ctx) -> decltype(ctx.out()) {
+	auto format(const Alphalcazar::Strategy::MinMax::ScoredPlacementMove& move, FormatContext& ctx) const -> decltype(ctx.out()) {
 		return format_to(ctx.out(), "Piece {} -> {}", move.PieceType, move.Coordinates);
 	}
 };

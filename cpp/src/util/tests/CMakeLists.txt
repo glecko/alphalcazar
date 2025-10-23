@@ -8,5 +8,5 @@ file(GLOB _sources
 )
 
 add_executable(Alphalcazar.Utils.Tests ${_sources})
-target_link_libraries(Alphalcazar.Utils.Tests Alphalcazar.Utils GTest::GTest)
+target_link_libraries(Alphalcazar.Utils.Tests Alphalcazar.Utils gtest::gtest)
 gtest_discover_tests(Alphalcazar.Utils.Tests)

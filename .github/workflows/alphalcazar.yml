@@ -42,27 +42,36 @@ jobs:
     - name: Configure command prompt for MSVC++
       uses: ilammy/msvc-dev-cmd@v1
       if: matrix.os == 'windows-latest'
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v6
       with:
-        python-version: 3.8
-    - name: Install latest conan 1 version
+        python-version: 3.11
+    - name: Install latest conan 2 version
       run: |
         pip install --upgrade wheel
-        pip install --upgrade "conan<2"
+        pip install --upgrade "conan<3"
+    - name: Install conan dependencies
+      working-directory: ${{ github.workspace }}/cpp
+      run: |
+        conan profile detect
+        conan install . -s build_type=Release -s compiler.cppstd=17 --build=missing --output-folder='${{ runner.temp }}/build/${{ runner.os }}'
+    - name: Install CMake
+      uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "~3.24.0"
     - name: Build with CMake
-      uses: lukka/run-cmake@v2
+      uses: lukka/run-cmake@v10
       env:
         CC: ${{ matrix.env_cc }}
         CXX: ${{ matrix.env_cxx }}
       with:
-        buildDirectory: '${{ runner.temp }}/build/${{ runner.os }}'
-        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        buildDirectory: ${{ runner.temp }}/build/${{ runner.os }}
         cmakeListsTxtPath: '${{ github.workspace }}/cpp/CMakeLists.txt'
-        cmakeAppendedArgs: "-G Ninja -DCMAKE_BUILD_TYPE=Release"
-    - name: Test
+        configurePreset:  ${{ matrix.os == 'windows-latest' && 'conan-default' || 'conan-release' }}
+        buildPreset: 'conan-release'
+    - name: Run tests
+      working-directory: ${{ runner.temp }}/build/${{ runner.os }}
       run: |
-        cd '${{ runner.temp }}/build/${{ runner.os }}'
         ctest -C Release --timeout 600 -V
 
   test-python:
@@ -70,16 +79,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v6
       with:
-        python-version: 3.7
+        python-version: 3.8
     - name: Install dependencies
+      working-directory: python_deprecated
       run: |
-        cd python_deprecated
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Test with pytest
+      working-directory: python_deprecated
       run: |
-        cd python_deprecated
         pytest

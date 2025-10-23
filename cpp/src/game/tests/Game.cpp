@@ -8,6 +8,8 @@
 #include "game/PlacementMove.hpp"
 #include "game/parameters.hpp"
 
+#include <algorithm>
+
 namespace Alphalcazar::Game {
 	class MockStrategy final : public Strategy {
 	public:

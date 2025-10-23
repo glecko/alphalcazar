@@ -9,6 +9,8 @@
 
 #include "setuphelpers.hpp"
 
+#include <algorithm>
+
 namespace Alphalcazar::Strategy::MinMax {
 	TEST(MinMaxStrategy, TestWinningSecondMoveDepthOne) {
 		/*

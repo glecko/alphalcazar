@@ -1,6 +1,6 @@
 # Python implementation
 
-This folder contains the Python 3.7 implementation of the project, which was deprecated in favour of the C++17 implementation as of May 2022.
+This folder contains the Python 3.8 implementation of the project, which was deprecated in favour of the C++17 implementation as of May 2022.
 
 ## Setting up the project
 

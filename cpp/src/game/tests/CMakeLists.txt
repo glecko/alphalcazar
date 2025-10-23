@@ -8,5 +8,5 @@ file(GLOB _sources
 )
 
 add_executable(Alphalcazar.Game.Tests ${_sources})
-target_link_libraries(Alphalcazar.Game.Tests Alphalcazar.Game GTest::GTest)
+target_link_libraries(Alphalcazar.Game.Tests Alphalcazar.Game gtest::gtest)
 gtest_discover_tests(Alphalcazar.Game.Tests)
