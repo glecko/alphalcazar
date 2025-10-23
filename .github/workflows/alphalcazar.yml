@@ -53,6 +53,7 @@ jobs:
     - name: Install conan dependencies
       working-directory: ${{ github.workspace }}/cpp
       run: |
+        conan profile detect
         conan install . -s build_type=Release --build=missing --output-folder='${{ runner.temp }}/build/${{ runner.os }}'
     - name: Build with CMake
       uses: lukka/run-cmake@v10
@@ -81,7 +82,6 @@ jobs:
     - name: Install dependencies
       working-directory: python_deprecated
       run: |
-        cd 
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Test with pytest
