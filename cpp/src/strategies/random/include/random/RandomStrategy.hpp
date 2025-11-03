@@ -3,7 +3,7 @@
 #include <game/Strategy.hpp>
 #include <game/aliases.hpp>
 
-#include <random>
+#include <pcg_random.hpp>
 
 namespace Alphalcazar::Game {
 	struct PlacementMove;
@@ -21,7 +21,6 @@ namespace Alphalcazar::Strategy::Random {
 		RandomStrategy();
 		Game::PlacementMove Execute(Game::PlayerId playerId, const Utils::StaticVector<Game::PlacementMove, Game::c_MaxLegalMovesCount>& legalMoves, const Game::Game& game) override;
 	private:
-		std::random_device mRandomDevice;
-		std::mt19937 mRandomEngine;
+		pcg32 mRandomEngine;
 	};
 }

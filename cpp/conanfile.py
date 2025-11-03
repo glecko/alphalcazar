@@ -2,7 +2,7 @@ from conan import ConanFile
 
 class AlphalcazarConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    requires = "spdlog/1.16.0", "fmt/12.0.0"
+    requires = "spdlog/1.16.0", "fmt/12.0.0", "pcg-cpp/cci.20220409"
     generators = "CMakeDeps", "CMakeToolchain"
 
     default_options = {

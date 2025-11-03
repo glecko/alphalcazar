@@ -11,7 +11,8 @@ add_library(Alphalcazar.Strategy.Random STATIC ${_sources})
 set_target_properties(Alphalcazar.Strategy.Random PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS true)
 target_include_directories(Alphalcazar.Strategy.Random PUBLIC include/)
 
-target_link_libraries(Alphalcazar.Strategy.Random Alphalcazar.Game)
+find_package(pcg-cpp)
+target_link_libraries(Alphalcazar.Strategy.Random Alphalcazar.Game pcg-cpp::pcg-cpp)
 
 if (BUILD_TESTS)
   add_subdirectory(tests)

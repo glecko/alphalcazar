@@ -8,6 +8,21 @@
 #include "game/PlacementMove.hpp"
 
 namespace Alphalcazar::Strategy::Random {
+	TEST(RandomStrategy, TestStrategyExecute) {
+		RandomStrategy strategy {};
+		Game::Game game {};
+		const auto legalMoves = game.GetLegalMoves(Game::PlayerId::PLAYER_ONE);
+		
+		// We run the test 100 times to make sure the results are consistent
+		for (std::size_t i = 0; i <= 100; i++) {
+			Game::PlacementMove placementMove = strategy.Execute(Game::PlayerId::PLAYER_ONE, legalMoves, game);
+			EXPECT_TRUE(placementMove.Valid());
+
+			// Returned placement move should be one of the legal moves
+			EXPECT_NE(std::find(legalMoves.begin(), legalMoves.end(), placementMove), legalMoves.end());
+		}
+	}
+	
 	TEST(RandomStrategy, TestSingleTurn) {
 		RandomStrategy strategy {};
 		// We run the test 100 times to make sure the results are consistent across several random moves
