@@ -58,7 +58,7 @@ jobs:
       run: sudo apt-get update -q && sudo apt-get install -q -y $LINUX_IMGUI_PREREQUISITES
 
     - name: Setup Vulkan SDK
-      uses: humbletim/setup-vulkan-sdk@v1.2.0
+      uses: humbletim/setup-vulkan-sdk@v1.2.1
       with:
         vulkan-query-version: 1.4.313.0
         vulkan-components: Vulkan-Headers, Vulkan-Loader
