@@ -2,7 +2,8 @@ from conan import ConanFile
 
 class AlphalcazarConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    requires = "spdlog/1.16.0", "fmt/12.0.0", "pcg-cpp/cci.20220409"
+    requires = "spdlog/1.16.0", "fmt/12.0.0", "pcg-cpp/cci.20220409",\
+                "imgui/1.90.1", "vulkan-headers/1.4.313.0", "vulkan-loader/1.4.313.0", "glfw/3.3.8"
     generators = "CMakeDeps", "CMakeToolchain"
 
     default_options = {

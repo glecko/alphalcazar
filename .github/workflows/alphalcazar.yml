@@ -39,26 +39,46 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Configure command prompt for MSVC++
       uses: ilammy/msvc-dev-cmd@v1
       if: matrix.os == 'windows-latest'
+
+    - name: Setup Vulkan SDK
+      uses: humbletim/setup-vulkan-sdk@v1.2.1
+      with:
+        vulkan-query-version: 1.4.313.0
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
+        vulkan-use-cache: true
+    
     - name: Set up Python 3.11
       uses: actions/setup-python@v6
       with:
         python-version: 3.11
+    
     - name: Install latest conan 2 version
       run: |
         pip install --upgrade wheel
         pip install --upgrade "conan<3"
+    
     - name: Install conan dependencies
       working-directory: ${{ github.workspace }}/cpp
+      shell: bash
       run: |
         conan profile detect
-        conan install . -s build_type=Release -s compiler.cppstd=17 --build=missing --output-folder='${{ runner.temp }}/build/${{ runner.os }}'
+        conan install . \
+          -s build_type=Release \
+          -s compiler.cppstd=17 \
+          --build=missing \
+          -c tools.system.package_manager:mode=install \
+          -c tools.system.package_manager:sudo=True \
+          --output-folder='${{ runner.temp }}/build/${{ runner.os }}'
+    
     - name: Install CMake
       uses: lukka/get-cmake@latest
       with:
         cmakeVersion: "~3.24.0"
+    
     - name: Build with CMake
       uses: lukka/run-cmake@v10
       env:
@@ -69,6 +89,7 @@ jobs:
         cmakeListsTxtPath: '${{ github.workspace }}/cpp/CMakeLists.txt'
         configurePreset:  ${{ matrix.os == 'windows-latest' && 'conan-default' || 'conan-release' }}
         buildPreset: 'conan-release'
+    
     - name: Run tests
       working-directory: ${{ runner.temp }}/build/${{ runner.os }}
       run: |

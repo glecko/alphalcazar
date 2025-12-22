@@ -13,7 +13,8 @@ endif()
 # Build options
 option(BUILD_MINMAX_STRATEGY "Build minmax strategy" ON)
 option(BUILD_RANDOM_STRATEGY "Build random strategy" ON)
-option(BUILD_TESTS "Compile tests" ON)
+option(BUILD_TESTS "Build tests" ON)
+option(BUILD_UI "Build the UI" ON)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
