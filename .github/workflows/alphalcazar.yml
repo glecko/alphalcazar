@@ -63,6 +63,7 @@ jobs:
     
     - name: Install conan dependencies
       working-directory: ${{ github.workspace }}/cpp
+      shell: bash
       run: |
         conan profile detect
         conan install . \
