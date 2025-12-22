@@ -70,6 +70,7 @@ jobs:
           -s compiler.cppstd=17 \
           --build=missing \
           -c tools.system.package_manager:mode=install \
+          -c tools.system.package_manager:sudo=True \
           --output-folder='${{ runner.temp }}/build/${{ runner.os }}'
     
     - name: Install CMake
